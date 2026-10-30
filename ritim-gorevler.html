@@ -329,6 +329,15 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .swatches button{width:34px; height:34px; border-radius:50%; background:var(--c); box-shadow:var(--raise-sm); transition:box-shadow .2s}
 .swatches button[aria-checked="true"]{box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--c)}
 .modal-foot{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.modal-card.login{width:min(470px, 100%); aspect-ratio:1; border-radius:50%; justify-content:center; padding:56px 64px; gap:18px; text-align:center;
+  box-shadow:18px 18px 40px var(--lo), -18px -18px 40px var(--hi), inset 0 0 0 10px var(--bg), inset 3px 3px 6px var(--lo)}
+.login .emboss{font-size:2.6rem}
+.login .sub{margin:0}
+.login .btn{width:100%}
+.login .err{color:var(--bad); font-size:.8rem; min-height:1.2em; margin:0}
+.modal.solid{background:var(--bg); backdrop-filter:none}
+@media (max-width: 520px){ .modal-card.login{aspect-ratio:auto; border-radius:var(--r-lg); padding:40px 24px} }
+.side-foot .btn.ghost{justify-content:flex-start; padding:0 6px; height:30px; font-size:.74rem; color:var(--ink-3)}
 
 /* ---------- Toast, reminders & tab bar ---------- */
 .toast{position:fixed; left:50%; bottom:calc(28px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%, 140%); z-index:60; display:flex; align-items:center; gap:16px;
@@ -434,6 +443,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
         Koyu tema
       </label>
       <div class="sync" id="syncState"><i></i><span>Bağlanıyor…</span></div>
+      <button class="btn ghost" data-backup>Yedekle ve taşı</button>
     </div>
   </aside>
 
@@ -446,6 +456,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
           <h1 class="emboss" id="h-pano">İyi günler</h1>
         </div>
         <div class="vhead-actions">
+          <button class="btn icon m-only" data-backup aria-label="Yedekle ve taşı"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg></button>
           <button class="btn icon m-only" data-theme-toggle aria-label="Temayı değiştir"><svg class="i" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
           <button class="btn primary" data-new><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni görev</button>
         </div>
@@ -666,6 +677,34 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   </form>
 </div>
 
+<div class="modal" id="backupModal" hidden role="dialog" aria-modal="true" aria-labelledby="bkTitle">
+  <div class="card modal-card">
+    <h2 id="bkTitle">Yedekle ve taşı</h2>
+    <p class="hint-txt" style="font-size:.86rem">Görevlerinizi başka bir cihaza ya da sürüme taşımak için burada dışa aktarın, diğer tarafta aynı pencereye yapıştırıp içe aktarın. İçe aktarma mevcut görevleri silmez; aynı görevleri günceller, yenilerini ekler.</p>
+    <textarea class="area" id="bkText" placeholder="Yedek metnini buraya yapıştırın" spellcheck="false" style="font-size:.78rem; min-height:140px"></textarea>
+    <div class="modal-foot">
+      <button type="button" class="btn sm" id="bkExport">Dışa aktar ve kopyala</button>
+      <button type="button" class="btn sm primary live" id="bkImport">İçe aktar</button>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn sm ghost danger" id="bkLogout" hidden>Bu cihazda çıkış yap</button>
+      <span style="flex:1"></span>
+      <button type="button" class="btn sm ghost" id="bkClose">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal solid" id="loginModal" hidden role="dialog" aria-modal="true" aria-labelledby="lgTitle">
+  <form class="card modal-card login" id="loginForm" autocomplete="on">
+    <h2 class="emboss" id="lgTitle">Ritim</h2>
+    <p class="sub">Görevlerinize giriş yapın</p>
+    <label class="field" for="lgPw"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><input type="password" id="lgPw" autocomplete="current-password" placeholder="Uygulama şifresi"></label>
+    <p class="err" id="lgErr" role="alert"></p>
+    <button class="btn primary" type="submit">Giriş yap</button>
+    <p class="sub" style="font-size:.76rem">Şifre, Cloudflare'de APP_PASSWORD olarak belirlediğiniz değerdir. Bu cihaz şifreyi hatırlar.</p>
+  </form>
+</div>
+
 <div class="reminders" id="reminders" aria-live="assertive"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button class="btn sm" id="toastBtn" hidden>Geri al</button></div>
 
@@ -724,6 +763,10 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   const catColor = id => `var(--${listOf(id)?.color || 'p8'})`;
   const catDot = id => `<span class="dot" style="background:${catColor(id)}"></span>`;
 
+  // Fill in fields that older or hand-made records may lack, so rendering never trips over them.
+  const normTask = t => ({ notes: '', pri: 'med', star: false, done: false, doneAt: null, pomo: 0, createdAt: 0, ...t,
+    title: String(t.title ?? 'Adsız görev'), subs: Array.isArray(t.subs) ? t.subs : [], pri: PRI[t.pri] ? t.pri : 'med' });
+
   // Example data is used only when the page runs without the cloud store (opened as a standalone file).
   function seedLocal() {
     const t = today();
@@ -757,11 +800,13 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   function write(col, id, data) {
     if (STORE.mode === 'local') return saveLocal();
-    if (STORE.mode !== 'cloud' || STORE.readOnly) return;
+    if (!['cloud', 'api'].includes(STORE.mode) || STORE.readOnly) return;
     pending.set(col + '/' + id, data === null ? null : clone(data));
+    if (STORE.mode === 'api') { saveLocal(); savePending(); }
     clearTimeout(flushTimer); flushTimer = setTimeout(flush, 350);
   }
   async function flush() {
+    if (STORE.mode === 'api') return flushApi();
     if (flushing) return; flushing = true;
     try {
       while (pending.size) {
@@ -815,7 +860,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
     if (saved && Array.isArray(saved.tasks)) {
-      S.tasks = saved.tasks; S.lists = saved.lists || [];
+      S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || [];
       S.focus = saved.focus || {};
       if (Array.isArray(saved.log)) saved.log.forEach(l => { const d = ymd(new Date(l.at)); (S.focus[d] ||= { sessions: [] }).sessions.push(l); });
       S.tasks.forEach(t => { if (!lists().some(l => l.id === t.cat)) t.cat = lists()[0].id; });
@@ -833,7 +878,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     const got = { tasks: false, lists: false, focus: false };
     const update = () => { if (!STORE.ready && got.tasks && got.lists && got.focus) { STORE.ready = true; checkReminders(); } render(); syncDrawer(); };
     const fail = e => { if (e && e.code === 'revoked') { STORE.readOnly = true; setSync(); } };
-    db.collection('tasks').onSnapshot(snap => { S.tasks = [...fromSnap('tasks', snap).values()]; got.tasks = true; update(); }, fail);
+    db.collection('tasks').onSnapshot(snap => { S.tasks = [...fromSnap('tasks', snap).values()].map(normTask); got.tasks = true; update(); }, fail);
     db.collection('lists').onSnapshot(snap => { S.lists = [...fromSnap('lists', snap).values()]; got.lists = true; update(); }, fail);
     db.collection('focus').onSnapshot(snap => { S.focus = Object.fromEntries(fromSnap('focus', snap)); got.focus = true; update(); }, fail);
   }
@@ -855,11 +900,131 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     render(); toast(`${items.length} görev buluta aktarıldı`);
   }
 
+  // ---------- Cloudflare backend (/api) for the self-hosted app ----------
+  // The device keeps a full copy of the data plus a queue of unsent changes, so the app also works offline.
+  const KEY_PW = 'ritim.key', KEY_PENDING = 'ritim.pending', KEY_REV = 'ritim.rev';
+  const API = { rev: 0, pulling: false };
+  const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+  const savePending = () => lsSet(KEY_PENDING, JSON.stringify([...pending]));
+  const api = (path, opts = {}) => fetch('/api/' + path, { ...opts, cache: 'no-store',
+    headers: { 'content-type': 'application/json', authorization: 'Bearer ' + (lsGet(KEY_PW) || '') } });
+  const isJson = r => (r.headers.get('content-type') || '').includes('application/json');
+
+  async function startApi() {
+    let r = null;
+    try { r = await api('sync?since=0'); } catch (e) {}
+    const known = lsGet(KEY_REV) !== null;
+    if (r && !isJson(r)) return startLocal();      // a static host without the API
+    if (!r && !known) return startLocal();         // offline on first visit and nothing cached yet
+    STORE.mode = 'api';
+    try {
+      const saved = JSON.parse(lsGet(KEY));
+      if (known && saved && Array.isArray(saved.tasks)) { S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || []; S.focus = saved.focus || {}; STORE.ready = true; }
+      (JSON.parse(lsGet(KEY_PENDING)) || []).forEach(([p, d]) => pending.set(p, d));
+    } catch (e) {}
+    API.rev = Number(lsGet(KEY_REV)) || 0;
+    registerSW();
+    if (!r) { STORE.offline = true; STORE.ready = true; setSync(); render(); return; }
+    await handleFirstSync(r);
+  }
+  async function handleFirstSync(r) {
+    if (r.status === 401) { setSync(); render(); return askLogin(); }
+    if (!r.ok) { const e = await r.json().catch(() => ({})); STORE.ready = true; setSync(); render(); return toast(e.error || 'Sunucuya ulaşılamadı.'); }
+    applySync(await r.json(), true);
+    flushApi();
+  }
+  function applySync(res, full) {
+    const docs = res.docs || [];
+    if (!full && !docs.length) { API.rev = res.rev; lsSet(KEY_REV, String(res.rev)); if (STORE.offline) { STORE.offline = false; setSync(); } return; }
+    const maps = {
+      tasks: new Map((full ? [] : S.tasks).map(t => [t.id, t])),
+      lists: new Map((full ? [] : S.lists).map(l => [l.id, l])),
+      focus: new Map(Object.entries(full ? {} : S.focus)),
+    };
+    docs.forEach(d => {
+      const m = maps[d.col]; if (!m || pending.has(d.col + '/' + d.id)) return;
+      if (d.data === null) m.delete(d.id); else m.set(d.id, d.col === 'focus' ? d.data : d.col === 'tasks' ? normTask({ ...d.data, id: d.id }) : { ...d.data, id: d.id });
+    });
+    for (const [path, data] of pending) {
+      const [c, id] = path.split('/'), m = maps[c]; if (!m) continue;
+      if (data === null) m.delete(id); else m.set(id, data);
+    }
+    S.tasks = [...maps.tasks.values()]; S.lists = [...maps.lists.values()]; S.focus = Object.fromEntries(maps.focus);
+    API.rev = res.rev; lsSet(KEY_REV, String(res.rev));
+    STORE.ready = true; STORE.offline = false;
+    saveLocal(); setSync();
+    if (!document.body.classList.contains('dragging')) { render(); syncDrawer(); }
+    checkReminders();
+  }
+  async function pull() {
+    if (STORE.mode !== 'api' || API.pulling || document.hidden || !lsGet(KEY_PW)) return;
+    API.pulling = true;
+    try {
+      const r = await api('sync?since=' + API.rev);
+      if (r.status === 401) return askLogin();
+      if (r.ok && isJson(r)) applySync(await r.json(), false);
+    } catch (e) { if (!STORE.offline) { STORE.offline = true; setSync(); } }
+    finally { API.pulling = false; }
+  }
+  async function flushApi() {
+    if (flushing || !pending.size || !lsGet(KEY_PW)) return;
+    flushing = true;
+    const sent = new Map(pending);
+    let retry = false;
+    try {
+      const r = await api('batch', { method: 'POST', body: JSON.stringify([...sent].map(([p, data]) => { const [col, id] = p.split('/'); return { col, id, data }; })) });
+      if (r.status === 401) { askLogin(); return; }
+      if (r.status >= 400 && r.status < 500) {
+        const e = await r.json().catch(() => ({}));
+        toast(`Bazı değişiklikler kaydedilemedi: ${e.error || r.status}`);
+      } else if (!r.ok) throw new Error(String(r.status));
+      for (const [p, v] of sent) if (pending.get(p) === v) pending.delete(p);
+      savePending();
+      if (STORE.offline) { STORE.offline = false; setSync(); }
+      retry = pending.size > 0;
+    } catch (e) {
+      if (!STORE.offline) { STORE.offline = true; setSync(); }
+    } finally {
+      flushing = false;
+      if (retry) setTimeout(flushApi, 300);
+    }
+  }
+  function askLogin() {
+    const m = $('#loginModal');
+    if (!m.hidden) return;
+    m.hidden = false; $('#lgErr').textContent = '';
+    setTimeout(() => $('#lgPw').focus(), 50);
+  }
+  $('#loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pw = $('#lgPw').value;
+    if (!pw) return $('#lgPw').focus();
+    const before = lsGet(KEY_PW);
+    lsSet(KEY_PW, pw);
+    $('#lgErr').textContent = '';
+    let r = null;
+    try { r = await api('sync?since=0'); } catch (err) {}
+    if (!r) { lsSet(KEY_PW, before); $('#lgErr').textContent = 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edin.'; return; }
+    if (r.status === 401) { lsSet(KEY_PW, before); $('#lgErr').textContent = 'Şifre yanlış.'; $('#lgPw').select(); return; }
+    $('#loginModal').hidden = true; $('#lgPw').value = '';
+    await handleFirstSync(r);
+  });
+  addEventListener('online', () => { flushApi(); pull(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { flushApi(); pull(); } });
+  setInterval(() => { pull(); if (pending.size) flushApi(); }, 20000);
+
+  function registerSW() {
+    const secure = location.protocol === 'https:' || location.hostname === 'localhost';
+    if ('serviceWorker' in navigator && secure) navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
   function setSync() {
     const el = $('#syncState');
     const txt = STORE.mode === 'cloud' ? (STORE.readOnly ? 'Salt okunur' : 'Bulutta kayıtlı · tüm cihazlarda')
+      : STORE.mode === 'api' ? (STORE.offline ? 'Çevrimdışı · bağlanınca eşitlenecek' : 'Bulutta kayıtlı · tüm cihazlarda')
       : STORE.mode === 'local' ? 'Bu tarayıcıda kayıtlı' : 'Bağlanıyor…';
-    el.classList.toggle('cloud', STORE.mode === 'cloud' && !STORE.readOnly);
+    el.classList.toggle('cloud', (STORE.mode === 'cloud' || (STORE.mode === 'api' && !STORE.offline)) && !STORE.readOnly);
     el.querySelector('span').textContent = txt;
   }
 
@@ -1237,6 +1402,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     if (el.closest('[data-new]')) return focusNew();
     if (el.closest('[data-theme-toggle]')) return toggleTheme();
     if (el.closest('[data-newlist]')) return openListModal(null);
+    if (el.closest('[data-backup]')) return openBackup();
     const ed = el.closest('[data-editlist]');
     if (ed) return openListModal(ed.dataset.editlist);
     if (el.closest('[data-clear-samples]')) return clearSamples();
@@ -1260,7 +1426,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.matches('.cat-row[data-cat]')) e.target.click();
-    if (e.key === 'Escape') { if (!$('#listModal').hidden) return closeListModal(); if (ui.open) return closeDrawer(); }
+    if (e.key === 'Escape') { if (!$('#backupModal').hidden) return closeBackup(); if (!$('#listModal').hidden) return closeListModal(); if (ui.open) return closeDrawer(); }
     if (e.target.matches('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'n' || e.key === 'N') { e.preventDefault(); focusNew(); }
     if (e.key === '/') { e.preventDefault(); go('gorevler'); setTimeout(() => $('#search').focus(), 30); }
@@ -1281,6 +1447,55 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       render();
     });
   }
+
+  // ---------- Backup: move data between devices or versions ----------
+  function openBackup() {
+    $('#bkText').value = '';
+    $('#bkLogout').hidden = STORE.mode !== 'api';
+    $('#backupModal').hidden = false;
+  }
+  const closeBackup = () => { $('#backupModal').hidden = true; };
+  $('#bkClose').addEventListener('click', closeBackup);
+  $('#backupModal').addEventListener('click', e => { if (e.target.id === 'backupModal') closeBackup(); });
+  $('#bkExport').addEventListener('click', () => {
+    const text = JSON.stringify({ app: 'ritim', v: 1, exportedAt: new Date().toISOString(), lists: lists(), tasks: S.tasks, focus: S.focus });
+    const ta = $('#bkText'); ta.value = text;
+    const done = () => toast(`${S.tasks.length} görev dışa aktarıldı ve kopyalandı`);
+    const fallback = () => { ta.focus(); ta.select(); toast('Metin seçildi; kopyalayıp diğer cihaza yapıştırın'); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+  $('#bkImport').addEventListener('click', () => {
+    let d;
+    try { d = JSON.parse($('#bkText').value); } catch (e) { return toast('Yedek metni okunamadı. Tamamını yapıştırdığınızdan emin olun.'); }
+    if (!d || d.app !== 'ritim' || !Array.isArray(d.tasks)) return toast('Bu metin bir Ritim yedeği değil.');
+    materializeLists();
+    (d.lists || []).forEach(l => {
+      if (!l || !l.id || !l.name) return;
+      const cur = S.lists.find(x => x.id === l.id);
+      if (cur) Object.assign(cur, l); else S.lists.push({ ...l });
+      putList(cur || l);
+    });
+    let n = 0;
+    d.tasks.forEach(t => {
+      if (!t || !t.id || !t.title) return;
+      const task = normTask(t);
+      if (!lists().some(l => l.id === task.cat)) task.cat = lists()[0].id;
+      const i = S.tasks.findIndex(x => x.id === task.id);
+      if (i >= 0) S.tasks[i] = task; else S.tasks.push(task);
+      putTask(task); n++;
+    });
+    Object.entries(d.focus || {}).forEach(([day, v]) => {
+      const have = S.focus[day]?.sessions || [], seen = new Set(have.map(x => x.at));
+      const merged = have.concat((v.sessions || []).filter(x => x && !seen.has(x.at)));
+      if (merged.length !== have.length) { S.focus[day] = { sessions: merged }; putFocus(day); }
+    });
+    closeBackup(); render();
+    toast(`${n} görev içe aktarıldı`);
+  });
+  $('#bkLogout').addEventListener('click', () => {
+    [KEY_PW, KEY_PENDING, KEY_REV, KEY].forEach(k => lsSet(k, null));
+    location.reload();
+  });
 
   // ---------- Lists ----------
   const lm = { id: null, color: 'p1' };
@@ -1514,7 +1729,9 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   // ---------- Boot ----------
   applyTheme();
   route();
-  if (window.claude && typeof window.claude.use === 'function') startCloud(); else startLocal();
+  if (window.claude && typeof window.claude.use === 'function') startCloud();
+  else if (/^https?:$/.test(location.protocol)) startApi();
+  else startLocal();
   setInterval(checkReminders, 20000);
   setInterval(() => { if (!F.running && !document.body.classList.contains('dragging')) render(); }, 60000);
 })();
