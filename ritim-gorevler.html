@@ -44,7 +44,14 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
-body{background:var(--bg); color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased}
+html{-webkit-text-size-adjust:100%; text-size-adjust:100%; overscroll-behavior:none; overflow-x:clip}
+body{background:var(--bg); color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none; overflow-x:clip; -webkit-tap-highlight-color:transparent; touch-action:manipulation}
+/* Keep the page still behind open panels and dialogs. */
+body:has(.drawer.open), body:has(.modal:not([hidden])){overflow:hidden}
+.d-body,.modal{overscroll-behavior:contain}
+/* iOS zooms into any field whose text is under 16px; keep fields at 16px on touch screens. */
+@media (pointer: coarse){ input, select, textarea{font-size:16px!important} }
 button,input,select,textarea{font:inherit; color:inherit}
 button{cursor:pointer; border:0; background:none}
 :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
@@ -286,6 +293,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .disc.xl{width:min(330px, 100%); height:auto; aspect-ratio:1}
 .ftime{font-size:clamp(3rem, 9vw, 4.4rem); font-weight:800; letter-spacing:-.03em; line-height:1; text-shadow:3px 3px 5px var(--lo), -2px -2px 3px var(--hi)}
 .frow{display:flex; gap:16px; width:min(330px,100%)}
+.focus-main .seg{justify-content:center}
 .frow .btn.primary{flex:1}
 .sessions{display:flex; gap:12px; align-items:center}
 .sessions i{width:14px; height:14px; border-radius:50%; box-shadow:var(--inset-sm)}
@@ -359,7 +367,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   .hero{grid-template-columns:1fr; justify-items:center}
   .hero-copy{width:100%}
   .span-7,.span-5{grid-column:span 12}
-  .focus,.calwrap{grid-template-columns:1fr}
+  .focus,.calwrap{grid-template-columns:minmax(0,1fr)}
   .daypanel{position:static}
 }
 @media (max-width: 860px){
