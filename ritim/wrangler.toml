@@ -1,5 +1,5 @@
-# Workers deployment (ritim.<account>.workers.dev). The Pages project ignores this file.
-name = "ritim"
+# Workers deployment (ritim-app.<account>.workers.dev). The Pages project ignores this file.
+name = "ritim-app"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 

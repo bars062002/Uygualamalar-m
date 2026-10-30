@@ -40,11 +40,11 @@ Bu klasör, Ritim görev yöneticisini Cloudflare Pages üzerinde kendi uygulama
 
 ## Workers olarak yayınlama (workers.dev)
 
-Bazı ağlar (örneğin şirket ağları) `pages.dev` adreslerini engeller. Aynı uygulama `ritim/worker.js` ve `ritim/wrangler.toml` ile Workers olarak da yayınlanır ve `ritim.<hesap>.workers.dev` adresinden açılır. İki sürüm aynı D1 veritabanını kullanır, görevler ortaktır.
+Bazı ağlar (örneğin şirket ağları) `pages.dev` adreslerini engeller. Aynı uygulama `ritim/worker.js` ve `ritim/wrangler.toml` ile Workers olarak da yayınlanır ve `ritim-app.<hesap>.workers.dev` adresinden açılır. İki sürüm aynı D1 veritabanını kullanır, görevler ortaktır.
 
 1. **Workers & Pages → Create → Continue with GitHub** ile `bars062002/Uygualamalar-m` deposunu seçin.
 2. Ayarlar:
-   - Project name: `ritim`
+   - Project name: `ritim-app` (wrangler.toml içindeki adla aynı olmalı)
    - Build command: *(boş)*
    - Deploy command: `npx wrangler deploy`
    - Path (Root directory): `ritim`
