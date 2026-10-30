@@ -1,0 +1,8 @@
+{
+  "name": "FocusFlow - OmniTask Pro",
+  "description": "Ultra-premium task management and productivity suite featuring Today dashboard, Calendar time-blocking, Task Details with subtask tracker, Performance Statistics, Device Sync, and Settings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "FocusFlow - OmniTask Pro",
+  "short_name": "FocusFlow",
+  "description": "Ultra-premium task management, calendar time-blocking and productivity suite.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#131315",
+  "theme_color": "#131315",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/aida-public/AB6AXuCPFzDeyiJ2qHZZaZfRO4uHw1dY3egxk3E7P7O4qjc1_2rLtujkyr8Y25nq7hRmxO7q3G9hk4PzicPTgCRlVLYvI1PDmYmbAlzrLk69AYbUHPPQuyuuF4q3q71suoLq0btGyrz3ZMgr_V6OtAY-GRP0BcX2beGs5_O-xTIWgUBS0SbRayJXX6Z56TGKYKAwqmR60xyu34chr7_KaStoQlDNtd8g5ueLcyR41N0qwG0K",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/aida-public/AB6AXuCPFzDeyiJ2qHZZaZfRO4uHw1dY3egxk3E7P7O4qjc1_2rLtujkyr8Y25nq7hRmxO7q3G9hk4PzicPTgCRlVLYvI1PDmYmbAlzrLk69AYbUHPPQuyuuF4q3q71suoLq0btGyrz3ZMgr_V6OtAY-GRP0BcX2beGs5_O-xTIWgUBS0SbRayJXX6Z56TGKYKAwqmR60xyu34chr7_KaStoQlDNtd8g5ueLcyR41N0qwG0K",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
