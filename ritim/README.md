@@ -38,6 +38,19 @@ Bu klasör, Ritim görev yöneticisini Cloudflare Pages üzerinde kendi uygulama
 6. **Yeniden yayınlayın.** **Deployments** sekmesinde son yayının yanındaki menüden **Retry deployment** seçin. Bağlama ve şifre ancak yeni yayından sonra etkin olur.
 7. `https://<proje-adı>.pages.dev` adresini açın ve şifrenizle giriş yapın.
 
+## Workers olarak yayınlama (workers.dev)
+
+Bazı ağlar (örneğin şirket ağları) `pages.dev` adreslerini engeller. Aynı uygulama `ritim/worker.js` ve `ritim/wrangler.toml` ile Workers olarak da yayınlanır ve `ritim.<hesap>.workers.dev` adresinden açılır. İki sürüm aynı D1 veritabanını kullanır, görevler ortaktır.
+
+1. **Workers & Pages → Create → Continue with GitHub** ile `bars062002/Uygualamalar-m` deposunu seçin.
+2. Ayarlar:
+   - Project name: `ritim`
+   - Build command: *(boş)*
+   - Deploy command: `npx wrangler deploy`
+   - Path (Root directory): `ritim`
+3. **Deploy**'a basın. D1 bağlaması `wrangler.toml` içinde tanımlıdır.
+4. Worker'ın **Settings → Variables and Secrets** bölümüne `APP_PASSWORD` adında **Secret** ekleyin.
+
 ## iPhone'a ekleme
 
 1. Uygulamanın adresini **Safari**'de açıp giriş yapın.

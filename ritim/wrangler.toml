@@ -1,0 +1,16 @@
+# Workers deployment (ritim.<account>.workers.dev). The Pages project ignores this file.
+name = "ritim"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ritim"
+database_id = "c34b265d-5467-48a1-ab11-05c0182a0aee"
+
+# APP_PASSWORD is a secret: set it in the dashboard (Settings → Variables and Secrets) or with
+#   npx wrangler secret put APP_PASSWORD
