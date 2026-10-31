@@ -54,6 +54,9 @@
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+/* Paint the status-bar band so scrolled content never shows under the clock. */
+body::before{content:""; position:fixed; inset:0 0 auto; height:calc(env(safe-area-inset-top, 0px) + 14px); z-index:35; pointer-events:none;
+  background:linear-gradient(to bottom, var(--bg) calc(100% - 14px), transparent)}
 html,body{height:100%}
 html{-webkit-text-size-adjust:100%; text-size-adjust:100%; overscroll-behavior:none; overflow-x:clip}
 body{background:var(--bg); color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
@@ -461,7 +464,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 @media (max-width: 860px){
   .app{grid-template-columns:minmax(0,1fr); padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:20px calc(var(--dock-b) + 96px); gap:0}
   /* Dock offset: just above the home indicator on notched phones, 8px from the edge on the rest. */
-  :root{--dock-b:max(8px, calc(env(safe-area-inset-bottom, 0px) - 14px)); --dock-h:64px}
+  :root{--dock-b:max(8px, calc(env(safe-area-inset-bottom, 0px) - 22px)); --dock-h:64px}
   .side{display:none}
   .m-only{display:flex!important}
   /* Content fades out under the dock instead of showing through below it. */
