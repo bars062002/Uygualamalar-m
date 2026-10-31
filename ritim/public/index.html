@@ -1324,7 +1324,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     const st = document.documentElement.style;
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] === 'number') st.setProperty({ t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], d[k] + 'px'); });
-    if (d.theme && HOST_THEME[d.theme] && HOST_THEME[d.theme] !== theme) { theme = HOST_THEME[d.theme]; accent = null; applyTheme(); }
+    const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
+    if ((nt && nt !== theme) || na !== accent) { if (nt) theme = nt; accent = na; applyTheme(); }
   });
   const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const lum = h => { const [r, g, b] = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
