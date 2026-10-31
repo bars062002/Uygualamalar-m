@@ -7,6 +7,7 @@
 <style>
 /* Layout: soft-clay workspace. A raised sidebar rail beside a content grid; the round sign-in card becomes the progress disc and the focus timer. */
 :root{
+  --spring:cubic-bezier(.34,1.45,.64,1); --ease-out:cubic-bezier(.2,.8,.2,1); --ease-io:cubic-bezier(.65,0,.35,1);
   --bg:#e4e5e9; --hi:#ffffff; --lo:#b9bcc4; --track:#d2d4da;
   --ink:#2e2f35; --ink-2:#5f616a; --ink-3:#8f919a;
   --accent:#9b1c1c; --accent-2:#5e0f12; --accent-soft:rgba(155,28,28,.10); --accent-glow:rgba(155,28,28,.32); --on-accent:#fff6f4;
@@ -67,14 +68,17 @@ svg.i{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; s
 .brand-mark span{width:18px; height:18px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 4px 10px var(--accent-glow)}
 .brand b{font-size:1.2rem; font-weight:800; letter-spacing:-.01em; display:block; line-height:1.1}
 .brand small{color:var(--ink-3); font-size:.75rem; font-weight:500}
-.nav{display:flex; flex-direction:column; gap:8px}
+.nav{display:flex; flex-direction:column; gap:8px; position:relative}
+.nav-ind{position:absolute; left:0; right:0; top:0; height:0; border-radius:var(--r-sm); box-shadow:var(--inset-sm); pointer-events:none; opacity:0}
+.nav-ind.ready{transition:transform .55s var(--spring), height .3s var(--ease-out), opacity .3s; opacity:1}
 .nav-label{display:flex; align-items:center; justify-content:space-between; font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); padding:0 10px}
 .nav-label button{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:var(--ink-3); box-shadow:var(--raise-sm)}
 .nav-label button:hover{color:var(--accent)}
 .nav-label svg.i{width:14px; height:14px}
 .nav a{display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:var(--r-sm); color:var(--ink-2); text-decoration:none; font-weight:500; transition:box-shadow .2s, color .2s}
 .nav a:hover{color:var(--ink)}
-.nav a.on{box-shadow:var(--inset-sm); color:var(--accent); font-weight:600}
+.nav a.on{color:var(--accent); font-weight:600}
+.nav a{position:relative}
 .nav a .count{margin-left:auto; font-size:.75rem; font-weight:600; color:var(--ink-3); min-width:26px; text-align:center; padding:2px 8px; border-radius:99px; box-shadow:var(--raise-sm)}
 .nav a.on .count{color:var(--accent)}
 .lists{display:flex; flex-direction:column; gap:4px}
@@ -99,7 +103,7 @@ svg.i{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; s
 .sync.cloud i{background:var(--ok); box-shadow:0 0 0 3px var(--track)}
 
 .main{min-width:0; display:flex; flex-direction:column}
-.view{display:flex; flex-direction:column; gap:28px; animation:rise .35s ease both}
+.view{display:flex; flex-direction:column; gap:28px}
 @keyframes rise{from{transform:translateY(6px); opacity:.6}to{transform:none; opacity:1}}
 .vhead{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-top:6px}
 .vhead-actions{display:flex; gap:12px; align-items:center}
@@ -117,9 +121,9 @@ svg.i{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; s
 
 .btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:48px; padding:0 24px; border-radius:var(--r-sm);
   box-shadow:var(--raise-sm); color:var(--ink-2); font-weight:600; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; text-decoration:none;
-  transition:box-shadow .25s, color .25s, background .25s, transform .1s}
+  transition:box-shadow .25s, color .25s, background .25s, transform .25s var(--spring)}
 .btn:hover{color:var(--ink)}
-.btn:active{box-shadow:var(--inset-sm); transform:translateY(1px)}
+.btn:active{box-shadow:var(--inset-sm); transform:scale(.97)}
 .btn.primary:hover,.btn.primary.live{background:linear-gradient(110deg,var(--accent) 0%,var(--accent-2) 100%); color:var(--on-accent); box-shadow:0 12px 24px -6px var(--accent-glow)}
 .btn.icon{width:48px; padding:0; letter-spacing:0}
 .btn.sm{height:38px; padding:0 16px; font-size:.75rem}
@@ -236,10 +240,11 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .dragging .group-head .hint{opacity:1}
 .tlist{display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; min-height:12px}
 .dragging .tlist{min-height:56px; border-radius:var(--r); box-shadow:var(--inset-sm); padding:6px}
-.task{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px 18px 16px 8px; border-radius:var(--r); box-shadow:var(--raise-sm); background:var(--bg); transition:box-shadow .25s, opacity .3s}
+.task{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px 18px 16px 8px; border-radius:var(--r); box-shadow:var(--raise-sm); background:var(--bg); transition:box-shadow .25s, opacity .3s, transform .3s var(--ease-out)}
+@media (hover:hover){ .task:hover{transform:translateY(-2px)} .stat{transition:transform .3s var(--ease-out), box-shadow .3s} .stat:hover{transform:translateY(-3px); box-shadow:var(--raise)} }
 .task:hover{box-shadow:var(--raise)}
 .task.done{opacity:.62}
-.task.done .ttl{text-decoration:line-through; text-decoration-color:var(--ink-3); color:var(--ink-3)}
+.task.done .ttl{color:var(--ink-3)}
 .grip{width:22px; height:36px; display:grid; place-items:center; color:var(--ink-3); cursor:grab; touch-action:none; opacity:.5; border-radius:8px}
 .grip:hover{opacity:1}
 .grip svg.i{width:16px; height:16px}
@@ -255,6 +260,11 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 @keyframes pop{50%{transform:scale(1.18)}}
 .tbody{min-width:0; text-align:left; display:flex; flex-direction:column; gap:6px; padding:0}
 .ttl{font-weight:500; font-size:.97rem; overflow-wrap:anywhere}
+/* Strike line drawn left to right when an item is completed. */
+.ttx{background:linear-gradient(currentColor,currentColor) 0 58% / 0% 1.5px no-repeat; transition:background-size .45s var(--ease-io), color .3s; -webkit-box-decoration-break:clone; box-decoration-break:clone}
+.task.done .ttx,.shop-item.done .ttx{background-size:100% 1.5px}
+.check{transition:background .25s, box-shadow .25s, color .2s, transform .3s var(--spring)}
+.check:active{transform:scale(.86)}
 .meta{display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center}
 .tactions{display:flex; align-items:center; gap:6px}
 .star{width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:var(--ink-3); transition:color .2s, box-shadow .2s}
@@ -311,7 +321,9 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .shop-item .check svg.i{width:14px; height:14px}
 .shop-item.done .check{background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 4px 10px var(--accent-glow); color:var(--on-accent)}
 .shop-item .nm{font-weight:500; overflow-wrap:anywhere; text-align:left; padding:0}
-.shop-item.done .nm{text-decoration:line-through; color:var(--ink-3)}
+.shop-item.done .nm{color:var(--ink-3)}
+.quick .chips button{transition:box-shadow .2s, color .2s, transform .25s var(--spring)}
+.quick .chips button:active{transform:scale(.94)}
 .shop-item .qty{font-size:.74rem; font-weight:600; color:var(--ink-2); padding:3px 10px; border-radius:99px; box-shadow:var(--inset-sm); white-space:nowrap}
 .shop-item .more{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; color:var(--ink-3)}
 .shop-item .more:hover{box-shadow:var(--inset-sm); color:var(--ink)}
@@ -323,6 +335,14 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .focus{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start}
 .focus-main{display:flex; flex-direction:column; align-items:center; gap:30px; padding:36px 26px}
 .disc.xl{width:min(330px, 100%); height:auto; aspect-ratio:1}
+.disc.xl.running{animation:breathe 4.5s ease-in-out infinite}
+.disc.xl.running .ring .bar{filter:drop-shadow(0 0 7px var(--accent-glow))}
+@keyframes breathe{50%{transform:scale(1.02)}}
+/* Confetti and sparks */
+.spark{position:fixed; left:0; top:0; width:7px; height:7px; border-radius:50%; pointer-events:none; z-index:80}
+.spark.bit{width:6px; height:10px; border-radius:2px}
+/* Smooth colour change when switching theme */
+html.theming, html.theming *{transition:background-color .45s ease, color .45s ease, box-shadow .45s ease, border-color .45s ease!important}
 .ftime{font-size:clamp(3rem, 9vw, 4.4rem); font-weight:800; letter-spacing:-.03em; line-height:1; text-shadow:3px 3px 5px var(--lo), -2px -2px 3px var(--hi)}
 .frow{display:flex; gap:16px; width:min(330px,100%)}
 .focus-main .seg{justify-content:center}
@@ -338,8 +358,10 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
 /* ---------- Drawer & modal ---------- */
 .scrim{position:fixed; inset:0; background:var(--scrim); backdrop-filter:blur(3px); z-index:40}
+.scrim:not([hidden]),.modal:not([hidden]){animation:fade .3s ease both}
+@keyframes fade{from{opacity:0}}
 .drawer{position:fixed; top:0; right:0; bottom:0; z-index:50; width:min(460px, 100%); background:var(--bg); box-shadow:-18px 0 40px -10px var(--lo);
-  display:flex; flex-direction:column; transform:translateX(105%); transition:transform .35s cubic-bezier(.2,.8,.2,1), visibility .35s; visibility:hidden;
+  display:flex; flex-direction:column; transform:translateX(105%); transition:transform .5s cubic-bezier(.22,1,.36,1), visibility .5s; visibility:hidden;
   padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px); padding-right:env(safe-area-inset-right, 0px)}
 .drawer.open{transform:none; visibility:visible}
 .d-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 26px 10px}
@@ -364,7 +386,9 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
 .modal{position:fixed; inset:0; z-index:55; display:grid; place-items:center; background:var(--scrim); backdrop-filter:blur(3px);
   padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
-.modal-card{width:min(420px, 100%); background:var(--bg); display:flex; flex-direction:column; gap:20px; animation:rise .25s ease both}
+.modal-card{width:min(420px, 100%); background:var(--bg); display:flex; flex-direction:column; gap:20px}
+.modal:not([hidden]) .modal-card{animation:modal-in .5s var(--spring) both}
+@keyframes modal-in{from{opacity:0; transform:translateY(18px) scale(.93)}}
 .swatches{display:flex; flex-wrap:wrap; gap:14px}
 .swatches button{width:34px; height:34px; border-radius:50%; background:var(--c); box-shadow:var(--raise-sm); transition:box-shadow .2s}
 .swatches button[aria-checked="true"]{box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--c)}
@@ -381,12 +405,15 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
 /* ---------- Toast, reminders & tab bar ---------- */
 .toast{position:fixed; left:50%; bottom:calc(28px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%, 140%); z-index:60; display:flex; align-items:center; gap:16px;
-  padding:12px 12px 12px 22px; border-radius:99px; background:var(--bg); box-shadow:var(--raise); font-size:.88rem; font-weight:500; transition:transform .3s cubic-bezier(.2,.8,.2,1), visibility .3s; max-width:calc(100% - 32px); visibility:hidden}
+  padding:12px 12px 12px 22px; border-radius:99px; background:var(--bg); box-shadow:var(--raise); font-size:.88rem; font-weight:500; transition:transform .5s var(--spring), visibility .5s; max-width:calc(100% - 32px); visibility:hidden}
 .toast.show{transform:translate(-50%, 0); visibility:visible}
 .toast .btn{height:34px; padding:0 14px; font-size:.72rem}
 .toast:not(.has-action){padding-right:22px}
 .reminders{position:fixed; z-index:58; top:calc(20px + env(safe-area-inset-top, 0px)); right:max(20px, env(safe-area-inset-right, 0px)); width:min(360px, calc(100% - 32px)); display:flex; flex-direction:column; gap:14px}
-.rem{display:grid; grid-template-columns:auto minmax(0,1fr); gap:2px 14px; padding:16px 18px; border-radius:var(--r); background:var(--bg); box-shadow:var(--raise); animation:rise .3s ease both}
+.rem{display:grid; grid-template-columns:auto minmax(0,1fr); gap:2px 14px; padding:16px 18px; border-radius:var(--r); background:var(--bg); box-shadow:var(--raise); animation:rem-in .6s var(--spring) both}
+@keyframes rem-in{from{opacity:0; transform:translateX(110%)}}
+.rem .bell svg{transform-origin:50% 10%; animation:ring 1.1s ease .3s 2}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-16deg)}45%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}
 .rem .bell{grid-row:span 2; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 14px -4px var(--accent-glow)}
 .rem b{font-weight:600; overflow-wrap:anywhere}
 .rem small{color:var(--ink-3); font-size:.78rem}
@@ -394,6 +421,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .rem .acts .btn{height:34px; padding:0 12px; font-size:.7rem}
 
 .tabbar{display:none}
+.tab-ind{display:none}
 
 @media (max-width: 1100px){
   .hero{grid-template-columns:1fr; justify-items:center}
@@ -410,8 +438,12 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     box-shadow:0 -8px 20px -8px var(--lo); border-radius:26px 26px 0 0;
     padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
   .tabbar a,.tabbar button{display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 6px; min-width:0; border-radius:var(--r-sm); color:var(--ink-3); font-size:.68rem; font-weight:600; text-decoration:none}
-  .tabbar a.on{color:var(--accent); box-shadow:var(--inset-sm)}
-  .tabbar .fab{width:56px; height:56px; padding:0; border-radius:50%; justify-content:center; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 10px 22px -6px var(--accent-glow); margin-top:-26px}
+  .tabbar a.on{color:var(--accent)}
+  .tab-ind{display:block; position:absolute; left:0; top:0; border-radius:var(--r-sm); box-shadow:var(--inset-sm); pointer-events:none; opacity:0}
+  .tab-ind.ready{transition:transform .55s var(--spring), width .3s var(--ease-out), opacity .3s; opacity:1}
+  .tabbar a,.tabbar button{position:relative; z-index:1}
+  .tabbar .fab{width:56px; height:56px; padding:0; border-radius:50%; justify-content:center; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 10px 22px -6px var(--accent-glow); margin-top:-26px; transition:transform .35s var(--spring)}
+  .tabbar .fab:active{transform:scale(.88) rotate(90deg)}
   .tabbar .fab svg.i{width:24px; height:24px}
   .toast{bottom:calc(100px + env(safe-area-inset-bottom, 0px))}
   .add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -462,6 +494,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       <div><b>Ritim</b><small>Görev yöneticisi</small></div>
     </div>
     <nav class="nav" aria-label="Görünümler">
+      <span class="nav-ind" aria-hidden="true"></span>
       <span class="nav-label">Menü</span>
       <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
       <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler<span class="count num" id="navCount">0</span></a>
@@ -678,6 +711,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 </div>
 
 <nav class="tabbar" aria-label="Alt menü">
+  <span class="tab-ind" aria-hidden="true"></span>
   <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
   <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler</a>
   <button class="fab" data-new aria-label="Yeni görev"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -1092,7 +1126,11 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     let r = null;
     try { r = await api('sync?since=0'); } catch (err) {}
     if (!r) { lsSet(KEY_PW, before); $('#lgErr').textContent = 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edin.'; return; }
-    if (r.status === 401) { lsSet(KEY_PW, before); $('#lgErr').textContent = 'Şifre yanlış.'; $('#lgPw').select(); return; }
+    if (r.status === 401) {
+      lsSet(KEY_PW, before); $('#lgErr').textContent = 'Şifre yanlış.'; $('#lgPw').select();
+      if (motionOK()) $('#loginForm').animate([0, -12, 10, -7, 4, 0].map(x => ({ transform: `translateX(${x}px)` })), { duration: 480, easing: 'ease-out' });
+      return;
+    }
     $('#loginModal').hidden = true; $('#lgPw').value = '';
     await handleFirstSync(r);
   });
@@ -1149,6 +1187,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     $('#themeSwitch').setAttribute('aria-checked', String(dark));
   }
   function toggleTheme() {
+    if (motionOK()) { document.documentElement.classList.add('theming'); setTimeout(() => document.documentElement.classList.remove('theming'), 500); }
     theme = $('#themeSwitch').getAttribute('aria-checked') === 'true' ? 'light' : 'dark';
     try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
     applyTheme();
@@ -1156,20 +1195,135 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   $('#themeSwitch').addEventListener('click', e => { e.preventDefault(); toggleTheme(); });
   matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
 
+  // ---------- Motion ----------
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const motionOK = () => !reduceMotion.matches && typeof Element.prototype.animate === 'function';
+  const EASE = 'cubic-bezier(.2,.8,.2,1)';
+  const ENTER = [{ opacity: 0, transform: 'translateY(16px) scale(.985)' }, { opacity: 1, transform: 'none' }];
+  const ITEMS = '.task[data-id], .shop-item[data-sid], .up-row[data-open]';
+  const keyOf = el => el.dataset.id || (el.dataset.sid && 's' + el.dataset.sid) || ('u' + el.dataset.open);
+
+  // FLIP: remember where list items were, then slide them from there to their new place after a re-render.
+  function snapshotItems() {
+    const m = new Map();
+    $$(ITEMS).forEach(el => { if (el.offsetParent) m.set(keyOf(el), el.getBoundingClientRect()); });
+    return m;
+  }
+  function flipItems(before) {
+    let fresh = 0;
+    $$(ITEMS).forEach(el => {
+      if (!el.offsetParent) return;
+      const old = before.get(keyOf(el)), now = el.getBoundingClientRect();
+      if (old) {
+        const dx = old.left - now.left, dy = old.top - now.top;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 480, easing: EASE });
+      } else {
+        el.animate(ENTER, { duration: 420, delay: Math.min(fresh++, 10) * 30, easing: EASE, fill: 'backwards' });
+      }
+    });
+  }
+  // Entering a view: blocks fade up one after another, bars and rings fill from zero.
+  function enterView() {
+    const view = $('#v-' + ui.route);
+    const blocks = [...view.children].filter(el => !el.hidden).flatMap(el =>
+      el.matches('.dash, .shop-grid, .focus, .calwrap, .groups') ? [...el.querySelectorAll(':scope > *, :scope > * > .card')] : [el]);
+    [...new Set(blocks)].forEach((el, i) => el.animate(ENTER, { duration: 560, delay: Math.min(i, 12) * 55, easing: EASE, fill: 'backwards' }));
+    view.querySelectorAll('.track i, .bar-col .fill').forEach((el, i) => {
+      const prop = el.classList.contains('fill') ? 'height' : 'width', target = el.style[prop];
+      el.animate([{ [prop]: '0%' }, { [prop]: target }], { duration: 900, delay: 150 + i * 45, easing: EASE, fill: 'backwards' });
+    });
+    view.querySelectorAll('.ring .bar').forEach(el => {
+      const target = getComputedStyle(el).strokeDashoffset;
+      el.animate([{ strokeDashoffset: C + 'px' }, { strokeDashoffset: target }], { duration: 1300, delay: 120, easing: EASE, fill: 'backwards' });
+    });
+    if (ui.route === 'pano') {
+      countUp($('#dashPct'), parseInt($('#dashPct').textContent, 10) || 0, v => `${v}<small>%</small>`);
+      $$('#dashStats .v, #dashBars .val').forEach(el => countUp(el, parseInt(el.textContent, 10) || 0));
+    }
+  }
+  function countUp(el, to, fmt = v => String(v)) {
+    if (!el || !to) return;
+    const start = performance.now(), dur = 900;
+    const step = now => {
+      const p = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.innerHTML = fmt(Math.round(to * e));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    el.innerHTML = fmt(0);
+    requestAnimationFrame(step);
+  }
+  // Fold an element away before it is removed from the list.
+  function leave(el) {
+    if (!el || !motionOK() || !el.offsetParent) return Promise.resolve();
+    const h = el.offsetHeight;
+    return el.animate([
+      { opacity: 1, transform: 'none', height: h + 'px' },
+      { opacity: 0, transform: 'translateX(28px) scale(.96)', height: '0px', paddingTop: '0px', paddingBottom: '0px', marginTop: '0px', marginBottom: '0px' },
+    ], { duration: 340, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).finished.catch(() => {});
+  }
+  // A small burst of coloured sparks from a point; with confetti=true a bigger celebration.
+  function burst(x, y, { n = 12, spread = 54, confetti = false } = {}) {
+    if (!motionOK()) return;
+    const colors = ['var(--accent)', 'var(--accent-2)', 'var(--p4)', 'var(--p3)', 'var(--p2)', 'var(--p5)'];
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('i');
+      d.className = 'spark' + (confetti && i % 2 ? ' bit' : '');
+      d.style.background = colors[i % colors.length];
+      document.body.appendChild(d);
+      const a = (Math.PI * 2 * i) / n + Math.random() * 0.6, r = spread * (0.55 + Math.random() * 0.7);
+      const tx = Math.cos(a) * r, ty = Math.sin(a) * r + (confetti ? spread * 0.6 : 0), rot = confetti ? Math.random() * 720 - 360 : 0;
+      d.animate([
+        { transform: `translate(${x}px, ${y}px) translate(-50%, -50%) scale(1) rotate(0deg)`, opacity: 1 },
+        { transform: `translate(${x + tx * 0.8}px, ${y + ty * 0.6 - (confetti ? spread * 0.5 : 0)}px) translate(-50%, -50%) scale(1) rotate(${rot / 2}deg)`, opacity: 1, offset: 0.45 },
+        { transform: `translate(${x + tx}px, ${y + ty}px) translate(-50%, -50%) scale(.4) rotate(${rot}deg)`, opacity: 0 },
+      ], { duration: (confetti ? 1300 : 650) + Math.random() * 300, easing: 'cubic-bezier(.2,.7,.3,1)' }).finished.then(() => d.remove(), () => d.remove());
+    }
+  }
+  const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+  // Sliding highlight behind the active menu item (sidebar and phone tab bar).
+  function moveIndicators() {
+    const side = $('.nav-ind'), sideOn = $('.side .nav a.on');
+    if (side && sideOn) {
+      side.style.height = sideOn.offsetHeight + 'px';
+      side.style.transform = `translateY(${sideOn.offsetTop}px)`;
+      requestAnimationFrame(() => side.classList.add('ready'));
+    }
+    const tab = $('.tab-ind'), tabOn = $('.tabbar a.on');
+    if (tab && tabOn && tabOn.offsetParent) {
+      Object.assign(tab.style, { width: tabOn.offsetWidth + 'px', height: tabOn.offsetHeight + 'px', transform: `translate(${tabOn.offsetLeft}px, ${tabOn.offsetTop}px)` });
+      requestAnimationFrame(() => tab.classList.add('ready'));
+    }
+    if (tab && !tabOn) tab.classList.remove('ready');
+  }
+  addEventListener('resize', moveIndicators);
+
   // ---------- Router ----------
   const ROUTES = ['pano', 'gorevler', 'alisveris', 'takvim', 'odak'];
   function route() {
     const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
     $$('[data-route]').forEach(a => a.classList.toggle('on', a.dataset.route === r));
-    ui.route = r;
+    if (ui.route !== r || !ui.shown) ui.entering = true;
+    ui.route = r; ui.shown = true;
     render();
+    moveIndicators();
   }
   addEventListener('hashchange', route);
   const go = r => { if (location.hash !== '#' + r) location.hash = r; else route(); };
 
   // ---------- Render ----------
   function render() {
+    const anim = motionOK(), wasReady = ui.dataShown;
+    const before = anim && !ui.entering ? snapshotItems() : null;
+    renderNow();
+    ui.dataShown = STORE.ready;
+    if (!anim) { ui.entering = false; return; }
+    // Re-run the entrance once real data replaces the loading state.
+    if (ui.entering || (!wasReady && STORE.ready)) { ui.entering = false; enterView(); }
+    else flipItems(before);
+  }
+  function renderNow() {
     renderSide();
     const hasSample = S.tasks.some(t => t.sample);
     const imp = importable();
@@ -1289,7 +1443,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       <span class="grip" aria-hidden="true" title="Sürükleyerek taşıyın">${ico('grip')}</span>
       <button class="check" data-toggle aria-label="${t.done ? 'Tamamlanmadı olarak işaretle' : 'Tamamlandı olarak işaretle'}">${ico('check')}</button>
       <button class="tbody" data-open="${t.id}">
-        <span class="ttl">${esc(t.title)}</span>
+        <span class="ttl"><span class="ttx">${esc(t.title)}</span></span>
         <span class="meta">
           <span class="chip">${catDot(t.cat)}${esc(catName(t.cat))}</span>
           ${t.due ? `<span class="pill ${!t.done && isLate(t) ? 'late' : !t.done && t.due === today() ? 'today' : ''}">${ico('clock')}${t.done ? fmtShort.format(parse(t.due)) : dueLabel(t.due)}</span>` : ''}
@@ -1405,7 +1559,10 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     $('#dayList').innerHTML = items.length ? items.map(x => taskHTML(x, false)).join('')
       : `<li class="empty" style="padding:24px"><b>${STORE.ready ? 'Bu gün boş' : 'Yükleniyor…'}</b>${STORE.ready ? 'Yukarıdan bu tarihe görev ekleyebilirsiniz.' : ''}</li>`;
   }
-  const shiftMonth = n => { ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + n, 1); renderCal(); };
+  const shiftMonth = n => {
+    ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + n, 1); renderCal();
+    if (motionOK()) $$('#cal .cal-day').forEach((el, i) => el.animate([{ opacity: 0, transform: `translateX(${n * 26}px)` }, { opacity: 1, transform: 'none' }], { duration: 420, delay: (i % 7) * 18, easing: EASE, fill: 'backwards' }));
+  };
   $('#calPrev').addEventListener('click', () => shiftMonth(-1));
   $('#calNext').addEventListener('click', () => shiftMonth(1));
   $('#calToday').addEventListener('click', () => { const n = new Date(); ui.calMonth = new Date(n.getFullYear(), n.getMonth(), 1); ui.calSel = today(); renderCal(); });
@@ -1462,9 +1619,32 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     return t;
   }
 
+  // Tick a task in a list: show the check, sparks and strike line first, then let it slide to its new place.
+  function completeFromList(li, btn) {
+    const t = byId(li.dataset.id); if (!t || li.dataset.busy) return;
+    btn.classList.add('pop');
+    if (t.done || !motionOK()) return afterToggle(t.id);
+    li.dataset.busy = '1';
+    li.classList.add('done');
+    burst(...centerOf(btn));
+    // In the task list the done group starts collapsed, so fold the row away instead of letting it vanish.
+    const folds = !li.closest('#dayList') && ui.filter === 'all' && ui.collapsed.done && !ui.q;
+    setTimeout(() => (folds ? leave(li) : Promise.resolve()).then(() => afterToggle(t.id)), 420);
+  }
+  function afterToggle(id) {
+    toggleDone(id);
+    const t = byId(id);
+    const plan = S.tasks.filter(isToday);
+    if (t && t.done && isToday(t) && plan.length > 1 && plan.every(x => x.done)) {
+      setTimeout(() => { burst(innerWidth / 2, innerHeight * 0.35, { n: 44, spread: Math.min(innerWidth, 520) * 0.42, confetti: true }); toast('Bugünün tüm görevleri tamam! 🎉'); }, 150);
+    }
+  }
+
   function deleteTask(id) {
     const i = S.tasks.findIndex(t => t.id === id); if (i < 0) return;
-    const [t] = S.tasks.splice(i, 1); dropTask(id); closeDrawer(); render();
+    const li = $(`.view:not([hidden]) .task[data-id="${id}"]`);
+    const [t] = S.tasks.splice(i, 1); dropTask(id); closeDrawer();
+    leave(li).then(render);
     toast('Görev silindi', () => { S.tasks.splice(i, 0, t); putTask(t); render(); });
   }
 
@@ -1508,7 +1688,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     const g = el.closest('button[data-group]');
     if (g) { const k = g.dataset.group; ui.collapsed[k] = g.getAttribute('aria-expanded') === 'true'; return renderTasks(); }
     const li = el.closest('.task');
-    if (li && el.closest('[data-toggle]')) { el.closest('[data-toggle]').classList.add('pop'); return toggleDone(li.dataset.id); }
+    if (li && el.closest('[data-toggle]')) return completeFromList(li, el.closest('[data-toggle]'));
     if (li && el.closest('[data-star]')) { const t = byId(li.dataset.id); t.star = !t.star; putTask(t); return render(); }
     const op = el.closest('[data-open]');
     if (op) return openDrawer(op.dataset.open);
@@ -1765,7 +1945,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
     const itemHTML = i => `<li class="shop-item ${i.done ? 'done' : ''}" data-sid="${i.id}">
       <button class="check" data-stoggle aria-label="${i.done ? 'Sepetten çıkar' : 'Sepete ekle'}: ${esc(i.name)}">${ico('check')}</button>
-      <button class="nm" data-sedit>${esc(i.name)}</button>
+      <button class="nm" data-sedit><span class="ttx">${esc(i.name)}</span></button>
       ${i.qty ? `<span class="qty num">${esc(i.qty)}</span>` : '<span></span>'}
       <button class="more" data-sedit aria-label="${esc(i.name)} ürününü düzenle"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
     </li>`;
@@ -1794,14 +1974,18 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       const bought = S.shop.filter(i => i.done);
       recordBought(bought);
       S.shop = S.shop.filter(i => !i.done); bought.forEach(i => dropShop(i.id));
-      render();
+      Promise.all($$('.basket .shop-item').map(leave)).then(render);
       return toast(`${bought.length} ürün sepetten kaldırıldı`, () => { S.shop = S.shop.concat(bought); bought.forEach(putShop); render(); });
     }
     const li = e.target.closest('[data-sid]'); if (!li) return;
     const item = S.shop.find(i => i.id === li.dataset.sid); if (!item) return;
     if (e.target.closest('[data-stoggle]')) {
-      item.done = !item.done; item.doneAt = item.done ? new Date().toISOString() : null;
-      putShop(item); return render();
+      if (li.dataset.busy) return;
+      const commit = () => { item.done = !item.done; item.doneAt = item.done ? new Date().toISOString() : null; putShop(item); render(); };
+      if (item.done || !motionOK()) return commit();
+      li.dataset.busy = '1'; li.classList.add('done');
+      const btn = e.target.closest('[data-stoggle]'); btn.classList.add('pop'); burst(...centerOf(btn), { n: 9, spread: 40 });
+      return setTimeout(commit, 380);
     }
     if (e.target.closest('[data-sedit]')) return openShopModal(item);
   });
@@ -1846,7 +2030,8 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     const b = $('#smDelete');
     if (!b.classList.contains('armed')) { b.classList.add('armed'); b.querySelector('span').textContent = 'Emin misiniz?'; shopArm = setTimeout(disarmShop, 3500); return; }
     const k = S.shop.findIndex(i => i.id === sm.id); if (k < 0) return closeShopModal();
-    const [item] = S.shop.splice(k, 1); dropShop(item.id); closeShopModal(); render();
+    const [item] = S.shop.splice(k, 1); dropShop(item.id); closeShopModal();
+    leave($(`.shop-item[data-sid="${item.id}"]`)).then(render);
     toast(`${item.name} silindi`, () => { S.shop.splice(k, 0, item); putShop(item); render(); });
   });
 
@@ -1855,6 +2040,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   function openDrawer(id) {
     ui.open = id; syncDrawer();
     drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); $('#scrim').hidden = false;
+    if (motionOK()) $$('#drawer .d-body > *').forEach((el, i) => el.animate(ENTER, { duration: 480, delay: 90 + i * 45, easing: EASE, fill: 'backwards' }));
     setTimeout(() => $('#dTitle').focus(), 60);
   }
   function closeDrawer() {
@@ -1972,6 +2158,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     $('#fStart span').textContent = F.running ? 'Duraklat' : F.left < F.total ? 'Devam et' : 'Başlat';
     $('#fStartIco').innerHTML = F.running ? ICO.pause : ICO.play;
     $('#fStart').classList.toggle('live', F.running);
+    $('.disc.xl').classList.toggle('running', F.running);
     const nf = $('#navFocus'); nf.hidden = !F.running && F.left === F.total; nf.textContent = mmss(Math.ceil(F.left));
   }
   function tick() {
@@ -1984,6 +2171,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   const todaysLog = () => (S.focus[today()]?.sessions || []);
   function finish() {
     stop(); beep();
+    if (!$('#v-odak').hidden) burst(...centerOf($('.disc.xl')), { n: 30, spread: 170, confetti: true });
     if (F.mode === 'focus') {
       const t = F.taskId && byId(F.taskId);
       if (t) { t.pomo = (t.pomo || 0) + 1; putTask(t); }
