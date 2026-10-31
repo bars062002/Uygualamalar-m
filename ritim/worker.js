@@ -7,9 +7,10 @@ import { onRequestPost as quick } from './functions/api/quick.js';
 import { onRequestPost as register } from './functions/api/register.js';
 import { onRequestPost as login } from './functions/api/login.js';
 import { onRequestGet as meGet, onRequestPost as mePost } from './functions/api/me.js';
+import { onRequestPost as claim } from './functions/api/claim.js';
 import { json } from './lib/http.js';
 
-const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost };
+const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost, 'POST /api/claim': claim };
 
 export default {
   async fetch(request, env) {

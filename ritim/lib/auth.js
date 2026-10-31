@@ -27,6 +27,8 @@ export async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS udocs (owner TEXT NOT NULL, col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (owner, col, id))'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS udocs_rev ON udocs (owner, rev)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS users_qkey ON users (qkey)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS docs (col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (col, id))'),
   ]);
   schemaReady = true;
 }

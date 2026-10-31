@@ -1292,6 +1292,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!r.ok) { const e = await r.json().catch(() => ({})); STORE.ready = true; setSync(); render(); return toast(e.error || 'Sunucuya ulaşılamadı.'); }
     applySync(await r.json(), true);
     flushApi();
+    setTimeout(offerServerLegacy, 1200);
   }
   function applySync(res, full) {
     const docs = res.docs || [];
@@ -1396,6 +1397,24 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     }
     return items.length;
   }
+  // Sunucuda hesaplardan önceki (sahipsiz) veriler varsa bir kez sor ve hesaba aktar.
+  let legacyAsked = false;
+  async function offerServerLegacy() {
+    if (legacyAsked || STORE.mode !== 'api' || !lsGet(KEY_PW)) return; legacyAsked = true;
+    let me = null; try { const r = await api('me'); if (r.ok) me = await r.json(); } catch (e) {}
+    if (!me || !me.legacy) return;
+    const m = $('#loginModal');
+    $('#lgLegacyTxt').textContent = `Ritim'in hesaplardan önceki sürümünde kaydedilmiş ${me.legacy.tasks} görev ve ${me.legacy.notes} not var. Bunlar senin ise ${me.name || me.username} hesabına aktarayım mı? Yalnızca bir hesap alabilir.`;
+    $('#loginForm').hidden = true; $('#lgLegacy').hidden = false; m.hidden = false;
+    $('#lgLegacyYes').onclick = async () => {
+      $('#lgLegacyYes').disabled = true;
+      let res = {}; try { const r = await api('claim', { method: 'POST', body: '{}' }); res = await r.json(); } catch (e) {}
+      $('#lgLegacyYes').disabled = false; m.hidden = true; $('#loginForm').hidden = false; $('#lgLegacy').hidden = true;
+      if (res.ok) { const s0 = await api('sync?since=0').catch(() => null); if (s0) await handleFirstSync(s0); toast(`${res.copied} kayıt hesabına aktarıldı`); }
+      else toast(res.error || 'Aktarılamadı');
+    };
+    $('#lgLegacyNo').onclick = () => { m.hidden = true; $('#loginForm').hidden = false; $('#lgLegacy').hidden = true; };
+  }
   $('#loginForm').addEventListener('submit', async e => {
     e.preventDefault();
     const username = $('#lgUser').value.trim(), password = $('#lgPw').value, name = $('#lgName').value.trim();
@@ -1413,6 +1432,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       [KEY, KEY_REV, KEY_PENDING].forEach(k => lsSet(k, null)); pending.clear();
       S.tasks = []; S.lists = []; S.focus = {}; S.shop = []; S.shophist = {}; S.notes = [];
     }
+    if (prev !== res.username) { lsSet('ritim.tasksImported', null); lsSet('ritim.notesImported', null); }
     lsSet(KEY_PW, res.token); lsSet(KEY_USER, res.username); lsSet('ritim.name', res.name || res.username);
     $('#lgPw').value = '';
     const finish = async () => {
@@ -1420,6 +1440,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       const s0 = await api('sync?since=0').catch(() => null);
       if (s0) await handleFirstSync(s0);
       toast(`Hoş geldin, ${res.name || res.username}`);
+      setTimeout(offerServerLegacy, 600);
     };
     if (legacy && !prev) {
       const nt = (legacy.tasks || []).filter(t => !t.sample).length, nn = (legacy.notes || []).length;
