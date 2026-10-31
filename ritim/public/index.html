@@ -1316,7 +1316,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // Inside Site Asistan: follow the host's theme and safe insets (not saved, so Ritim on its own keeps the user's choice).
   const EMBED = /[?&]embed=1\b/.test(location.search);
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest' };
+  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest' };
   addEventListener('message', e => {
     const d = e.data;
     if (!EMBED || !d || d.type !== 'sa-insets') return;
