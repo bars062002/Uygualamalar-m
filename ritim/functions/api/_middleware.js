@@ -1,18 +1,18 @@
 import { json } from '../../lib/http.js';
+import { ensureSchema, userFromToken, bearer } from '../../lib/auth.js';
 
-// /api istekleri: D1 bağlamasını ve tabloyu hazırlar. Şifre istenmez.
-let schemaReady = false;
+// Her /api isteği: tabloyu hazırlar; kayıt/giriş dışındaki istekler bir oturum ister.
+// Herkes yalnızca kendi belgelerini görür (udocs.owner = kullanıcı adı).
+const OPEN = new Set(['/api/register', '/api/login', '/api/quick']);
 
-export async function onRequest({ request, env, next }) {
-  if (!env.DB) return json({ error: 'D1 veritabanı bağlı değil. Pages ayarlarında DB adıyla bir D1 bağlaması ekleyin.' }, 500);
-  // Şifre kaldırıldı (kullanıcının isteğiyle): uygulama ve API girişsiz çalışır.
-
-  if (!schemaReady) {
-    await env.DB.batch([
-      env.DB.prepare('CREATE TABLE IF NOT EXISTS docs (col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (col, id))'),
-      env.DB.prepare('CREATE INDEX IF NOT EXISTS docs_rev ON docs (rev)'),
-    ]);
-    schemaReady = true;
-  }
+export async function onRequest(ctx) {
+  const { request, env, next } = ctx;
+  if (!env.DB) return json({ error: 'D1 veritabanı bağlı değil.' }, 500);
+  await ensureSchema(env);
+  const path = new URL(request.url).pathname;
+  if (OPEN.has(path)) return next();
+  const user = await userFromToken(env, bearer(request));
+  if (!user) { await new Promise(r => setTimeout(r, 300)); return json({ error: 'Oturum açın.', auth: true }, 401); }
+  ctx.data = ctx.data || {}; ctx.data.user = user;
   return next();
 }

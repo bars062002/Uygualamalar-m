@@ -1,4 +1,5 @@
 import { json } from '../../lib/http.js';
+import { ensureSchema } from '../../lib/auth.js';
 
 // POST /api/quick — iPhone Kestirmeler / Eylem Düğmesi için hızlı ekleme.
 // Gövde: {"text": "..."} ya da düz metin.
@@ -12,6 +13,11 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const up = s => s.toLocaleUpperCase('tr-TR');
 
 export async function onRequestPost({ request, env }) {
+  // Kişisel kestirme anahtarı: ?k=… (Ritim → Yedekle ve taşı penceresindeki adres)
+  const k = new URL(request.url).searchParams.get('k') || '';
+  const who = k.length >= 20 ? await env.DB.prepare('SELECT username FROM users WHERE qkey = ?').bind(k).first() : null;
+  if (!who) return json({ error: 'Kestirme adresi geçersiz. Ritim → Yedekle ve taşı penceresindeki kişisel adresi kullanın.' }, 401);
+  const owner = who.username;
   let text = '';
   const ct = request.headers.get('content-type') || '';
   try {
@@ -24,14 +30,14 @@ export async function onRequestPost({ request, env }) {
   const now = new Date(), rev = Date.now();
   const note = text.match(/^not\b[\s:,.-]*([\s\S]+)$/i);
   if (note) {
-    const rows = (await env.DB.prepare("SELECT id, data FROM docs WHERE col = 'notes' AND data IS NOT NULL").all()).results || [];
+    const rows = (await env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'notes' AND data IS NOT NULL").bind(owner).all()).results || [];
     let id = null, doc = null;
     for (const r of rows) { try { const d = JSON.parse(r.data); if (d && d.src === 'scratch') { id = r.id; doc = d; break; } } catch {} }
     const line = `- ${stamp(now)} · ${note[1].trim()}`;
     if (!doc) { id = uid(); doc = { id, title: 'Karalamalar', body: '', site: '', pinned: false, created: now.toISOString(), src: 'scratch' }; }
     doc.body = line + (doc.body ? '\n' + doc.body : ''); doc.updated = now.toISOString();
-    await env.DB.prepare('INSERT INTO docs (col, id, data, rev) VALUES (?, ?, ?, ?) ON CONFLICT (col, id) DO UPDATE SET data = excluded.data, rev = excluded.rev')
-      .bind('notes', id, JSON.stringify(doc), rev).run();
+    await env.DB.prepare('INSERT INTO udocs (owner, col, id, data, rev) VALUES (?, ?, ?, ?, ?) ON CONFLICT (owner, col, id) DO UPDATE SET data = excluded.data, rev = excluded.rev')
+      .bind(owner, 'notes', id, JSON.stringify(doc), rev).run();
     return json({ ok: true, kind: 'note', message: 'Not Karalamalar’a eklendi' });
   }
 
@@ -45,6 +51,6 @@ export async function onRequestPost({ request, env }) {
   const title = rest.replace(/\s+/g, ' ').replace(/^[\s,:-]+|[\s,:-]+$/g, '').slice(0, 140) || text.slice(0, 140);
   const id = uid();
   const task = { id, title, site, cat: 'is', pri: 'med', due, remind, notes: '', star: false, done: false, doneAt: null, repeat: null, subs: [], pomo: 0, createdAt: Date.now(), src: 'quick' };
-  await env.DB.prepare('INSERT INTO docs (col, id, data, rev) VALUES (?, ?, ?, ?)').bind('tasks', id, JSON.stringify(task), rev).run();
+  await env.DB.prepare('INSERT INTO udocs (owner, col, id, data, rev) VALUES (?, ?, ?, ?, ?)').bind(owner, 'tasks', id, JSON.stringify(task), rev).run();
   return json({ ok: true, kind: 'task', message: `Görev eklendi: ${site ? site + ' · ' : ''}${title}` });
 }

@@ -635,6 +635,10 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   .note-ed{padding:16px; min-height:calc(100vh - 220px)}
 }
 .qk-box{display:flex; flex-direction:column; gap:10px; padding:16px; border-radius:var(--r-sm); box-shadow:var(--inset-sm)}
+.modal-card.login{aspect-ratio:auto; border-radius:var(--r-lg); padding:44px 40px; width:min(440px, 100%)}
+@media (max-width: 520px){ .modal-card.login{padding:36px 22px} }
+.lg-seg{width:100%; display:grid; grid-template-columns:1fr 1fr}
+.lg-seg button{justify-content:center}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -996,7 +1000,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     </div>
     <div class="qk-box" id="qkBox" hidden>
       <span class="lbl">iPhone kestirmesi · Eylem Düğmesi</span>
-      <p class="hint-txt" style="font-size:.8rem; margin:0">Kestirmede “URL içeriğini al” eylemi bu adrese <b>POST</b> ile <b>{"text": "…"}</b> gönderir. “not …” ile başlayan metin Notlar’a, diğerleri görev olarak eklenir; başta saha kodu, “yarın 14:30” gibi ifadeler anlaşılır.</p>
+      <p class="hint-txt" style="font-size:.8rem; margin:0">Bu adres <b>sana özeldir</b>, kimseyle paylaşma. Kestirmede “URL içeriğini al” eylemi bu adrese <b>POST</b> ile <b>{"text": "…"}</b> gönderir. “not …” ile başlayan metin Notlar’a, diğerleri görev olarak eklenir; başta saha kodu, “yarın 14:30” gibi ifadeler anlaşılır.</p>
       <div style="display:flex; gap:10px; align-items:center"><label class="field" style="flex:1; height:44px"><input id="qkUrl" readonly></label><button type="button" class="btn sm" id="qkCopy">Kopyala</button></div>
     </div>
     <div class="modal-foot">
@@ -1010,12 +1014,21 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 <div class="modal solid" id="loginModal" hidden role="dialog" aria-modal="true" aria-labelledby="lgTitle">
   <form class="card modal-card login" id="loginForm" autocomplete="on">
     <h2 class="emboss" id="lgTitle">Ritim</h2>
-    <p class="sub">Görevlerinize giriş yapın</p>
-    <label class="field" for="lgPw"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><input type="password" id="lgPw" autocomplete="current-password" placeholder="Uygulama şifresi"></label>
+    <p class="sub" id="lgSub">Hesabına giriş yap</p>
+    <div class="seg lg-seg" id="lgSeg" role="tablist"><button type="button" data-m="login" class="on">Giriş yap</button><button type="button" data-m="register">Hesap oluştur</button></div>
+    <label class="field" for="lgName" id="lgNameF" hidden><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="lgName" autocomplete="name" placeholder="Adın soyadın" maxlength="60"></label>
+    <label class="field" for="lgUser"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Kullanıcı adı" maxlength="32"></label>
+    <label class="field" for="lgPw"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><input type="password" id="lgPw" autocomplete="current-password" placeholder="Şifre"></label>
     <p class="err" id="lgErr" role="alert"></p>
-    <button class="btn primary" type="submit">Giriş yap</button>
-    <p class="sub" style="font-size:.76rem">Şifre, Cloudflare'de APP_PASSWORD olarak belirlediğiniz değerdir. Bu cihaz şifreyi hatırlar.</p>
+    <button class="btn primary" type="submit" id="lgGo">Giriş yap</button>
+    <p class="sub" style="font-size:.76rem" id="lgHint">Her kişinin kendi hesabı vardır; görevlerini ve notlarını yalnızca sen görürsün. Bu cihaz oturumu hatırlar.</p>
   </form>
+  <div class="card modal-card login" id="lgLegacy" hidden>
+    <h2 class="emboss">Önceki veriler</h2>
+    <p class="sub" id="lgLegacyTxt"></p>
+    <button class="btn primary" type="button" id="lgLegacyYes">Hesabıma aktar</button>
+    <button class="btn ghost" type="button" id="lgLegacyNo">Aktarma</button>
+  </div>
 </div>
 
 <div class="modal" id="shopModal" hidden role="dialog" aria-modal="true" aria-labelledby="smTitle">
@@ -1248,7 +1261,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 
   // ---------- Cloudflare backend (/api) for the self-hosted app ----------
   // The device keeps a full copy of the data plus a queue of unsent changes, so the app also works offline.
-  const KEY_PW = 'ritim.key', KEY_PENDING = 'ritim.pending', KEY_REV = 'ritim.rev';
+  const KEY_PW = 'ritim.key', KEY_PENDING = 'ritim.pending', KEY_REV = 'ritim.rev', KEY_USER = 'ritim.user';
   const API = { rev: 0, pulling: false };
   const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const lsSet = (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
@@ -1309,7 +1322,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     checkReminders();
   }
   async function pull() {
-    if (STORE.mode !== 'api' || API.pulling || document.hidden) return;
+    if (STORE.mode !== 'api' || API.pulling || document.hidden || !lsGet(KEY_PW)) return;
     API.pulling = true;
     try {
       const r = await api('sync?since=' + API.rev);
@@ -1319,7 +1332,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     finally { API.pulling = false; }
   }
   async function flushApi() {
-    if (flushing || !pending.size) return;
+    if (flushing || !pending.size || !lsGet(KEY_PW)) return;
     flushing = true;
     const sent = new Map(pending);
     let retry = false;
@@ -1341,29 +1354,87 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       if (retry) setTimeout(flushApi, 300);
     }
   }
+  // ---------- Hesap: giriş / hesap oluşturma ----------
+  const lg = { mode: 'login' };
   function askLogin() {
     const m = $('#loginModal');
     if (!m.hidden) return;
+    $('#loginForm').hidden = false; $('#lgLegacy').hidden = true;
     m.hidden = false; $('#lgErr').textContent = '';
-    setTimeout(() => $('#lgPw').focus(), 50);
+    setTimeout(() => $('#lgUser').focus(), 50);
+  }
+  function setLgMode(mode) {
+    lg.mode = mode;
+    $$('#lgSeg button').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+    $('#lgNameF').hidden = mode !== 'register';
+    $('#lgGo').textContent = mode === 'register' ? 'Hesap oluştur' : 'Giriş yap';
+    $('#lgSub').textContent = mode === 'register' ? 'Kendi kullanıcı adını ve şifreni belirle' : 'Hesabına giriş yap';
+    $('#lgPw').setAttribute('autocomplete', mode === 'register' ? 'new-password' : 'current-password');
+    $('#lgErr').textContent = '';
+  }
+  $('#lgSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setLgMode(b.dataset.m); });
+  const shake = () => { if (motionOK()) $('#loginForm').animate([0, -12, 10, -7, 4, 0].map(x => ({ transform: `translateX(${x}px)` })), { duration: 480, easing: 'ease-out' }); };
+  // Bu cihazda, hesaplardan önceki sürümden kalan veriler (tek kişilik Ritim) var mı?
+  function legacyCache() {
+    if (lsGet(KEY_USER)) return null;
+    let d = null; try { d = JSON.parse(lsGet(KEY)); } catch (e) {}
+    if (!d) return null;
+    const tasks = (d.tasks || []).filter(t => t && !t.sample), notes = d.notes || [];
+    return tasks.length || notes.length || (d.shop || []).length ? d : null;
+  }
+  async function uploadLegacy(d) {
+    const items = [];
+    (d.tasks || []).filter(t => t && t.id && !t.sample).forEach(t => items.push({ col: 'tasks', id: t.id, data: t }));
+    (d.lists || []).filter(l => l && l.id).forEach(l => items.push({ col: 'lists', id: l.id, data: l }));
+    (d.shop || []).filter(i => i && i.id).forEach(i => items.push({ col: 'shop', id: i.id, data: i }));
+    (d.notes || []).filter(n => n && n.id).forEach(n => items.push({ col: 'notes', id: n.id, data: n }));
+    Object.entries(d.focus || {}).forEach(([k, v]) => items.push({ col: 'focus', id: k, data: v }));
+    Object.entries(d.shophist || {}).forEach(([k, v]) => v && items.push({ col: 'shophist', id: k, data: v }));
+    for (let i = 0; i < items.length; i += 400) {
+      const r = await api('batch', { method: 'POST', body: JSON.stringify(items.slice(i, i + 400)) }).catch(() => null);
+      if (!r || !r.ok) throw new Error('upload');
+    }
+    return items.length;
   }
   $('#loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const pw = $('#lgPw').value;
-    if (!pw) return $('#lgPw').focus();
-    const before = lsGet(KEY_PW);
-    lsSet(KEY_PW, pw);
-    $('#lgErr').textContent = '';
-    let r = null;
-    try { r = await api('sync?since=0'); } catch (err) {}
-    if (!r) { lsSet(KEY_PW, before); $('#lgErr').textContent = 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edin.'; return; }
-    if (r.status === 401) {
-      lsSet(KEY_PW, before); $('#lgErr').textContent = 'Şifre yanlış.'; $('#lgPw').select();
-      if (motionOK()) $('#loginForm').animate([0, -12, 10, -7, 4, 0].map(x => ({ transform: `translateX(${x}px)` })), { duration: 480, easing: 'ease-out' });
+    const username = $('#lgUser').value.trim(), password = $('#lgPw').value, name = $('#lgName').value.trim();
+    if (!username) return $('#lgUser').focus();
+    if (!password) return $('#lgPw').focus();
+    if (lg.mode === 'register' && !name) return $('#lgName').focus();
+    $('#lgErr').textContent = ''; $('#lgGo').disabled = true;
+    let r = null, res = {};
+    try { r = await fetch('/api/' + (lg.mode === 'register' ? 'register' : 'login'), { method: 'POST', cache: 'no-store', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username, password, name }) }); res = await r.json().catch(() => ({})); } catch (err) {}
+    $('#lgGo').disabled = false;
+    if (!r) { $('#lgErr').textContent = 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edin.'; return; }
+    if (!r.ok || !res.token) { $('#lgErr').textContent = res.error || 'Giriş yapılamadı.'; shake(); return; }
+    const legacy = legacyCache(), prev = lsGet(KEY_USER);
+    if (prev && prev !== res.username) {             // başka hesaba geçiş: bu cihazdaki önceki hesabın kopyasını temizle
+      [KEY, KEY_REV, KEY_PENDING].forEach(k => lsSet(k, null)); pending.clear();
+      S.tasks = []; S.lists = []; S.focus = {}; S.shop = []; S.shophist = {}; S.notes = [];
+    }
+    lsSet(KEY_PW, res.token); lsSet(KEY_USER, res.username); lsSet('ritim.name', res.name || res.username);
+    $('#lgPw').value = '';
+    const finish = async () => {
+      $('#loginModal').hidden = true;
+      const s0 = await api('sync?since=0').catch(() => null);
+      if (s0) await handleFirstSync(s0);
+      toast(`Hoş geldin, ${res.name || res.username}`);
+    };
+    if (legacy && !prev) {
+      const nt = (legacy.tasks || []).filter(t => !t.sample).length, nn = (legacy.notes || []).length;
+      $('#lgLegacyTxt').textContent = `Bu cihazda Ritim'in önceki (hesapsız) sürümünden ${nt} görev ve ${nn} not var. Bunları ${res.name || res.username} hesabına aktarayım mı? Bu cihaz başkasına aitse “Aktarma”yı seç.`;
+      $('#loginForm').hidden = true; $('#lgLegacy').hidden = false;
+      $('#lgLegacyYes').onclick = async () => {
+        $('#lgLegacyYes').disabled = true;
+        try { const n = await uploadLegacy(legacy); toast(`${n} kayıt hesabına aktarıldı`); } catch (err) { toast('Aktarım tamamlanamadı; Yedekle ve taşı ile tekrar deneyebilirsin'); }
+        $('#lgLegacyYes').disabled = false; [KEY, KEY_REV].forEach(k => lsSet(k, null)); await finish();
+      };
+      $('#lgLegacyNo').onclick = async () => { [KEY, KEY_REV, KEY_PENDING].forEach(k => lsSet(k, null)); pending.clear(); S.tasks = []; S.notes = []; S.shop = []; await finish(); };
       return;
     }
-    $('#loginModal').hidden = true; $('#lgPw').value = '';
-    await handleFirstSync(r);
+    if (!prev) { [KEY, KEY_REV, KEY_PENDING].forEach(k => lsSet(k, null)); pending.clear(); }
+    await finish();
   });
   addEventListener('online', () => { flushApi(); pull(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { flushApi(); pull(); } });
@@ -2053,8 +2124,10 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // ---------- Backup: move data between devices or versions ----------
   function openBackup() {
     $('#bkText').value = '';
-    $('#bkLogout').hidden = true;
-    $('#qkBox').hidden = STORE.mode !== 'api'; $('#qkUrl').value = location.origin + '/api/quick';
+    $('#bkLogout').hidden = STORE.mode !== 'api' || !lsGet(KEY_PW);
+    $('#bkLogout').textContent = `Çıkış yap · ${lsGet('ritim.name') || lsGet(KEY_USER) || ''}`;
+    $('#qkBox').hidden = true;
+    if (STORE.mode === 'api' && lsGet(KEY_PW)) api('me').then(r => r.ok ? r.json() : null).then(m => { if (m && m.quickUrl) { $('#qkUrl').value = m.quickUrl; $('#qkBox').hidden = false; } }).catch(() => {});
     $('#backupModal').hidden = false;
   }
   const closeBackup = () => { $('#backupModal').hidden = true; };
@@ -2109,8 +2182,9 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     toast(`${n} görev içe aktarıldı`);
   });
   $('#qkCopy').addEventListener('click', () => { const u = $('#qkUrl').value; try { navigator.clipboard.writeText(u).then(() => toast('Kestirme adresi kopyalandı'), () => { $('#qkUrl').select(); }); } catch (e) { $('#qkUrl').select(); } });
-  $('#bkLogout').addEventListener('click', () => {
-    [KEY_PW, KEY_PENDING, KEY_REV, KEY].forEach(k => lsSet(k, null));
+  $('#bkLogout').addEventListener('click', async () => {
+    try { await api('me', { method: 'POST', body: '{}' }); } catch (e) {}
+    [KEY_PW, KEY_PENDING, KEY_REV, KEY, KEY_USER, 'ritim.name'].forEach(k => lsSet(k, null));
     location.reload();
   });
 
@@ -2340,7 +2414,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     return out.map(x => { const m = x.title.match(/^\[([^\]]{2,20})\]\s*(.*)$/); return { title: m ? (m[2] || m[1]) : x.title, site: m && !/^genel$/i.test(m[1]) ? m[1] : '', body: x.lines.join('\n').replace(/^\n+|\s+$/g, '') }; });
   }
   function importScratch(items) {
-    if (!STORE.ready) { noteImportQ = items; return; }
+    if (!STORE.ready || (STORE.mode === 'api' && !lsGet(KEY_USER))) { noteImportQ = items; return; }
     let done = []; try { done = JSON.parse(lsGet(KEY_NIMP) || '[]'); } catch (e) {}
     const seen = new Set(done); let n = 0;
     (items || []).forEach(it => {
@@ -2371,7 +2445,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   const isoDay = v => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) ? v.slice(0, 10) : null;
   const siteCode = v => { const c = String(v || '').trim().toLocaleUpperCase('tr-TR'); return c === 'GENEL' ? '' : c.slice(0, 20); };
   function importSaTasks(items) {
-    if (!STORE.ready) { taskImportQ = items; return; }
+    if (!STORE.ready || (STORE.mode === 'api' && !lsGet(KEY_USER))) { taskImportQ = items; return; }
     let done = []; try { done = JSON.parse(lsGet(KEY_TIMP) || '[]'); } catch (e) {}
     const seen = new Set(done); let nt = 0, nn = 0;
     materializeLists();
@@ -2422,8 +2496,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     importSaTasks(d.items);
   });
-  setInterval(() => { if (taskImportQ && STORE.ready) { const q = taskImportQ; taskImportQ = null; importSaTasks(q); } }, 700);
-  setInterval(() => { if (noteImportQ && STORE.ready) { const q = noteImportQ; noteImportQ = null; importScratch(q); } }, 700);
+  setInterval(() => { if (taskImportQ && STORE.ready && (STORE.mode !== 'api' || lsGet(KEY_USER))) { const q = taskImportQ; taskImportQ = null; importSaTasks(q); } }, 700);
+  setInterval(() => { if (noteImportQ && STORE.ready && (STORE.mode !== 'api' || lsGet(KEY_USER))) { const q = noteImportQ; noteImportQ = null; importScratch(q); } }, 700);
 
   // ---------- Lists ----------
   const lm = { id: null, color: 'p1' };
