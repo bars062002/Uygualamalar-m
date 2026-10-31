@@ -526,6 +526,28 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   .two{grid-template-columns:1fr}
   .d-head,.d-body,.d-foot{padding-left:18px; padding-right:18px}
 }
+/* ---------- Embedded in Site Asistan (?embed=1) ----------
+   The host draws its own sidebar and tab bar, so Ritim hides its own and navigates with a top segment.
+   The host sends its safe insets (top segment, bottom tab bar) as --sa-top / --sa-bottom. */
+.embed-nav{display:none}
+html.embed .side,html.embed .tabbar,html.embed .tab-ind{display:none!important}
+html.embed body::after,html.embed body::before{display:none!important}
+html.embed .app{grid-template-columns:minmax(0,1fr)!important; gap:0!important; max-width:1100px;
+  padding-top:calc(var(--sa-top, 0px) + 12px)!important; padding-bottom:calc(var(--sa-bottom, 0px) + 28px)!important}
+html.embed .m-only{display:flex!important}
+html.embed .embed-nav{display:flex; position:sticky; top:calc(var(--sa-top, 0px) + 6px); z-index:25; gap:4px; padding:5px; margin:0 0 22px;
+  border-radius:18px; background:var(--surface); box-shadow:var(--raise-sm); overflow-x:auto; scrollbar-width:none}
+html.embed .embed-nav a{flex:1 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; height:38px; padding:0 12px; border-radius:14px;
+  color:var(--ink-3); font-size:.8rem; font-weight:600; text-decoration:none; white-space:nowrap; transition:color .25s, box-shadow .25s}
+html.embed .embed-nav a svg.i{width:17px; height:17px}
+html.embed .embed-nav a.on{color:var(--accent); box-shadow:var(--inset-sm)}
+html.embed .embed-nav .fab{flex:none; width:38px; height:38px; border-radius:12px; display:grid; place-items:center; color:var(--on-accent);
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 14px -6px var(--accent-glow)}
+html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 14px)}
+html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 16px)!important}
+html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
+@media (max-width: 520px){ html.embed .embed-nav a span{display:none} html.embed .embed-nav a{flex:1 1 0; padding:0} }
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
 }
@@ -572,6 +594,14 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   </aside>
 
   <main class="main">
+    <nav class="embed-nav" aria-label="Ritim bölümleri">
+      <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Pano</span></a>
+      <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>Görevler</span></a>
+      <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span>Alışveriş</span></a>
+      <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Takvim</span></a>
+      <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odak</span></a>
+      <button class="fab" data-new aria-label="Yeni ekle"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </nav>
     <!-- Pano -->
     <section class="view" id="v-pano" aria-labelledby="h-pano">
       <header class="vhead">
@@ -1202,6 +1232,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   setInterval(() => { pull(); if (pending.size) flushApi(); }, 20000);
 
   function registerSW() {
+    if (EMBED) return;
     const secure = location.protocol === 'https:' || location.hostname === 'localhost';
     if ('serviceWorker' in navigator && secure) navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
@@ -1264,6 +1295,19 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   ];
   let theme = null, accent = null;
   try { theme = localStorage.getItem(THEME_KEY); accent = localStorage.getItem(ACCENT_KEY); } catch (e) {}
+  // Inside Site Asistan: follow the host's theme and safe insets (not saved, so Ritim on its own keeps the user's choice).
+  const EMBED = /[?&]embed=1\b/.test(location.search);
+  if (EMBED) document.documentElement.classList.add('embed');
+  const HOST_THEME = { ritim: 'light', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest' };
+  addEventListener('message', e => {
+    const d = e.data;
+    if (!EMBED || !d || d.type !== 'sa-insets') return;
+    let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
+    if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    const st = document.documentElement.style;
+    ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] === 'number') st.setProperty({ t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], d[k] + 'px'); });
+    if (d.theme && HOST_THEME[d.theme] && HOST_THEME[d.theme] !== theme) { theme = HOST_THEME[d.theme]; accent = null; applyTheme(); }
+  });
   const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const lum = h => { const [r, g, b] = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
   const isDarkTheme = () => theme ? theme !== 'light' : matchMedia('(prefers-color-scheme: dark)').matches;
