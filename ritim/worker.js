@@ -3,9 +3,10 @@
 import { onRequest as guard } from './functions/api/_middleware.js';
 import { onRequestGet as sync } from './functions/api/sync.js';
 import { onRequestPost as batch } from './functions/api/batch.js';
+import { onRequestPost as quick } from './functions/api/quick.js';
 import { json } from './lib/http.js';
 
-const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch };
+const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick };
 
 export default {
   async fetch(request, env) {
