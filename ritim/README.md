@@ -5,8 +5,9 @@ Bu klasör, Ritim görev yöneticisini Cloudflare Pages üzerinde kendi uygulama
 - iPhone'da Safari'den **Ana Ekrana Ekle** ile kendi simgesiyle, tam ekran açılır.
 - Görevler Cloudflare D1 veritabanında saklanır ve tüm cihazlarınız arasında eşitlenir.
 - İnternet yokken de çalışır; değişiklikler bağlantı gelince gönderilir.
-- Uygulama şifresizdir (kullanıcının tercihi): adresi bilen herkes görevlere erişebilir. Adresi paylaşmayın.
-- iPhone Kestirmeleri / Eylem Düğmesi: `POST /api/quick` gövdesi `{"text": "…"}`. “not …” Notlar'a, diğerleri görev olarak eklenir (başta saha kodu, “yarın 14:30” anlaşılır).
+- Her kişi kendi hesabını açar (kullanıcı adı + şifre, PBKDF2). Herkes yalnızca kendi görevlerini, notlarını ve listelerini görür (`udocs.owner`).
+- Hesaplardan önceki tek kişilik veriler (`docs` tablosu) silinmedi ama hiçbir uçtan okunmaz; o cihazdaki kopya, ilk girişte onayla hesaba aktarılır.
+- iPhone Kestirmeleri / Eylem Düğmesi: `POST /api/quick?k=<kişisel anahtar>` gövdesi `{"text": "…"}`. “not …” Notlar'a, diğerleri görev olarak eklenir (başta saha kodu, “yarın 14:30” anlaşılır).
 
 ## Klasör yapısı
 
