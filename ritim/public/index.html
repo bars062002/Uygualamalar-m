@@ -569,6 +569,63 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
 }
+/* ---------- Notlar ---------- */
+.notes{display:grid; grid-template-columns:minmax(260px,340px) 1fr; gap:24px; margin-top:24px; align-items:start}
+.notes-side{padding:18px; display:flex; flex-direction:column; gap:16px; position:sticky; top:calc(var(--sa-top,0px) + 70px); max-height:calc(100vh - 140px)}
+.note-list{display:flex; flex-direction:column; gap:12px; overflow:auto; padding:6px; margin:-6px; min-height:60px}
+.note-it{display:flex; flex-direction:column; gap:4px; text-align:left; padding:14px 16px; border-radius:var(--r-sm); box-shadow:var(--raise-sm); color:var(--ink); transition:box-shadow .2s, transform .25s var(--spring, cubic-bezier(.34,1.56,.64,1))}
+.note-it:hover{transform:translateY(-1px)}
+.note-it.on{box-shadow:var(--inset-sm)}
+.note-it.on .nt-t{color:var(--accent)}
+.note-it .nt-t{display:flex; align-items:center; gap:6px; font-weight:600; font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.note-it .nt-t svg{width:13px; height:13px; flex:none; color:var(--accent)}
+.note-it .nt-s{font-size:.78rem; color:var(--ink-3); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.45}
+.note-it .nt-d{font-size:.7rem; color:var(--ink-3); font-weight:500}
+.note-it mark{background:var(--accent-soft); color:inherit; border-radius:4px; padding:0 2px}
+.note-none{padding:18px 8px; text-align:center; color:var(--ink-3); font-size:.85rem}
+.note-ed{padding:22px; min-height:520px; display:flex; flex-direction:column}
+.ne-empty{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; color:var(--ink-3); padding:40px 20px}
+.ne-empty b{color:var(--ink-2); font-size:1rem}
+.ne-empty p{margin:0; font-size:.86rem; max-width:320px}
+.ne-empty-ic{width:68px; height:68px; border-radius:22px; display:grid; place-items:center; box-shadow:var(--raise); color:var(--accent); margin-bottom:8px}
+.ne-empty-ic svg{width:28px; height:28px}
+.ne-wrap{display:flex; flex-direction:column; gap:14px; flex:1; min-height:0}
+.ne-top{display:flex; align-items:center; gap:12px}
+.ne-back{display:none}
+.ne-title{flex:1; min-width:0; border:0; background:none; outline:none; font:inherit; font-size:1.5rem; font-weight:700; letter-spacing:-.02em; color:var(--ink); padding:4px 0}
+.ne-title::placeholder{color:var(--ink-3)}
+.ne-mode{flex:none}
+.ne-tools{display:flex; align-items:center; gap:10px}
+.ne-meta{flex:1; font-size:.75rem; color:var(--ink-3); font-weight:500}
+#nePin.on{color:var(--accent); box-shadow:var(--inset-sm)}
+.ne-body{flex:1; min-height:340px; resize:vertical; font-size:.95rem; line-height:1.65}
+.ne-prev{flex:1; min-height:340px; padding:20px 22px; border-radius:var(--r-sm); box-shadow:var(--inset); overflow:auto; line-height:1.7; font-size:.95rem; color:var(--ink)}
+.ne-help{margin:0; font-size:.74rem; color:var(--ink-3)}
+.md h1,.md h2,.md h3{margin:.9em 0 .35em; line-height:1.25; letter-spacing:-.01em}
+.md h1{font-size:1.35rem} .md h2{font-size:1.12rem} .md h3{font-size:1rem; color:var(--ink-2)}
+.md>:first-child{margin-top:0}
+.md p{margin:.35em 0}
+.md ul,.md ol{margin:.35em 0; padding-left:1.3em}
+.md li{margin:.15em 0}
+.md li.chk{list-style:none; margin-left:-1.3em; display:flex; gap:10px; align-items:flex-start}
+.md li.chk input{appearance:none; -webkit-appearance:none; flex:none; width:20px; height:20px; margin-top:3px; border-radius:7px; box-shadow:var(--inset-sm); cursor:pointer; display:grid; place-items:center}
+.md li.chk input:checked{background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 4px 10px -3px var(--accent-glow)}
+.md li.chk input:checked::after{content:""; width:9px; height:5px; border-left:2px solid var(--on-accent); border-bottom:2px solid var(--on-accent); transform:translateY(-1px) rotate(-45deg)}
+.md li.chk.done span{color:var(--ink-3); text-decoration:line-through}
+.md a{color:var(--accent); font-weight:600; text-decoration:none; border-bottom:1px solid var(--accent-soft)}
+.md code{font-family:ui-monospace,Menlo,monospace; font-size:.86em; padding:1px 6px; border-radius:6px; box-shadow:var(--inset-sm)}
+.md hr{border:0; height:2px; border-radius:2px; box-shadow:var(--inset-sm); margin:1em 0}
+.md blockquote{margin:.5em 0; padding:6px 14px; border-radius:12px; box-shadow:var(--inset-sm); color:var(--ink-2)}
+@media (max-width: 900px){
+  .notes{grid-template-columns:1fr}
+  .notes-side{position:static; max-height:none}
+  .notes .note-ed{display:none}
+  .notes.editing .notes-side{display:none}
+  .notes.editing .note-ed{display:flex}
+  .ne-back{display:inline-flex}
+  .ne-title{font-size:1.2rem}
+  .note-ed{padding:16px; min-height:calc(100vh - 220px)}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -592,6 +649,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
       <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler<span class="count num" id="navCount">0</span></a>
       <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş<span class="count num" id="navShop">0</span></a>
+      <a href="#notlar" data-route="notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Notlar<span class="count num" id="navNotes">0</span></a>
       <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
       <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak<span class="count num" id="navFocus" hidden>25:00</span></a>
     </nav>
@@ -616,6 +674,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Pano</span></a>
       <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>Görevler</span></a>
       <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span>Alışveriş</span></a>
+      <a href="#notlar" data-route="notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Notlar</span></a>
       <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Takvim</span></a>
       <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odak</span></a>
       <button class="fab" data-new aria-label="Yeni ekle"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -629,6 +688,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
         </div>
         <div class="vhead-actions">
           <button class="btn icon m-only" data-backup aria-label="Yedekle ve taşı"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg></button>
+          <a class="btn icon m-only" href="#notlar" aria-label="Notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></a>
           <a class="btn icon m-only" href="#odak" aria-label="Odak zamanlayıcısı"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></a>
           <button class="btn icon m-only" data-look aria-label="Görünüm: tema ve vurgu rengi"><svg class="i" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.8-1.7 1.7-1.7h2A5.6 5.6 0 0 0 22 11c0-5-4.5-9-10-9z"/></svg></button>
           <button class="btn primary" data-new><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni görev</button>
@@ -730,6 +790,46 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       </div>
       <div class="quick" id="shopQuick"></div>
       <div class="shop-grid" id="shopGrid"></div>
+    </section>
+
+    <!-- Notlar -->
+    <section class="view" id="v-notlar" aria-labelledby="h-notlar" hidden>
+      <header class="vhead">
+        <div>
+          <p class="eyebrow">Defter</p>
+          <h1 class="emboss" id="h-notlar">Notlar</h1>
+        </div>
+        <button class="btn primary" id="noteNew"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni not</button>
+      </header>
+      <div class="notes" id="notesWrap">
+        <div class="card notes-side">
+          <label class="field" for="noteQ"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="noteQ" type="search" placeholder="Notlarda ara…" autocomplete="off" enterkeyhint="search"></label>
+          <div class="note-list" id="noteList"></div>
+        </div>
+        <div class="card note-ed" id="noteEd">
+          <div class="ne-empty" id="neEmpty">
+            <span class="ne-empty-ic"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+            <b>Bir not seç ya da yeni not aç</b>
+            <p>Toplantı notları, aranacak kişiler, saha bilgileri… Hepsi tek defterde.</p>
+          </div>
+          <div class="ne-wrap" id="neWrap" hidden>
+            <div class="ne-top">
+              <button class="btn icon sm ne-back" id="neBack" aria-label="Notlara dön"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+              <input class="ne-title" id="neTitle" placeholder="Başlık" maxlength="120" aria-label="Not başlığı">
+              <div class="seg ne-mode" id="neMode" role="tablist" aria-label="Görünüm"><button type="button" data-m="edit" class="on">Yaz</button><button type="button" data-m="prev">Önizle</button></div>
+            </div>
+            <div class="ne-tools">
+              <span class="ne-meta num" id="neMeta"></span>
+              <button class="btn icon sm" id="nePin" aria-label="Sabitle" title="Sabitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2H6z"/></svg></button>
+              <button class="btn icon sm" id="neCopy" aria-label="Kopyala" title="Kopyala"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+              <button class="btn icon sm danger" id="neDel" aria-label="Sil" title="Sil"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+            </div>
+            <textarea class="area ne-body" id="neBody" placeholder="# Başlık&#10;- Toplantı linki: https://…&#10;- Arayacak kişi: 0533 123 45 67&#10;- [ ] Yapılacak&#10;**Önemli:** …"></textarea>
+            <div class="ne-prev md" id="nePrev" hidden></div>
+            <p class="ne-help">**kalın**, *eğik*, # başlık, - liste, - [ ] yapılacak. Telefon ve bağlantılar Önizle'de tıklanır.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Takvim -->
@@ -852,6 +952,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   </div>
   <div class="d-foot">
     <span class="d-meta num" id="dMeta"></span>
+    <button class="btn sm" id="dToNote" title="Görevi nota aktar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Nota aktar</span></button>
     <button class="btn sm" id="dFocus"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odaklan</span></button>
     <button class="btn sm danger" id="dDelete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>Sil</span></button>
   </div>
@@ -980,7 +1081,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   const REPEAT = { daily: 'Her gün', weekdays: 'Hafta içi', weekly: 'Her hafta', monthly: 'Her ay' };
   const KEY = 'ritim.v1', THEME_KEY = 'ritim.theme', ACCENT_KEY = 'ritim.accent';
 
-  const S = { tasks: [], lists: [], focus: {}, shop: [], shophist: {} };
+  const S = { tasks: [], lists: [], focus: {}, shop: [], shophist: {}, notes: [] };
   const lists = () => (S.lists.length ? S.lists : DEFAULT_LISTS).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const listOf = id => lists().find(l => l.id === id) || lists()[0];
   const catName = id => listOf(id)?.name || 'Liste';
@@ -1086,7 +1187,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (saved && Array.isArray(saved.tasks)) {
       S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || [];
       S.focus = saved.focus || {};
-      S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {};
+      S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {}; S.notes = (saved.notes || []).map(normNote);
       if (Array.isArray(saved.log)) saved.log.forEach(l => { const d = ymd(new Date(l.at)); (S.focus[d] ||= { sessions: [] }).sessions.push(l); });
       S.tasks.forEach(t => { if (!lists().some(l => l.id === t.cat)) t.cat = lists()[0].id; });
     } else {
@@ -1100,7 +1201,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     try { db = await window.claude.use('db'); } catch (e) {}
     if (!db) return startLocal();
     STORE.mode = 'cloud'; STORE.db = db; setSync();
-    const got = { tasks: false, lists: false, focus: false, shop: false, shophist: false };
+    const got = { tasks: false, lists: false, focus: false, shop: false, shophist: false, notes: false };
     const update = () => { if (!STORE.ready && Object.values(got).every(Boolean)) { STORE.ready = true; checkReminders(); } render(); syncDrawer(); };
     const fail = e => { if (e && e.code === 'revoked') { STORE.readOnly = true; setSync(); } };
     db.collection('tasks').onSnapshot(snap => { S.tasks = [...fromSnap('tasks', snap).values()].map(normTask); got.tasks = true; update(); }, fail);
@@ -1108,6 +1209,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     db.collection('focus').onSnapshot(snap => { S.focus = Object.fromEntries(fromSnap('focus', snap)); got.focus = true; update(); }, fail);
     db.collection('shop').onSnapshot(snap => { S.shop = [...fromSnap('shop', snap).values()].map(normShop); got.shop = true; update(); }, fail);
     db.collection('shophist').onSnapshot(snap => { S.shophist = Object.fromEntries(fromSnap('shophist', snap)); got.shophist = true; update(); }, fail);
+    db.collection('notes').onSnapshot(snap => { S.notes = [...fromSnap('notes', snap).values()].map(normNote); got.notes = true; update(); }, fail);
   }
 
   // Tasks saved in this browser by the earlier, browser-only version can be moved to the cloud on request.
@@ -1147,7 +1249,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     STORE.mode = 'api';
     try {
       const saved = JSON.parse(lsGet(KEY));
-      if (known && saved && Array.isArray(saved.tasks)) { S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || []; S.focus = saved.focus || {}; S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {}; STORE.ready = true; }
+      if (known && saved && Array.isArray(saved.tasks)) { S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || []; S.focus = saved.focus || {}; S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {}; S.notes = (saved.notes || []).map(normNote); STORE.ready = true; }
       (JSON.parse(lsGet(KEY_PENDING)) || []).forEach(([p, d]) => pending.set(p, d));
     } catch (e) {}
     API.rev = Number(lsGet(KEY_REV)) || 0;
@@ -1170,18 +1272,19 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       focus: new Map(Object.entries(full ? {} : S.focus)),
       shop: new Map((full ? [] : S.shop).map(i => [i.id, i])),
       shophist: new Map(Object.entries(full ? {} : S.shophist)),
+      notes: new Map((full ? [] : S.notes).map(n => [n.id, n])),
     };
     docs.forEach(d => {
       const m = maps[d.col]; if (!m || pending.has(d.col + '/' + d.id)) return;
       if (d.data === null) m.delete(d.id);
-      else m.set(d.id, ['focus', 'shophist'].includes(d.col) ? d.data : d.col === 'tasks' ? normTask({ ...d.data, id: d.id }) : d.col === 'shop' ? normShop({ ...d.data, id: d.id }) : { ...d.data, id: d.id });
+      else m.set(d.id, ['focus', 'shophist'].includes(d.col) ? d.data : d.col === 'tasks' ? normTask({ ...d.data, id: d.id }) : d.col === 'shop' ? normShop({ ...d.data, id: d.id }) : d.col === 'notes' ? normNote({ ...d.data, id: d.id }) : { ...d.data, id: d.id });
     });
     for (const [path, data] of pending) {
       const [c, id] = path.split('/'), m = maps[c]; if (!m) continue;
       if (data === null) m.delete(id); else m.set(id, data);
     }
     S.tasks = [...maps.tasks.values()]; S.lists = [...maps.lists.values()]; S.focus = Object.fromEntries(maps.focus);
-    S.shop = [...maps.shop.values()]; S.shophist = Object.fromEntries(maps.shophist);
+    S.shop = [...maps.shop.values()]; S.shophist = Object.fromEntries(maps.shophist); S.notes = [...maps.notes.values()];
     API.rev = res.rev; lsSet(KEY_REV, String(res.rev));
     STORE.ready = true; STORE.offline = false;
     saveLocal(); setSync();
@@ -1498,7 +1601,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   addEventListener('resize', moveIndicators);
 
   // ---------- Router ----------
-  const ROUTES = ['pano', 'gorevler', 'alisveris', 'takvim', 'odak'];
+  const ROUTES = ['pano', 'gorevler', 'alisveris', 'notlar', 'takvim', 'odak'];
   function route() {
     const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
@@ -1537,12 +1640,14 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (ui.route === 'takvim') renderCal();
     if (ui.route === 'odak') renderFocus();
     if (ui.route === 'alisveris') renderShop();
+    if (ui.route === 'notlar') renderNotes();
   }
 
   function renderSide() {
     const open = S.tasks.filter(t => !t.done);
     $('#navCount').textContent = open.length;
     $('#navShop').textContent = S.shop.filter(i => !i.done).length;
+    $('#navNotes').textContent = S.notes.length;
     const onTasks = ui.route === 'gorevler';
     $('#sideLists').innerHTML = lists().map(l => {
       const n = open.filter(t => t.cat === l.id).length;
@@ -1856,6 +1961,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     e.preventDefault();
     const title = $('#addTitle').value.trim();
     if (!title) { $('#addTitle').focus(); toast('Görev adı boş olamaz'); return; }
+    const nm = title.match(/^not\b[\s:,.-]*(.+)$/is);
+    if (nm) { quickNote(nm[1].trim()); $('#addTitle').value = ''; return; }
     addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value);
     $('#addTitle').value = '';
   });
@@ -1865,6 +1972,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // The add button follows the current view: a shop item, a task for the selected day, or a new task.
   function focusNew() {
     if (ui.route === 'alisveris') return $('#shopIn').focus();
+    if (ui.route === 'notlar') return newNote();
     if (ui.route === 'takvim') return $('#dayAddIn').focus();
     go('gorevler');
     if (ui.cat) $('#addCat').value = ui.cat;
@@ -1934,7 +2042,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   $('#bkClose').addEventListener('click', closeBackup);
   $('#backupModal').addEventListener('click', e => { if (e.target.id === 'backupModal') closeBackup(); });
   $('#bkExport').addEventListener('click', () => {
-    const text = JSON.stringify({ app: 'ritim', v: 1, exportedAt: new Date().toISOString(), lists: lists(), tasks: S.tasks, focus: S.focus, shop: S.shop, shophist: S.shophist });
+    const text = JSON.stringify({ app: 'ritim', v: 1, exportedAt: new Date().toISOString(), lists: lists(), tasks: S.tasks, focus: S.focus, shop: S.shop, shophist: S.shophist, notes: S.notes });
     const ta = $('#bkText'); ta.value = text;
     const done = () => toast(`${S.tasks.length} görev dışa aktarıldı ve kopyalandı`);
     const fallback = () => { ta.focus(); ta.select(); toast('Metin seçildi; kopyalayıp diğer cihaza yapıştırın'); };
@@ -1977,6 +2085,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       S.shophist[key] = cur ? { ...h, count: Math.max(cur.count || 0, h.count || 0) } : h;
       putHist(key);
     });
+    (d.notes || []).forEach(x => { if (!x || !x.id) return; const nt = normNote(x), k = S.notes.findIndex(y => y.id === nt.id); if (k >= 0) S.notes[k] = nt; else S.notes.push(nt); putNote(nt); });
     closeBackup(); render();
     toast(`${n} görev içe aktarıldı`);
   });
@@ -1984,6 +2093,191 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     [KEY_PW, KEY_PENDING, KEY_REV, KEY].forEach(k => lsSet(k, null));
     location.reload();
   });
+
+
+  // ---------- Notlar ----------
+  // Markdown defter: başlık, gövde, sabitleme. Site Asistan'daki eski Görevler notları ilk açılışta buraya taşınır.
+  function normNote(n) {
+    const now = new Date().toISOString();
+    return { id: String(n.id), title: String(n.title || '').slice(0, 120), body: String(n.body || ''), pinned: !!n.pinned,
+      created: n.created || now, updated: n.updated || n.created || now, src: n.src || '' };
+  }
+  const putNote = n => write('notes', n.id, n);
+  const nui = { sel: null, mode: 'edit', q: '' };
+  const noteOf = id => S.notes.find(n => n.id === id);
+  const noteTitle = n => n.title.trim() || (n.body.trim().split('\n')[0] || '').replace(/^#+\s*|[*_`>]/g, '').trim().slice(0, 60) || 'Adsız not';
+  const plain = t => t.replace(/^#+\s*/gm, '').replace(/^\s*[-*]\s+(\[[ xX]\]\s*)?/gm, '').replace(/[*_`>]/g, '').replace(/\s+/g, ' ').trim();
+  const fmtNote = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  function mdInline(t) {
+    return t
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, '$1<i>$2</i>')
+      .replace(/\bhttps?:\/\/[^\s<)]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\//, '').slice(0, 48)}</a>`)
+      .replace(/(^|[^\d>])((?:\+90[\s.-]?|0)?5\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2})(?!\d)/g, (m, p, ph) => `${p}<a href="tel:${ph.replace(/[^\d+]/g, '')}">${ph}</a>`);
+  }
+  function mdRender(src) {
+    const lines = esc(src).split('\n'); let html = '', list = null, li = 0;
+    const close = () => { if (list) { html += `</${list}>`; list = null; } };
+    lines.forEach((ln, idx) => {
+      let m;
+      if ((m = ln.match(/^\s*[-*]\s+\[([ xX])\]\s*(.*)$/))) {
+        if (list !== 'ul') { close(); html += '<ul>'; list = 'ul'; }
+        const on = m[1] !== ' ';
+        html += `<li class="chk${on ? ' done' : ''}"><input type="checkbox" data-line="${idx}"${on ? ' checked' : ''} aria-label="Tamamlandı"><span>${mdInline(m[2])}</span></li>`; return;
+      }
+      if ((m = ln.match(/^\s*[-*]\s+(.*)$/))) { if (list !== 'ul') { close(); html += '<ul>'; list = 'ul'; } html += `<li>${mdInline(m[1])}</li>`; return; }
+      if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); html += '<ol>'; list = 'ol'; } html += `<li>${mdInline(m[1])}</li>`; return; }
+      close();
+      if ((m = ln.match(/^(#{1,3})\s+(.*)$/))) { const h = m[1].length; html += `<h${h}>${mdInline(m[2])}</h${h}>`; return; }
+      if (/^\s*(-{3,}|\*{3,})\s*$/.test(ln)) { html += '<hr>'; return; }
+      if ((m = ln.match(/^&gt;\s?(.*)$/))) { html += `<blockquote>${mdInline(m[1])}</blockquote>`; return; }
+      if (!ln.trim()) { html += '<p></p>'; return; }
+      html += `<p>${mdInline(ln)}</p>`;
+    });
+    close();
+    return html || '<p style="color:var(--ink-3)">Henüz bir şey yazılmadı.</p>';
+  }
+
+  function sortedNotes() {
+    const q = lowerTr(nui.q.trim());
+    return S.notes
+      .filter(n => !q || lowerTr(n.title + ' ' + n.body).includes(q))
+      .sort((a, b) => (b.pinned - a.pinned) || String(b.updated).localeCompare(String(a.updated)));
+  }
+  function hl(text) {
+    const q = nui.q.trim(); const e = esc(text); if (!q) return e;
+    const i = lowerTr(text).indexOf(lowerTr(q)); if (i < 0) return e;
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+  const PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2H6z"/></svg>';
+  function renderNotes() {
+    const list = sortedNotes();
+    if (nui.sel && !noteOf(nui.sel)) nui.sel = null;
+    $('#noteList').innerHTML = list.length ? list.map(n => {
+      const body = plain(n.body); const q = nui.q.trim();
+      let snip = body; if (q) { const i = lowerTr(body).indexOf(lowerTr(q)); if (i > 40) snip = '…' + body.slice(i - 30); }
+      return `<button class="note-it${n.id === nui.sel ? ' on' : ''}" data-note="${n.id}" data-flip="${n.id}"><span class="nt-t">${n.pinned ? PIN_SVG : ''}${hl(noteTitle(n))}</span><span class="nt-s">${hl(snip.slice(0, 160)) || '&nbsp;'}</span><span class="nt-d num">${fmtNote.format(new Date(n.updated))}</span></button>`;
+    }).join('') : `<p class="note-none">${S.notes.length ? 'Aramaya uyan not yok.' : 'Henüz not yok. “Yeni not” ile başla.'}</p>`;
+    paintNoteEditor();
+  }
+  function paintNoteEditor(force) {
+    const n = noteOf(nui.sel);
+    $('#neEmpty').hidden = !!n; $('#neWrap').hidden = !n;
+    $('#notesWrap').classList.toggle('editing', !!n && ui.route === 'notlar' && nui.mobileOpen);
+    if (!n) return;
+    const ti = $('#neTitle'), bo = $('#neBody');
+    if (force || document.activeElement !== ti) ti.value = n.title;
+    if (force || document.activeElement !== bo) bo.value = n.body;
+    $('#nePin').classList.toggle('on', n.pinned); $('#nePin').setAttribute('aria-pressed', String(n.pinned));
+    $('#neMeta').textContent = `${n.body.length.toLocaleString('tr-TR')} karakter · ${fmtNote.format(new Date(n.updated))}`;
+    $$('#neMode button').forEach(b => b.classList.toggle('on', b.dataset.m === nui.mode));
+    bo.hidden = nui.mode !== 'edit'; $('#nePrev').hidden = nui.mode === 'edit';
+    if (nui.mode !== 'edit') $('#nePrev').innerHTML = mdRender(n.body);
+  }
+  function openNote(id, focusBody) {
+    nui.sel = id; nui.mobileOpen = true;
+    if (ui.route !== 'notlar') go('notlar'); else renderNotes();
+    paintNoteEditor(true);
+    if (focusBody) setTimeout(() => { const b = $('#neBody'); if (!b.hidden) { b.focus(); b.setSelectionRange(b.value.length, b.value.length); } }, 60);
+  }
+  function newNote(title = '', body = '', src = '') {
+    const now = new Date().toISOString();
+    const n = normNote({ id: uid(), title, body, created: now, updated: now, src });
+    S.notes.push(n); putNote(n); nui.mode = 'edit'; nui.q = ''; $('#noteQ').value = '';
+    openNote(n.id, false);
+    setTimeout(() => (title ? $('#neBody') : $('#neTitle')).focus(), 80);
+    return n;
+  }
+  let noteSaveT = 0;
+  function touchNote(n) {
+    n.updated = new Date().toISOString();
+    clearTimeout(noteSaveT); noteSaveT = setTimeout(() => { putNote(n); renderNotes(); }, 400);
+  }
+  // Hızlı not: görev ekleme kutusuna "not …" yazınca Karalamalar notunun başına tarihli satır olarak eklenir.
+  function quickNote(text) {
+    let n = S.notes.find(x => x.src === 'scratch');
+    if (!n) { const now = new Date().toISOString(); n = normNote({ id: uid(), title: 'Karalamalar', body: '', created: now, src: 'scratch' }); S.notes.push(n); }
+    const d = new Date(), stamp = d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    n.body = `- ${stamp} · ${text}` + (n.body ? '\n' + n.body : ''); n.updated = d.toISOString(); putNote(n);
+    render(); toast('Not “Karalamalar”a eklendi');
+  }
+
+  $('#noteNew').addEventListener('click', () => newNote());
+  $('#noteQ').addEventListener('input', e => { nui.q = e.target.value; renderNotes(); });
+  $('#noteList').addEventListener('click', e => { const b = e.target.closest('[data-note]'); if (b) openNote(b.dataset.note); });
+  $('#neBack').addEventListener('click', () => { nui.mobileOpen = false; renderNotes(); });
+  $('#neTitle').addEventListener('input', e => { const n = noteOf(nui.sel); if (!n) return; n.title = e.target.value; touchNote(n); });
+  $('#neBody').addEventListener('input', e => { const n = noteOf(nui.sel); if (!n) return; n.body = e.target.value; touchNote(n); $('#neMeta').textContent = `${n.body.length.toLocaleString('tr-TR')} karakter · şimdi`; });
+  $('#neMode').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; nui.mode = b.dataset.m; paintNoteEditor(); });
+  $('#nePrev').addEventListener('change', e => {
+    const cb = e.target.closest('input[data-line]'), n = noteOf(nui.sel); if (!cb || !n) return;
+    const ls = n.body.split('\n'), i = +cb.dataset.line;
+    ls[i] = ls[i].replace(/\[([ xX])\]/, cb.checked ? '[x]' : '[ ]'); n.body = ls.join('\n'); touchNote(n); paintNoteEditor();
+  });
+  $('#nePin').addEventListener('click', () => { const n = noteOf(nui.sel); if (!n) return; n.pinned = !n.pinned; putNote(n); renderNotes(); toast(n.pinned ? 'Not sabitlendi' : 'Sabitleme kaldırıldı'); });
+  $('#neCopy').addEventListener('click', () => {
+    const n = noteOf(nui.sel); if (!n) return; const t = (n.title ? '# ' + n.title + '\n\n' : '') + n.body;
+    try { navigator.clipboard.writeText(t).then(() => toast('Not kopyalandı'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); }
+  });
+  $('#neDel').addEventListener('click', () => {
+    const n = noteOf(nui.sel); if (!n) return; const k = S.notes.indexOf(n);
+    S.notes.splice(k, 1); write('notes', n.id, null); nui.sel = null; nui.mobileOpen = false; renderNotes();
+    toast('Not silindi', () => { S.notes.splice(k, 0, n); putNote(n); nui.sel = n.id; renderNotes(); });
+  });
+  // Görev çekmecesinden: görevi yeni bir nota aktar
+  $('#dToNote').addEventListener('click', () => {
+    const t = byId(ui.open); if (!t) return;
+    const l = lists().find(x => x.id === t.cat);
+    const body = [
+      `- Liste: ${l ? l.name : '-'}`,
+      `- Son tarih: ${t.due ? fmtShort.format(parse(t.due)) : 'Belirtilmedi'}`,
+      ...(t.subs || []).map(x => `- [${x.d ? 'x' : ' '}] ${x.t || ''}`),
+      '', t.notes || ''
+    ].join('\n').trim();
+    closeDrawer(); newNote(t.title, body, 'task');
+  });
+
+  // Site Asistan içinde: eski Görevler (Kişisel / Ekip) not defterlerini bir kez Ritim notlarına taşı.
+  const KEY_NIMP = 'ritim.notesImported';
+  let noteImportQ = null;
+  function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+  function splitScratch(text, label) {
+    const out = []; let cur = { title: `Karalamalar · ${label}`, lines: [] };
+    text.replace(/\r/g, '').split('\n').forEach(ln => {
+      const m = ln.match(/^#{1,2}\s+(.+)$/);
+      if (m) { if (cur.lines.join('').trim()) out.push(cur); cur = { title: m[1].replace(/[*_`]/g, '').trim().slice(0, 120), lines: [] }; }
+      else cur.lines.push(ln);
+    });
+    if (cur.lines.join('').trim()) out.push(cur);
+    return out.map(x => ({ title: x.title, body: x.lines.join('\n').replace(/^\n+|\s+$/g, '') }));
+  }
+  function importScratch(items) {
+    if (!STORE.ready) { noteImportQ = items; return; }
+    let done = []; try { done = JSON.parse(lsGet(KEY_NIMP) || '[]'); } catch (e) {}
+    const seen = new Set(done); let n = 0;
+    (items || []).forEach(it => {
+      if (!it || typeof it.text !== 'string' || !it.text.trim()) return;
+      const label = it.label || 'Görevler';
+      splitScratch(it.text, label).forEach((sec, i) => {
+        const id = 'sa-' + (it.src || 'x') + '-' + hashStr(sec.title + '\n' + sec.body);
+        if (seen.has(id) || noteOf(id)) { seen.add(id); return; }
+        const now = new Date().toISOString();
+        const note = normNote({ id, title: sec.title, body: sec.body, created: now, updated: new Date(Date.now() - i * 1000).toISOString(), src: 'sa-' + (it.src || '') });
+        S.notes.push(note); putNote(note); seen.add(id); n++;
+      });
+    });
+    lsSet(KEY_NIMP, JSON.stringify([...seen]));
+    if (n) { render(); toast(`Görevler'deki notlarından ${n} not Ritim'e taşındı`); }
+  }
+  addEventListener('message', e => {
+    const d = e.data; if (!EMBED || !d || d.type !== 'sa-notes') return;
+    let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
+    if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    importScratch(d.items);
+  });
+  setInterval(() => { if (noteImportQ && STORE.ready) { const q = noteImportQ; noteImportQ = null; importScratch(q); } }, 700);
 
   // ---------- Lists ----------
   const lm = { id: null, color: 'p1' };
