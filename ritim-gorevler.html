@@ -616,6 +616,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   .ne-title{font-size:1.2rem}
   .note-ed{padding:16px; min-height:calc(100vh - 220px)}
 }
+.qk-box{display:flex; flex-direction:column; gap:10px; padding:16px; border-radius:var(--r-sm); box-shadow:var(--inset-sm)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -975,6 +976,11 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <button type="button" class="btn sm" id="bkExport">Dışa aktar ve kopyala</button>
       <button type="button" class="btn sm primary live" id="bkImport">İçe aktar</button>
     </div>
+    <div class="qk-box" id="qkBox" hidden>
+      <span class="lbl">iPhone kestirmesi · Eylem Düğmesi</span>
+      <p class="hint-txt" style="font-size:.8rem; margin:0">Kestirmede “URL içeriğini al” eylemi bu adrese <b>POST</b> ile <b>{"text": "…"}</b> gönderir. “not …” ile başlayan metin Notlar’a, diğerleri görev olarak eklenir; başta saha kodu, “yarın 14:30” gibi ifadeler anlaşılır.</p>
+      <div style="display:flex; gap:10px; align-items:center"><label class="field" style="flex:1; height:44px"><input id="qkUrl" readonly></label><button type="button" class="btn sm" id="qkCopy">Kopyala</button></div>
+    </div>
     <div class="modal-foot">
       <button type="button" class="btn sm ghost danger" id="bkLogout" hidden>Bu cihazda çıkış yap</button>
       <span style="flex:1"></span>
@@ -1285,7 +1291,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     checkReminders();
   }
   async function pull() {
-    if (STORE.mode !== 'api' || API.pulling || document.hidden || !lsGet(KEY_PW)) return;
+    if (STORE.mode !== 'api' || API.pulling || document.hidden) return;
     API.pulling = true;
     try {
       const r = await api('sync?since=' + API.rev);
@@ -1295,7 +1301,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     finally { API.pulling = false; }
   }
   async function flushApi() {
-    if (flushing || !pending.size || !lsGet(KEY_PW)) return;
+    if (flushing || !pending.size) return;
     flushing = true;
     const sent = new Map(pending);
     let retry = false;
@@ -2029,7 +2035,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // ---------- Backup: move data between devices or versions ----------
   function openBackup() {
     $('#bkText').value = '';
-    $('#bkLogout').hidden = STORE.mode !== 'api';
+    $('#bkLogout').hidden = true;
+    $('#qkBox').hidden = STORE.mode !== 'api'; $('#qkUrl').value = location.origin + '/api/quick';
     $('#backupModal').hidden = false;
   }
   const closeBackup = () => { $('#backupModal').hidden = true; };
@@ -2083,11 +2090,76 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     closeBackup(); render();
     toast(`${n} görev içe aktarıldı`);
   });
+  $('#qkCopy').addEventListener('click', () => { const u = $('#qkUrl').value; try { navigator.clipboard.writeText(u).then(() => toast('Kestirme adresi kopyalandı'), () => { $('#qkUrl').select(); }); } catch (e) { $('#qkUrl').select(); } });
   $('#bkLogout').addEventListener('click', () => {
     [KEY_PW, KEY_PENDING, KEY_REV, KEY].forEach(k => lsSet(k, null));
     location.reload();
   });
 
+
+  // ---------- Büyüyerek açılan pencereler ----------
+  // Görev penceresi ve diyaloglar, dokunulan düğmenin yerinden büyüyerek açılır; kapanınca aynı düğmeye küçülerek döner.
+  (function growFromTap() {
+    let tap = null;
+    const PICK = 'button, a, [data-open], .task, .note-it, .day, .cal-cell';
+    addEventListener('pointerdown', e => {
+      const t = e.target.closest && e.target.closest(PICK);
+      if (t) tap = { el: t, box: t.getBoundingClientRect(), at: performance.now() };
+    }, true);
+    const recent = panel => tap && performance.now() - tap.at < 1400 && !panel.contains(tap.el) ? tap : null;
+    const centerShift = (from, to) => ({
+      x: from.left + from.width / 2 - (to.left + to.width / 2),
+      y: from.top + from.height / 2 - (to.top + to.height / 2),
+      sx: Math.max(from.width / to.width, 0.05), sy: Math.max(from.height / to.height, 0.05)
+    });
+    const GROW = 'cubic-bezier(.22,1,.36,1)', SHRINK = 'cubic-bezier(.6,0,.4,1)';
+    function grow(card, src) {
+      const to = card.getBoundingClientRect(); if (!to.width) return;
+      const k = centerShift(src.box, to), keepT = card.style.transition, keepA = card.style.animation;
+      card.style.transition = 'none'; card.style.animation = 'none';
+      const a = card.animate([
+        { transform: `translate(${k.x}px, ${k.y}px) scale(${k.sx}, ${k.sy})`, opacity: 0, borderRadius: '16px' },
+        { opacity: 1, offset: 0.3 },
+        { transform: 'none', opacity: 1, borderRadius: getComputedStyle(card).borderRadius }
+      ], { duration: 540, easing: GROW });
+      a.onfinish = a.oncancel = () => { card.style.transition = keepT; card.style.animation = keepA; };
+    }
+    function shrink(box, radius, fill, target) {
+      const ghost = document.createElement('div');
+      ghost.style.cssText = `position:fixed; left:${box.left}px; top:${box.top}px; width:${box.width}px; height:${box.height}px; z-index:9999; pointer-events:none; border-radius:${radius}; background:${fill}; box-shadow:var(--raise)`;
+      document.body.appendChild(ghost);
+      const to = target.isConnected && target.getBoundingClientRect().width ? target.getBoundingClientRect() : box;
+      const k = centerShift(to, box);
+      const a = ghost.animate([
+        { transform: 'none', opacity: 1 },
+        { opacity: 0.85, offset: 0.65 },
+        { transform: `translate(${k.x}px, ${k.y}px) scale(${k.sx}, ${k.sy})`, opacity: 0, borderRadius: '14px' }
+      ], { duration: 400, easing: SHRINK });
+      a.onfinish = a.oncancel = () => ghost.remove();
+    }
+    // İzlenen pencereler: açık mı, büyüyen kart hangisi
+    const watch = [
+      { el: $('#drawer'), open: el => el.classList.contains('open'), card: el => el },
+      ...$$('.modal').map(m => ({ el: m, open: el => !el.hidden, card: el => el.querySelector('.modal-card') || el }))
+    ];
+    watch.forEach(w => {
+      w.was = w.open(w.el);
+      new MutationObserver(() => {
+        const now = w.open(w.el); if (now === w.was) return; w.was = now;
+        if (!motionOK()) return;
+        const card = w.card(w.el);
+        if (now) {
+          const src = recent(w.el); w.src = src ? src.el : null; if (!src) return;
+          grow(card, src);
+          requestAnimationFrame(() => { w.box = card.getBoundingClientRect(); w.radius = getComputedStyle(card).borderRadius; w.fill = getComputedStyle(card).backgroundColor; });
+        } else if (w.src && w.box) {
+          const keep = card.style.transition; card.style.transition = 'none'; setTimeout(() => { card.style.transition = keep; }, 60);
+          shrink(w.box, w.radius, w.fill && !/rgba\(0, 0, 0, 0\)/.test(w.fill) ? w.fill : 'var(--surface)', w.src);
+          w.src = null;
+        }
+      }).observe(w.el, { attributes: true, attributeFilter: ['class', 'hidden'] });
+    });
+  })();
 
   // ---------- Notlar ----------
   // Markdown defter: başlık, gövde, sabitleme. Site Asistan'daki eski Görevler notları ilk açılışta buraya taşınır.

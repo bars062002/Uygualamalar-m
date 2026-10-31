@@ -5,14 +5,15 @@ Bu klasör, Ritim görev yöneticisini Cloudflare Pages üzerinde kendi uygulama
 - iPhone'da Safari'den **Ana Ekrana Ekle** ile kendi simgesiyle, tam ekran açılır.
 - Görevler Cloudflare D1 veritabanında saklanır ve tüm cihazlarınız arasında eşitlenir.
 - İnternet yokken de çalışır; değişiklikler bağlantı gelince gönderilir.
-- Verilere yalnızca belirlediğiniz uygulama şifresiyle erişilir.
+- Uygulama şifresizdir (kullanıcının tercihi): adresi bilen herkes görevlere erişebilir. Adresi paylaşmayın.
+- iPhone Kestirmeleri / Eylem Düğmesi: `POST /api/quick` gövdesi `{"text": "…"}`. “not …” Notlar'a, diğerleri görev olarak eklenir (başta saha kodu, “yarın 14:30” anlaşılır).
 
 ## Klasör yapısı
 
 | Yol | Ne işe yarar |
 | --- | --- |
 | `public/` | Yayınlanan dosyalar: uygulama, manifest, simgeler, service worker |
-| `functions/api/` | Cloudflare Pages Functions: `sync` (okuma) ve `batch` (yazma), şifre kontrolü `_middleware.js` içinde |
+| `functions/api/` | Cloudflare Pages Functions: `sync` (okuma) ve `batch` (yazma), `quick` (hızlı ekleme); `_middleware.js` tabloyu hazırlar |
 | `lib/http.js` | API için ortak yardımcılar |
 | `build.mjs` | `public/index.html` dosyasını depo kökündeki `ritim-gorevler.html`'den üretir |
 
