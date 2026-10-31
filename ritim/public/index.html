@@ -305,6 +305,38 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .daypanel .tlist{gap:12px}
 .daypanel .task{padding:12px 14px}
 
+/* ---------- Shopping ---------- */
+.shop-add{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px}
+.shop-top{display:flex; flex-wrap:wrap; gap:14px 22px; align-items:center; justify-content:space-between}
+.shop-progress{display:flex; align-items:center; gap:14px; min-width:min(320px,100%); flex:1}
+.shop-progress .track{flex:1}
+.shop-progress span{font-size:.85rem; color:var(--ink-2); font-weight:500; white-space:nowrap}
+.quick{display:flex; flex-direction:column; gap:12px}
+.quick .chips{display:flex; flex-wrap:wrap; gap:10px}
+.quick .chips button{display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:99px; box-shadow:var(--raise-sm); font-size:.82rem; font-weight:500; color:var(--ink-2); transition:box-shadow .2s, color .2s}
+.quick .chips button:hover{color:var(--ink)}
+.quick .chips button:active{box-shadow:var(--inset-sm)}
+.quick .chips button small{color:var(--ink-3); font-size:.72rem}
+.shop-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(300px,100%), 1fr)); gap:22px; align-items:start}
+.aisle{padding:20px 20px 12px}
+.aisle .card-head{margin-bottom:8px}
+.aisle h2{display:flex; align-items:center; gap:10px; font-size:.95rem}
+.aisle h2 .dot{width:10px; height:10px}
+.shop-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.shop-item{display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; gap:12px; align-items:center; padding:10px 0; border-top:1px solid var(--track)}
+.shop-item:first-child{border-top:0}
+.shop-item .check{width:28px; height:28px}
+.shop-item .check svg.i{width:14px; height:14px}
+.shop-item.done .check{background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 4px 10px var(--accent-glow); color:var(--on-accent)}
+.shop-item .nm{font-weight:500; overflow-wrap:anywhere; text-align:left; padding:0}
+.shop-item.done .nm{text-decoration:line-through; color:var(--ink-3)}
+.shop-item .qty{font-size:.74rem; font-weight:600; color:var(--ink-2); padding:3px 10px; border-radius:99px; box-shadow:var(--inset-sm); white-space:nowrap}
+.shop-item .more{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; color:var(--ink-3)}
+.shop-item .more:hover{box-shadow:var(--inset-sm); color:var(--ink)}
+.shop-item .more svg.i{width:16px; height:16px}
+.basket .card-head .btn{height:34px}
+.basket.aisle{opacity:.85}
+
 /* ---------- Focus ---------- */
 .focus{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start}
 .focus-main{display:flex; flex-direction:column; align-items:center; gap:30px; padding:36px 26px}
@@ -395,7 +427,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   .tabbar{display:flex; position:fixed; left:0; right:0; bottom:0; z-index:30; justify-content:space-around; align-items:center; background:var(--bg);
     box-shadow:0 -8px 20px -8px var(--lo); border-radius:26px 26px 0 0;
     padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
-  .tabbar a,.tabbar button{display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 10px; border-radius:var(--r-sm); color:var(--ink-3); font-size:.68rem; font-weight:600; text-decoration:none}
+  .tabbar a,.tabbar button{display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 6px; min-width:0; border-radius:var(--r-sm); color:var(--ink-3); font-size:.68rem; font-weight:600; text-decoration:none}
   .tabbar a.on{color:var(--accent); box-shadow:var(--inset-sm)}
   .tabbar .fab{width:56px; height:56px; padding:0; border-radius:50%; justify-content:center; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 10px 22px -6px var(--accent-glow); margin-top:-26px}
   .tabbar .fab svg.i{width:24px; height:24px}
@@ -451,6 +483,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       <span class="nav-label">Menü</span>
       <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
       <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler<span class="count num" id="navCount">0</span></a>
+      <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş<span class="count num" id="navShop">0</span></a>
       <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
       <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak<span class="count num" id="navFocus" hidden>25:00</span></a>
     </nav>
@@ -565,6 +598,26 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       <div class="groups" id="groups"></div>
     </section>
 
+    <!-- Alışveriş -->
+    <section class="view" id="v-alisveris" aria-labelledby="h-alisveris" hidden>
+      <header class="vhead">
+        <div>
+          <p class="eyebrow">Market</p>
+          <h1 class="emboss" id="h-alisveris">Alışveriş</h1>
+        </div>
+        <button class="btn sm" id="shopCopy"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Listeyi kopyala</button>
+      </header>
+      <form class="shop-add" id="shopForm" autocomplete="off">
+        <label class="field" for="shopIn"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><input id="shopIn" placeholder="2 kg domates, süt, ekmek…" maxlength="300"></label>
+        <button class="btn primary" type="submit">Ekle</button>
+      </form>
+      <div class="shop-top">
+        <div class="shop-progress"><span class="num" id="shopProgTxt">Liste boş</span><div class="track"><i id="shopProgBar" style="width:0%"></i></div></div>
+      </div>
+      <div class="quick" id="shopQuick"></div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </section>
+
     <!-- Takvim -->
     <section class="view" id="v-takvim" aria-labelledby="h-takvim" hidden>
       <header class="vhead">
@@ -646,6 +699,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
   <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler</a>
   <button class="fab" data-new aria-label="Yeni görev"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş</a>
   <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
   <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak</a>
 </nav>
@@ -731,6 +785,23 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   </form>
 </div>
 
+<div class="modal" id="shopModal" hidden role="dialog" aria-modal="true" aria-labelledby="smTitle">
+  <form class="card modal-card" id="shopEditForm" autocomplete="off">
+    <h2 id="smTitle">Ürünü düzenle</h2>
+    <div><span class="lbl">Ürün</span><label class="field" for="smName"><input id="smName" maxlength="80"></label></div>
+    <div class="two">
+      <div><span class="lbl">Miktar</span><label class="field" for="smQty"><input id="smQty" maxlength="24" placeholder="Örn: 2 kg"></label></div>
+      <div><span class="lbl">Reyon</span><label class="field" for="smAisle"><select id="smAisle"></select></label></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn sm danger" id="smDelete"><span>Sil</span></button>
+      <span style="flex:1"></span>
+      <button type="button" class="btn sm ghost" id="smCancel">Vazgeç</button>
+      <button type="submit" class="btn sm primary live">Kaydet</button>
+    </div>
+  </form>
+</div>
+
 <div class="reminders" id="reminders" aria-live="assertive"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button class="btn sm" id="toastBtn" hidden>Geri al</button></div>
 
@@ -782,7 +853,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   const REPEAT = { daily: 'Her gün', weekdays: 'Hafta içi', weekly: 'Her hafta', monthly: 'Her ay' };
   const KEY = 'ritim.v1', THEME_KEY = 'ritim.theme';
 
-  const S = { tasks: [], lists: [], focus: {} };
+  const S = { tasks: [], lists: [], focus: {}, shop: [], shophist: {} };
   const lists = () => (S.lists.length ? S.lists : DEFAULT_LISTS).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const listOf = id => lists().find(l => l.id === id) || lists()[0];
   const catName = id => listOf(id)?.name || 'Liste';
@@ -888,10 +959,11 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     if (saved && Array.isArray(saved.tasks)) {
       S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || [];
       S.focus = saved.focus || {};
+      S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {};
       if (Array.isArray(saved.log)) saved.log.forEach(l => { const d = ymd(new Date(l.at)); (S.focus[d] ||= { sessions: [] }).sessions.push(l); });
       S.tasks.forEach(t => { if (!lists().some(l => l.id === t.cat)) t.cat = lists()[0].id; });
     } else {
-      S.tasks = seedLocal(); S.lists = DEFAULT_LISTS.map(l => ({ ...l }));
+      S.tasks = seedLocal(); S.lists = DEFAULT_LISTS.map(l => ({ ...l })); S.shop = seedShop();
     }
     setSync(); render(); checkReminders();
   }
@@ -901,12 +973,14 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     try { db = await window.claude.use('db'); } catch (e) {}
     if (!db) return startLocal();
     STORE.mode = 'cloud'; STORE.db = db; setSync();
-    const got = { tasks: false, lists: false, focus: false };
-    const update = () => { if (!STORE.ready && got.tasks && got.lists && got.focus) { STORE.ready = true; checkReminders(); } render(); syncDrawer(); };
+    const got = { tasks: false, lists: false, focus: false, shop: false, shophist: false };
+    const update = () => { if (!STORE.ready && Object.values(got).every(Boolean)) { STORE.ready = true; checkReminders(); } render(); syncDrawer(); };
     const fail = e => { if (e && e.code === 'revoked') { STORE.readOnly = true; setSync(); } };
     db.collection('tasks').onSnapshot(snap => { S.tasks = [...fromSnap('tasks', snap).values()].map(normTask); got.tasks = true; update(); }, fail);
     db.collection('lists').onSnapshot(snap => { S.lists = [...fromSnap('lists', snap).values()]; got.lists = true; update(); }, fail);
     db.collection('focus').onSnapshot(snap => { S.focus = Object.fromEntries(fromSnap('focus', snap)); got.focus = true; update(); }, fail);
+    db.collection('shop').onSnapshot(snap => { S.shop = [...fromSnap('shop', snap).values()].map(normShop); got.shop = true; update(); }, fail);
+    db.collection('shophist').onSnapshot(snap => { S.shophist = Object.fromEntries(fromSnap('shophist', snap)); got.shophist = true; update(); }, fail);
   }
 
   // Tasks saved in this browser by the earlier, browser-only version can be moved to the cloud on request.
@@ -946,7 +1020,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     STORE.mode = 'api';
     try {
       const saved = JSON.parse(lsGet(KEY));
-      if (known && saved && Array.isArray(saved.tasks)) { S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || []; S.focus = saved.focus || {}; STORE.ready = true; }
+      if (known && saved && Array.isArray(saved.tasks)) { S.tasks = saved.tasks.map(normTask); S.lists = saved.lists || []; S.focus = saved.focus || {}; S.shop = (saved.shop || []).map(normShop); S.shophist = saved.shophist || {}; STORE.ready = true; }
       (JSON.parse(lsGet(KEY_PENDING)) || []).forEach(([p, d]) => pending.set(p, d));
     } catch (e) {}
     API.rev = Number(lsGet(KEY_REV)) || 0;
@@ -967,16 +1041,20 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       tasks: new Map((full ? [] : S.tasks).map(t => [t.id, t])),
       lists: new Map((full ? [] : S.lists).map(l => [l.id, l])),
       focus: new Map(Object.entries(full ? {} : S.focus)),
+      shop: new Map((full ? [] : S.shop).map(i => [i.id, i])),
+      shophist: new Map(Object.entries(full ? {} : S.shophist)),
     };
     docs.forEach(d => {
       const m = maps[d.col]; if (!m || pending.has(d.col + '/' + d.id)) return;
-      if (d.data === null) m.delete(d.id); else m.set(d.id, d.col === 'focus' ? d.data : d.col === 'tasks' ? normTask({ ...d.data, id: d.id }) : { ...d.data, id: d.id });
+      if (d.data === null) m.delete(d.id);
+      else m.set(d.id, ['focus', 'shophist'].includes(d.col) ? d.data : d.col === 'tasks' ? normTask({ ...d.data, id: d.id }) : d.col === 'shop' ? normShop({ ...d.data, id: d.id }) : { ...d.data, id: d.id });
     });
     for (const [path, data] of pending) {
       const [c, id] = path.split('/'), m = maps[c]; if (!m) continue;
       if (data === null) m.delete(id); else m.set(id, data);
     }
     S.tasks = [...maps.tasks.values()]; S.lists = [...maps.lists.values()]; S.focus = Object.fromEntries(maps.focus);
+    S.shop = [...maps.shop.values()]; S.shophist = Object.fromEntries(maps.shophist);
     API.rev = res.rev; lsSet(KEY_REV, String(res.rev));
     STORE.ready = true; STORE.offline = false;
     saveLocal(); setSync();
@@ -1097,7 +1175,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
 
   // ---------- Router ----------
-  const ROUTES = ['pano', 'gorevler', 'takvim', 'odak'];
+  const ROUTES = ['pano', 'gorevler', 'alisveris', 'takvim', 'odak'];
   function route() {
     const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
@@ -1122,11 +1200,13 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     if (ui.route === 'gorevler') renderTasks();
     if (ui.route === 'takvim') renderCal();
     if (ui.route === 'odak') renderFocus();
+    if (ui.route === 'alisveris') renderShop();
   }
 
   function renderSide() {
     const open = S.tasks.filter(t => !t.done);
     $('#navCount').textContent = open.length;
+    $('#navShop').textContent = S.shop.filter(i => !i.done).length;
     const onTasks = ui.route === 'gorevler';
     $('#sideLists').innerHTML = lists().map(l => {
       const n = open.filter(t => t.cat === l.id).length;
@@ -1418,6 +1498,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   $('#segFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.filter = b.dataset.f; renderTasks(); });
 
   function focusNew() {
+    if (ui.route === 'alisveris') return $('#shopIn').focus();
     go('gorevler');
     if (ui.cat) $('#addCat').value = ui.cat;
     setTimeout(() => $('#addTitle').focus(), 30);
@@ -1452,13 +1533,15 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.matches('.cat-row[data-cat]')) e.target.click();
-    if (e.key === 'Escape') { if (!$('#backupModal').hidden) return closeBackup(); if (!$('#listModal').hidden) return closeListModal(); if (ui.open) return closeDrawer(); }
+    if (e.key === 'Escape') { if (!$('#backupModal').hidden) return closeBackup(); if (!$('#listModal').hidden) return closeListModal(); if (!$('#shopModal').hidden) return closeShopModal(); if (ui.open) return closeDrawer(); }
     if (e.target.matches('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'n' || e.key === 'N') { e.preventDefault(); focusNew(); }
     if (e.key === '/') { e.preventDefault(); go('gorevler'); setTimeout(() => $('#search').focus(), 30); }
   });
 
   function clearSamples() {
+    const removedShop = S.shop.filter(i => i.sample);
+    S.shop = S.shop.filter(i => !i.sample); removedShop.forEach(i => dropShop(i.id));
     const removed = S.tasks.filter(t => t.sample);
     const focusBefore = clone(S.focus);
     S.tasks = S.tasks.filter(t => !t.sample); removed.forEach(t => dropTask(t.id));
@@ -1484,7 +1567,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
   $('#bkClose').addEventListener('click', closeBackup);
   $('#backupModal').addEventListener('click', e => { if (e.target.id === 'backupModal') closeBackup(); });
   $('#bkExport').addEventListener('click', () => {
-    const text = JSON.stringify({ app: 'ritim', v: 1, exportedAt: new Date().toISOString(), lists: lists(), tasks: S.tasks, focus: S.focus });
+    const text = JSON.stringify({ app: 'ritim', v: 1, exportedAt: new Date().toISOString(), lists: lists(), tasks: S.tasks, focus: S.focus, shop: S.shop, shophist: S.shophist });
     const ta = $('#bkText'); ta.value = text;
     const done = () => toast(`${S.tasks.length} görev dışa aktarıldı ve kopyalandı`);
     const fallback = () => { ta.focus(); ta.select(); toast('Metin seçildi; kopyalayıp diğer cihaza yapıştırın'); };
@@ -1514,6 +1597,18 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
       const have = S.focus[day]?.sessions || [], seen = new Set(have.map(x => x.at));
       const merged = have.concat((v.sessions || []).filter(x => x && !seen.has(x.at)));
       if (merged.length !== have.length) { S.focus[day] = { sessions: merged }; putFocus(day); }
+    });
+    (d.shop || []).forEach(i => {
+      if (!i || !i.id || !i.name) return;
+      const item = normShop(i), k = S.shop.findIndex(x => x.id === item.id);
+      if (k >= 0) S.shop[k] = item; else S.shop.push(item);
+      putShop(item);
+    });
+    Object.entries(d.shophist || {}).forEach(([key, h]) => {
+      if (!h || !h.name) return;
+      const cur = S.shophist[key];
+      S.shophist[key] = cur ? { ...h, count: Math.max(cur.count || 0, h.count || 0) } : h;
+      putHist(key);
     });
     closeBackup(); render();
     toast(`${n} görev içe aktarıldı`);
@@ -1580,6 +1675,197 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
     if (ui.cat === id) ui.cat = null;
     closeListModal(); render();
     toast(`Liste silindi, görevler “${target.name}” listesine taşındı`);
+  });
+
+  // ---------- Shopping list ----------
+  // Aisles in store order; the keyword lists let new items land in the right aisle on their own.
+  const AISLES = [
+    ['sebze', 'Meyve & Sebze', 'p3', 'domates salatalık biber sivri kapya patates soğan sarımsak limon elma muz portakal mandalina çilek üzüm armut havuç marul maydanoz dereotu roka ıspanak patlıcan kabak avokado karpuz kavun nane mantar brokoli karnabahar lahana pırasa kiraz şeftali kayısı erik nar ayva greyfurt kivi taze fasulye bezelye bamya enginar turp semizotu yeşillik meyve sebze'],
+    ['sut', 'Süt & Kahvaltılık', 'p2', 'süt yoğurt peynir kaşar beyaz peynir tulum tereyağı yumurta zeytin bal reçel kaymak ayran krema labne lor tahin pekmez kefir fındık ezmesi fıstık ezmesi kahvaltılık helva'],
+    ['et', 'Et, Tavuk & Balık', 'p1', 'et kıyma kuşbaşı biftek pirzola tavuk but göğüs kanat bonfile balık somon ton balığı sucuk salam sosis pastırma köfte hindi karides levrek çipura hamsi palamut ciğer'],
+    ['firin', 'Fırın', 'p4', 'ekmek simit poğaça lavaş tost ekmeği bazlama pide kruvasan yufka galeta tam buğday ekmeği'],
+    ['temel', 'Temel Gıda', 'p7', 'un şeker tuz pirinç bulgur makarna spagetti erişte mercimek nohut kuru fasulye yağ ayçiçek yağı zeytinyağı salça sirke baharat karabiber pul biber kimyon nane kekik irmik nişasta maya kabartma tozu konserve sos ketçap mayonez hardal kahve türk kahvesi çay yulaf müsli mısır gevreği kakao vanilya'],
+    ['atistirmalik', 'Atıştırmalık & Tatlı', 'p5', 'çikolata bisküvi cips kraker kuruyemiş fındık ceviz badem fıstık kaju kek gofret dondurma lokum kuru üzüm kuru kayısı çekirdek patlamış mısır şekerleme sakız puding'],
+    ['icecek', 'İçecek', 'p6', 'su maden suyu soda kola meyve suyu gazoz limonata enerji içeceği soğuk çay ice tea şalgam boza süt kahvesi'],
+    ['temizlik', 'Temizlik & Ev', 'p8', 'deterjan bulaşık deterjanı bulaşık tableti çamaşır deterjanı yumuşatıcı çamaşır suyu sabun sıvı sabun peçete kağıt havlu tuvalet kağıdı çöp torbası sünger cam sil yüzey temizleyici streç film alüminyum folyo pişirme kağıdı ampul pil kibrit'],
+    ['bakim', 'Kişisel Bakım', 'p2', 'şampuan diş macunu diş fırçası diş ipi deodorant krem el kremi tıraş jileti tıraş köpüğü ped hijyenik ped mendil ıslak mendil pamuk losyon saç kremi duş jeli güneş kremi bebek bezi parfüm'],
+    ['diger', 'Diğer', 'p8', ''],
+  ].map(([id, name, color, words]) => ({ id, name, color, words: words ? splitWords(words) : [] }));
+  function splitWords(str) {
+    // Multi-word keywords are written joined in the list above; recover them from a fixed set.
+    const multi = ['beyaz peynir', 'fındık ezmesi', 'fıstık ezmesi', 'ton balığı', 'tost ekmeği', 'tam buğday ekmeği', 'kuru fasulye', 'taze fasulye', 'ayçiçek yağı', 'pul biber', 'kabartma tozu', 'türk kahvesi', 'mısır gevreği', 'kuru üzüm', 'kuru kayısı', 'patlamış mısır', 'maden suyu', 'meyve suyu', 'enerji içeceği', 'soğuk çay', 'ice tea', 'süt kahvesi', 'bulaşık deterjanı', 'bulaşık tableti', 'çamaşır deterjanı', 'çamaşır suyu', 'sıvı sabun', 'kağıt havlu', 'tuvalet kağıdı', 'çöp torbası', 'cam sil', 'yüzey temizleyici', 'streç film', 'alüminyum folyo', 'pişirme kağıdı', 'diş macunu', 'diş fırçası', 'diş ipi', 'el kremi', 'tıraş jileti', 'tıraş köpüğü', 'hijyenik ped', 'ıslak mendil', 'saç kremi', 'duş jeli', 'güneş kremi', 'bebek bezi'];
+    let rest = ' ' + str + ' ';
+    const out = [];
+    multi.forEach(m => { if (rest.includes(' ' + m + ' ')) { out.push(m); rest = rest.replace(' ' + m + ' ', ' '); } });
+    return out.concat(rest.trim().split(/\s+/).filter(Boolean));
+  }
+  const aisleOf = id => AISLES.find(a => a.id === id) || AISLES[AISLES.length - 1];
+  const lowerTr = x => String(x).toLocaleLowerCase('tr-TR').trim();
+  // Document ids must be plain ASCII, so fold Turkish letters (Çay → cay).
+  const histKey = name => lowerTr(name).replace(/[çğıöşüâîû]/g, c => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u' }[c]))
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'urun';
+  const normShop = i => ({ qty: '', cat: 'diger', done: false, doneAt: null, createdAt: 0, ...i, name: String(i.name ?? '') });
+
+  function guessAisle(name) {
+    const n = ' ' + lowerTr(name);
+    const learned = S.shophist[histKey(name)];
+    if (learned && learned.cat) return learned.cat;
+    let best = null, len = 0;
+    AISLES.forEach(a => a.words.forEach(w => {
+      if (w.length > len && (n.includes(' ' + w))) { best = a.id; len = w.length; }
+    }));
+    return best || 'diger';
+  }
+  // "2 kg domates", "domates 2 kg", "3 adet limon", "süt x2" → { name, qty }
+  const UNIT = '(?:kg|kilo|gr|g|gram|lt|l|litre|ml|adet|tane|paket|kutu|şişe|demet|kavanoz|poşet|düzine)';
+  function parseItem(raw) {
+    const t = raw.trim().replace(/\s+/g, ' ');
+    let m = t.match(new RegExp('^(\\d+(?:[.,]\\d+)?\\s*' + UNIT + '?)\\s+(.+)$', 'i'));
+    if (m) return { qty: m[1].replace(/\s+/g, ' '), name: m[2] };
+    m = t.match(new RegExp('^(.+?)\\s+(\\d+(?:[.,]\\d+)?\\s*' + UNIT + '?)$', 'i'));
+    if (m) return { name: m[1], qty: m[2] };
+    m = t.match(/^(.+?)\s*[x×]\s*(\d+)$/i);
+    if (m) return { name: m[1], qty: m[2] + ' adet' };
+    return { name: t, qty: '' };
+  }
+  const cap1 = x => x ? x[0].toLocaleUpperCase('tr-TR') + x.slice(1) : x;
+
+  const putShop = i => write('shop', i.id, i);
+  const dropShop = id => write('shop', id, null);
+  const putHist = key => write('shophist', key, S.shophist[key]);
+
+  function seedShop() {
+    return [['2 kg domates', 'sebze'], ['süt', 'sut'], ['ekmek', 'firin'], ['yumurta', 'sut'], ['deterjan', 'temizlik'], ['çay', 'temel']]
+      .map(([raw, cat], k) => { const p = parseItem(raw); return { id: uid() + k, name: cap1(p.name), qty: p.qty, cat, done: k === 2, doneAt: null, createdAt: Date.now() + k, sample: true }; });
+  }
+
+  function addShopItems(text) {
+    const parts = text.split(/[,;\n]+/).map(x => x.trim()).filter(Boolean);
+    const added = [], already = [];
+    parts.forEach(part => {
+      const p = parseItem(part);
+      if (!p.name) return;
+      const name = cap1(p.name);
+      const existing = S.shop.find(i => !i.done && lowerTr(i.name) === lowerTr(name));
+      if (existing) { if (p.qty) { existing.qty = p.qty; putShop(existing); } already.push(existing.name); return; }
+      const item = { id: uid() + added.length, name, qty: p.qty, cat: guessAisle(name), done: false, doneAt: null, createdAt: Date.now() + added.length };
+      S.shop.push(item); putShop(item); added.push(item);
+    });
+    render();
+    if (added.length === 1) toast(`${added[0].name} → ${aisleOf(added[0].cat).name}`);
+    else if (added.length > 1) toast(`${added.length} ürün eklendi${already.length ? `, ${already.length} tanesi zaten listedeydi` : ''}`);
+    else if (already.length) toast(`${already[0]} zaten listede`);
+  }
+
+  function recordBought(items) {
+    items.forEach(i => {
+      const key = histKey(i.name), cur = S.shophist[key];
+      S.shophist[key] = { name: i.name, cat: i.cat, count: (cur?.count || 0) + 1, last: new Date().toISOString() };
+      putHist(key);
+    });
+  }
+
+  const STAPLES = ['Süt', 'Ekmek', 'Yumurta', 'Domates', 'Peynir', 'Su', 'Muz', 'Tavuk', 'Makarna', 'Deterjan'];
+  function renderShop() {
+    const open = S.shop.filter(i => !i.done), done = S.shop.filter(i => i.done);
+    const total = S.shop.length;
+    $('#shopProgTxt').textContent = !STORE.ready ? 'Yükleniyor…' : total ? `${total} üründen ${done.length} tanesi sepette` : 'Liste boş';
+    $('#shopProgBar').style.width = (total ? done.length / total * 100 : 0) + '%';
+
+    // Quick add: most bought items that are not on the list yet; common staples until there is history.
+    const onList = new Set(open.map(i => lowerTr(i.name)));
+    const hist = Object.values(S.shophist).filter(h => h && h.name && h.count > 0 && !onList.has(lowerTr(h.name)))
+      .sort((a, b) => (b.count || 0) - (a.count || 0) || (b.last || '').localeCompare(a.last || '')).slice(0, 12);
+    const chips = hist.length ? hist.map(h => ({ name: h.name, note: `${h.count}×` }))
+      : STAPLES.filter(x => !onList.has(lowerTr(x))).map(name => ({ name, note: '' }));
+    $('#shopQuick').innerHTML = chips.length ? `<span class="lbl" style="margin:0">${hist.length ? 'Sık alınanlar' : 'Hızlı ekle'}</span>
+      <div class="chips">${chips.map(c => `<button data-quick="${esc(c.name)}">+ ${esc(c.name)}${c.note ? ` <small class="num">${c.note}</small>` : ''}</button>`).join('')}</div>` : '';
+
+    const itemHTML = i => `<li class="shop-item ${i.done ? 'done' : ''}" data-sid="${i.id}">
+      <button class="check" data-stoggle aria-label="${i.done ? 'Sepetten çıkar' : 'Sepete ekle'}: ${esc(i.name)}">${ico('check')}</button>
+      <button class="nm" data-sedit>${esc(i.name)}</button>
+      ${i.qty ? `<span class="qty num">${esc(i.qty)}</span>` : '<span></span>'}
+      <button class="more" data-sedit aria-label="${esc(i.name)} ürününü düzenle"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+    </li>`;
+    const byAisle = AISLES.map(a => ({ a, items: open.filter(i => aisleOf(i.cat).id === a.id).sort((x, y) => x.createdAt - y.createdAt) })).filter(g => g.items.length);
+    let html = byAisle.map(({ a, items }) => `<section class="card aisle">
+      <div class="card-head"><h2><span class="dot" style="background:var(--${a.color})"></span>${a.name}</h2><span class="num">${items.length}</span></div>
+      <ul class="shop-list">${items.map(itemHTML).join('')}</ul></section>`).join('');
+    if (done.length) html += `<section class="card aisle basket">
+      <div class="card-head"><h2>${ICO_BASKET}Sepette</h2><button class="btn sm" data-sclear>Sepeti temizle</button></div>
+      <ul class="shop-list">${done.sort((x, y) => (y.doneAt || '').localeCompare(x.doneAt || '')).map(itemHTML).join('')}</ul></section>`;
+    if (!html) html = `<div class="empty" style="grid-column:1/-1"><b>${STORE.ready ? 'Alışveriş listeniz boş' : 'Yükleniyor…'}</b>${STORE.ready ? 'Yukarıya ürünleri virgülle ayırarak yazın; örneğin “2 kg domates, süt, ekmek”. Ürünler reyonlarına kendiliğinden ayrılır.' : ''}</div>`;
+    $('#shopGrid').innerHTML = html;
+  }
+  const ICO_BASKET = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 11 4-7M19 11l-4-7M2 11h20M4 11l1.6 8.1A2 2 0 0 0 7.6 21h8.8a2 2 0 0 0 2-1.9L20 11"/></svg>';
+
+  $('#shopForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('#shopIn').value.trim();
+    if (!v) return $('#shopIn').focus();
+    addShopItems(v); $('#shopIn').value = '';
+  });
+  $('#v-alisveris').addEventListener('click', e => {
+    const q = e.target.closest('[data-quick]');
+    if (q) return addShopItems(q.dataset.quick);
+    if (e.target.closest('[data-sclear]')) {
+      const bought = S.shop.filter(i => i.done);
+      recordBought(bought);
+      S.shop = S.shop.filter(i => !i.done); bought.forEach(i => dropShop(i.id));
+      render();
+      return toast(`${bought.length} ürün sepetten kaldırıldı`, () => { S.shop = S.shop.concat(bought); bought.forEach(putShop); render(); });
+    }
+    const li = e.target.closest('[data-sid]'); if (!li) return;
+    const item = S.shop.find(i => i.id === li.dataset.sid); if (!item) return;
+    if (e.target.closest('[data-stoggle]')) {
+      item.done = !item.done; item.doneAt = item.done ? new Date().toISOString() : null;
+      putShop(item); return render();
+    }
+    if (e.target.closest('[data-sedit]')) return openShopModal(item);
+  });
+  $('#shopCopy').addEventListener('click', () => {
+    const open = S.shop.filter(i => !i.done);
+    if (!open.length) return toast('Listede alınacak ürün yok');
+    const text = 'Alışveriş listesi\n' + AISLES.map(a => {
+      const items = open.filter(i => aisleOf(i.cat).id === a.id);
+      return items.length ? `\n${a.name}\n` + items.map(i => `• ${i.name}${i.qty ? ` (${i.qty})` : ''}`).join('\n') : '';
+    }).join('') ;
+    const fallback = () => toast('Kopyalanamadı; bu cihaz panoya yazmaya izin vermiyor');
+    try { navigator.clipboard.writeText(text).then(() => toast('Liste kopyalandı; mesaja yapıştırabilirsiniz'), fallback); } catch (e) { fallback(); }
+  });
+
+  const sm = { id: null };
+  $('#smAisle').innerHTML = AISLES.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+  function openShopModal(item) {
+    sm.id = item.id;
+    $('#smName').value = item.name; $('#smQty').value = item.qty || ''; $('#smAisle').value = aisleOf(item.cat).id;
+    disarmShop(); $('#shopModal').hidden = false;
+    setTimeout(() => $('#smName').focus(), 30);
+  }
+  const closeShopModal = () => { $('#shopModal').hidden = true; disarmShop(); };
+  $('#smCancel').addEventListener('click', closeShopModal);
+  $('#shopModal').addEventListener('click', e => { if (e.target.id === 'shopModal') closeShopModal(); });
+  $('#shopEditForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const item = S.shop.find(i => i.id === sm.id); if (!item) return closeShopModal();
+    const name = cap1($('#smName').value.trim()); if (!name) return $('#smName').focus();
+    const cat = $('#smAisle').value;
+    if (cat !== item.cat) {
+      // Remember the chosen aisle so this product goes there next time.
+      const key = histKey(name), cur = S.shophist[key];
+      S.shophist[key] = { name, cat, count: cur?.count || 0, last: cur?.last || null }; putHist(key);
+    }
+    Object.assign(item, { name, qty: $('#smQty').value.trim(), cat });
+    putShop(item); closeShopModal(); render();
+  });
+  let shopArm;
+  const disarmShop = () => { clearTimeout(shopArm); const b = $('#smDelete'); b.classList.remove('armed'); b.querySelector('span').textContent = 'Sil'; };
+  $('#smDelete').addEventListener('click', () => {
+    const b = $('#smDelete');
+    if (!b.classList.contains('armed')) { b.classList.add('armed'); b.querySelector('span').textContent = 'Emin misiniz?'; shopArm = setTimeout(disarmShop, 3500); return; }
+    const k = S.shop.findIndex(i => i.id === sm.id); if (k < 0) return closeShopModal();
+    const [item] = S.shop.splice(k, 1); dropShop(item.id); closeShopModal(); render();
+    toast(`${item.name} silindi`, () => { S.shop.splice(k, 0, item); putShop(item); render(); });
   });
 
   // ---------- Drawer ----------
