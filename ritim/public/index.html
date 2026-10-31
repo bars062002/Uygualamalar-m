@@ -466,6 +466,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .rem .acts .btn{height:34px; padding:0 12px; font-size:.7rem}
 
 .tabbar{display:none}
+.mini-timer{display:none}
 .tab-ind{display:none}
 
 @media (max-width: 1100px){
@@ -495,10 +496,25 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   .tab-ind{display:block; position:absolute; left:0; top:0; border-radius:18px; background:var(--accent-soft); pointer-events:none; opacity:0}
   .tab-ind.ready{transition:transform .55s var(--spring), width .3s var(--ease-out), opacity .3s; opacity:1}
   .tabbar a,.tabbar button{position:relative; z-index:1}
-  .tabbar .fab{flex:none; width:50px; height:50px; margin:0 4px; display:grid; place-items:center; border-radius:17px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 8px 18px -6px var(--accent-glow); transition:transform .35s var(--spring)}
-  .tabbar .fab:active{transform:scale(.88) rotate(90deg)}
-  .tabbar .fab svg.i{width:22px; height:22px}
+  /* Raised centre button: two tabs on each side, lifted above the dock with a ring in the dock's colour. */
+  .tabbar .fab{flex:none; width:58px; height:58px; margin:-30px 6px 0; display:grid; place-items:center; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent);
+    box-shadow:0 0 0 6px var(--surface), 0 0 0 7px color-mix(in srgb, var(--lo) 35%, transparent), 0 14px 26px -8px var(--accent-glow);
+    transition:transform .4s var(--spring)}
+  .tabbar .fab::after{content:""; position:absolute; inset:-6px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 45%)}
+  .tabbar .fab{position:relative}
+  .tabbar .fab:active{transform:scale(.9) rotate(90deg)}
+  .tabbar .fab svg.i{width:24px; height:24px; stroke-width:2.4}
+  .mini-timer:not([hidden]){display:flex; position:fixed; z-index:31; left:50%; bottom:calc(92px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
+    align-items:center; gap:8px; padding:8px 16px 8px 12px; border-radius:99px; background:var(--surface); box-shadow:var(--raise-sm); color:var(--ink); text-decoration:none;
+    font-weight:700; font-size:.9rem; animation:timer-in .5s var(--spring) both}
+  .mini-timer svg.i{color:var(--accent)}
+  .mini-timer small{font-size:.72rem; font-weight:500; color:var(--ink-3); white-space:nowrap}
+  .mini-timer.paused svg.i{color:var(--ink-3)}
+  @keyframes timer-in{from{opacity:0; transform:translate(-50%, 14px) scale(.9)}}
   .toast{bottom:calc(92px + env(safe-area-inset-bottom, 0px))}
+  body:has(.mini-timer:not([hidden])) .toast{bottom:calc(142px + env(safe-area-inset-bottom, 0px))}
   .add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .add .field.grow{grid-column:1 / -1}
   .add input[type=date]{width:100%}
@@ -581,6 +597,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
         </div>
         <div class="vhead-actions">
           <button class="btn icon m-only" data-backup aria-label="Yedekle ve taşı"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg></button>
+          <a class="btn icon m-only" href="#odak" aria-label="Odak zamanlayıcısı"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></a>
           <button class="btn icon m-only" data-look aria-label="Görünüm: tema ve vurgu rengi"><svg class="i" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.8-1.7 1.7-1.7h2A5.6 5.6 0 0 0 22 11c0-5-4.5-9-10-9z"/></svg></button>
           <button class="btn primary" data-new><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni görev</button>
         </div>
@@ -767,7 +784,6 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   <button class="fab" data-new aria-label="Yeni görev"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş</a>
   <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
-  <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak</a>
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -804,6 +820,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   </div>
   <div class="d-foot">
     <span class="d-meta num" id="dMeta"></span>
+    <button class="btn sm" id="dFocus"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odaklan</span></button>
     <button class="btn sm danger" id="dDelete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>Sil</span></button>
   </div>
 </aside>
@@ -877,6 +894,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
     <div class="modal-foot"><span style="flex:1"></span><button type="button" class="btn sm primary live" id="lkClose">Tamam</button></div>
   </div>
 </div>
+
+<a class="mini-timer" id="miniTimer" href="#odak" hidden aria-label="Odak zamanlayıcısına git"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span class="num" id="miniTime">25:00</span><small id="miniLabel">Odak</small></a>
 
 <div class="reminders" id="reminders" aria-live="assertive"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button class="btn sm" id="toastBtn" hidden>Geri al</button></div>
@@ -1421,6 +1440,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
     ui.route = r; ui.shown = true;
     render();
     moveIndicators();
+    paintTimer();
   }
   addEventListener('hashchange', route);
   const go = r => { if (location.hash !== '#' + r) location.hash = r; else route(); };
@@ -1772,8 +1792,10 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   $('#search').addEventListener('input', e => { ui.q = e.target.value; renderTasks(); });
   $('#segFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.filter = b.dataset.f; renderTasks(); });
 
+  // The add button follows the current view: a shop item, a task for the selected day, or a new task.
   function focusNew() {
     if (ui.route === 'alisveris') return $('#shopIn').focus();
+    if (ui.route === 'takvim') return $('#dayAddIn').focus();
     go('gorevler');
     if (ui.cat) $('#addCat').value = ui.cat;
     setTimeout(() => $('#addTitle').focus(), 30);
@@ -2273,6 +2295,11 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
     $('#fStart').classList.toggle('live', F.running);
     $('.disc.xl').classList.toggle('running', F.running);
     const nf = $('#navFocus'); nf.hidden = !F.running && F.left === F.total; nf.textContent = mmss(Math.ceil(F.left));
+    const mt = $('#miniTimer');
+    mt.hidden = nf.hidden || ui.route === 'odak';
+    mt.classList.toggle('paused', !F.running);
+    $('#miniTime').textContent = mmss(Math.ceil(F.left));
+    $('#miniLabel').textContent = !F.running ? 'Duraklatıldı' : F.mode === 'focus' ? 'Odak' : MODES[F.mode].label;
   }
   function tick() {
     F.left = Math.max(0, (F.endAt - Date.now()) / 1000);
@@ -2301,6 +2328,11 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
     render();
   }
   $('#fStart').addEventListener('click', () => { F.running ? (stop(), paintTimer()) : start(); });
+  $('#dFocus').addEventListener('click', () => {
+    const id = ui.open; closeDrawer();
+    if (F.mode !== 'focus' && !F.running) setMode('focus');
+    F.taskId = id; go('odak');
+  });
   $('#fReset').addEventListener('click', () => setMode(F.mode));
   $('#fmode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
   $('#fTask').addEventListener('change', e => { F.taskId = e.target.value; renderFocus(); });
