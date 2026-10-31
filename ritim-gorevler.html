@@ -231,6 +231,14 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
 /* ---------- Tasks ---------- */
 .add{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto auto; gap:14px; align-items:center}
+.add .field.grow{grid-column:1 / -1}
+.add .site-f{width:auto; min-width:0}
+.add .site-f input,#dSite,#neSite{text-transform:uppercase; letter-spacing:.04em; font-weight:600}
+.chip.site{padding:2px 9px; border-radius:8px; box-shadow:var(--inset-sm); color:var(--accent); font-weight:700; letter-spacing:.04em; font-size:.72rem}
+.ne-site{height:40px; width:190px; padding:0 14px; flex:none}
+.ne-site svg{width:16px; height:16px}
+.note-it .nt-site{align-self:flex-start; margin-bottom:2px}
+@media (max-width:900px){ .ne-tools{flex-wrap:wrap} .ne-site{width:100%; order:-1} }
 .add .field.small{width:auto}
 .add input[type=date]{min-width:0; width:140px}
 .toolbar{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
@@ -728,6 +736,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <div class="list-strip m-only" id="listStrip" aria-label="Listeler"></div>
       <form class="add" id="addForm" autocomplete="off">
         <label class="field grow" for="addTitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="addTitle" placeholder="Yeni görev ekleyin… (N)" maxlength="140"></label>
+        <label class="field small site-f" for="addSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="addSite" placeholder="Saha kodu" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Saha kodu"></label>
         <label class="field small" for="addCat"><select id="addCat" aria-label="Liste"></select></label>
         <label class="field small" for="addPri"><select id="addPri" aria-label="Öncelik"><option value="high">Yüksek</option><option value="med" selected>Orta</option><option value="low">Düşük</option></select></label>
         <label class="field small" for="addDue"><input type="date" id="addDue" aria-label="Son tarih"></label>
@@ -801,6 +810,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
               <div class="seg ne-mode" id="neMode" role="tablist" aria-label="Görünüm"><button type="button" data-m="edit" class="on">Yaz</button><button type="button" data-m="prev">Önizle</button></div>
             </div>
             <div class="ne-tools">
+              <label class="field ne-site" for="neSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="neSite" placeholder="Saha kodu" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Saha kodu"></label>
               <span class="ne-meta num" id="neMeta"></span>
               <button class="btn icon sm" id="nePin" aria-label="Sabitle" title="Sabitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2H6z"/></svg></button>
               <button class="btn icon sm" id="neCopy" aria-label="Kopyala" title="Kopyala"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
@@ -908,6 +918,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   </div>
   <div class="d-body">
     <input class="d-title" id="dTitle" aria-label="Görev başlığı" maxlength="140">
+    <div><span class="lbl">Saha kodu</span><label class="field" for="dSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="dSite" placeholder="Örn. KSEMR32087" maxlength="20" autocapitalize="characters" spellcheck="false"></label></div>
     <label class="toggle-row" for="dDone"><button class="switch" id="dDone" role="switch" aria-checked="false"></button>Tamamlandı</label>
     <div class="two">
       <div><span class="lbl">Liste</span><label class="field" for="dCat"><select id="dCat"></select></label></div>
@@ -1735,6 +1746,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <button class="tbody" data-open="${t.id}">
         <span class="ttl"><span class="ttx">${esc(t.title)}</span></span>
         <span class="meta">
+          ${t.site ? `<span class="chip site num">${esc(t.site)}</span>` : ''}
           <span class="chip">${catDot(t.cat)}${esc(catName(t.cat))}</span>
           ${t.due ? `<span class="pill ${!t.done && isLate(t) ? 'late' : !t.done && t.due === today() ? 'today' : ''}">${ico('clock')}${t.done ? fmtShort.format(parse(t.due)) : dueLabel(t.due)}</span>` : ''}
           ${t.remind && t.due && !t.done ? `<span class="chip num">${ico('bell')}${t.remind}</span>` : ''}
@@ -1753,7 +1765,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   function renderTasks() {
     const q = ui.q.trim().toLocaleLowerCase('tr-TR');
     let list = S.tasks.filter(t => !ui.cat || t.cat === ui.cat);
-    if (q) list = list.filter(t => (t.title + ' ' + t.notes + ' ' + t.subs.map(s => s.t).join(' ')).toLocaleLowerCase('tr-TR').includes(q));
+    if (q) list = list.filter(t => (t.title + ' ' + (t.site || '') + ' ' + t.notes + ' ' + t.subs.map(s => s.t).join(' ')).toLocaleLowerCase('tr-TR').includes(q));
     if (ui.filter === 'today') list = list.filter(isToday);
     if (ui.filter === 'star') list = list.filter(t => t.star);
     if (ui.filter === 'done') list = list.filter(t => t.done);
@@ -1902,8 +1914,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (t.done) toast(made ? `Tamamlandı. Sonraki: ${dueLabel(made.due)}` : 'Görev tamamlandı', () => toggleDone(id));
   }
 
-  function addTask(title, cat, pri, due) {
-    const t = { id: uid(), title, cat, pri, due: due || null, notes: '', star: false, done: false, doneAt: null, repeat: null, remind: null, subs: [], pomo: 0, createdAt: Date.now() };
+  function addTask(title, cat, pri, due, site) {
+    const t = { id: uid(), title, site: (site || '').trim().toLocaleUpperCase('tr-TR'), cat, pri, due: due || null, notes: '', star: false, done: false, doneAt: null, repeat: null, remind: null, subs: [], pomo: 0, createdAt: Date.now() };
     S.tasks.push(t); putTask(t); render();
     toast(`“${title}” eklendi`);
     return t;
@@ -1945,8 +1957,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!title) { $('#addTitle').focus(); toast('Görev adı boş olamaz'); return; }
     const nm = title.match(/^not\b[\s:,.-]*(.+)$/is);
     if (nm) { quickNote(nm[1].trim()); $('#addTitle').value = ''; return; }
-    addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value);
-    $('#addTitle').value = '';
+    addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value, $('#addSite').value);
+    $('#addTitle').value = ''; $('#addSite').value = '';
   });
   $('#search').addEventListener('input', e => { ui.q = e.target.value; renderTasks(); });
   $('#segFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.filter = b.dataset.f; renderTasks(); });
@@ -2081,7 +2093,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // Markdown defter: başlık, gövde, sabitleme. Site Asistan'daki eski Görevler notları ilk açılışta buraya taşınır.
   function normNote(n) {
     const now = new Date().toISOString();
-    return { id: String(n.id), title: String(n.title || '').slice(0, 120), body: String(n.body || ''), pinned: !!n.pinned,
+    return { id: String(n.id), title: String(n.title || '').slice(0, 120), body: String(n.body || ''), site: String(n.site || '').toLocaleUpperCase('tr-TR'), pinned: !!n.pinned,
       created: n.created || now, updated: n.updated || n.created || now, src: n.src || '' };
   }
   const putNote = n => write('notes', n.id, n);
@@ -2125,7 +2137,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   function sortedNotes() {
     const q = lowerTr(nui.q.trim());
     return S.notes
-      .filter(n => !q || lowerTr(n.title + ' ' + n.body).includes(q))
+      .filter(n => !q || lowerTr(n.title + ' ' + (n.site || '') + ' ' + n.body).includes(q))
       .sort((a, b) => (b.pinned - a.pinned) || String(b.updated).localeCompare(String(a.updated)));
   }
   function hl(text) {
@@ -2140,7 +2152,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     $('#noteList').innerHTML = list.length ? list.map(n => {
       const body = plain(n.body); const q = nui.q.trim();
       let snip = body; if (q) { const i = lowerTr(body).indexOf(lowerTr(q)); if (i > 40) snip = '…' + body.slice(i - 30); }
-      return `<button class="note-it${n.id === nui.sel ? ' on' : ''}" data-note="${n.id}" data-flip="${n.id}"><span class="nt-t">${n.pinned ? PIN_SVG : ''}${hl(noteTitle(n))}</span><span class="nt-s">${hl(snip.slice(0, 160)) || '&nbsp;'}</span><span class="nt-d num">${fmtNote.format(new Date(n.updated))}</span></button>`;
+      return `<button class="note-it${n.id === nui.sel ? ' on' : ''}" data-note="${n.id}" data-flip="${n.id}">${n.site ? `<span class="chip site num nt-site">${hl(n.site)}</span>` : ''}<span class="nt-t">${n.pinned ? PIN_SVG : ''}${hl(noteTitle(n))}</span><span class="nt-s">${hl(snip.slice(0, 160)) || '&nbsp;'}</span><span class="nt-d num">${fmtNote.format(new Date(n.updated))}</span></button>`;
     }).join('') : `<p class="note-none">${S.notes.length ? 'Aramaya uyan not yok.' : 'Henüz not yok. “Yeni not” ile başla.'}</p>`;
     paintNoteEditor();
   }
@@ -2152,6 +2164,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     const ti = $('#neTitle'), bo = $('#neBody');
     if (force || document.activeElement !== ti) ti.value = n.title;
     if (force || document.activeElement !== bo) bo.value = n.body;
+    if (force || document.activeElement !== $('#neSite')) $('#neSite').value = n.site || '';
     $('#nePin').classList.toggle('on', n.pinned); $('#nePin').setAttribute('aria-pressed', String(n.pinned));
     $('#neMeta').textContent = `${n.body.length.toLocaleString('tr-TR')} karakter · ${fmtNote.format(new Date(n.updated))}`;
     $$('#neMode button').forEach(b => b.classList.toggle('on', b.dataset.m === nui.mode));
@@ -2164,9 +2177,9 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     paintNoteEditor(true);
     if (focusBody) setTimeout(() => { const b = $('#neBody'); if (!b.hidden) { b.focus(); b.setSelectionRange(b.value.length, b.value.length); } }, 60);
   }
-  function newNote(title = '', body = '', src = '') {
+  function newNote(title = '', body = '', src = '', site = '') {
     const now = new Date().toISOString();
-    const n = normNote({ id: uid(), title, body, created: now, updated: now, src });
+    const n = normNote({ id: uid(), title, body, site, created: now, updated: now, src });
     S.notes.push(n); putNote(n); nui.mode = 'edit'; nui.q = ''; $('#noteQ').value = '';
     openNote(n.id, false);
     setTimeout(() => (title ? $('#neBody') : $('#neTitle')).focus(), 80);
@@ -2190,6 +2203,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   $('#noteQ').addEventListener('input', e => { nui.q = e.target.value; renderNotes(); });
   $('#noteList').addEventListener('click', e => { const b = e.target.closest('[data-note]'); if (b) openNote(b.dataset.note); });
   $('#neBack').addEventListener('click', () => { nui.mobileOpen = false; renderNotes(); });
+  $('#neSite').addEventListener('input', e => { const n = noteOf(nui.sel); if (!n) return; n.site = e.target.value.trim().toLocaleUpperCase('tr-TR'); touchNote(n); });
   $('#neTitle').addEventListener('input', e => { const n = noteOf(nui.sel); if (!n) return; n.title = e.target.value; touchNote(n); });
   $('#neBody').addEventListener('input', e => { const n = noteOf(nui.sel); if (!n) return; n.body = e.target.value; touchNote(n); $('#neMeta').textContent = `${n.body.length.toLocaleString('tr-TR')} karakter · şimdi`; });
   $('#neMode').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; nui.mode = b.dataset.m; paintNoteEditor(); });
@@ -2218,7 +2232,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       ...(t.subs || []).map(x => `- [${x.d ? 'x' : ' '}] ${x.t || ''}`),
       '', t.notes || ''
     ].join('\n').trim();
-    closeDrawer(); newNote(t.title, body, 'task');
+    closeDrawer(); newNote(t.title, body, 'task', t.site || '');
   });
 
   // Site Asistan içinde: eski Görevler (Kişisel / Ekip) not defterlerini bir kez Ritim notlarına taşı.
@@ -2233,7 +2247,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       else cur.lines.push(ln);
     });
     if (cur.lines.join('').trim()) out.push(cur);
-    return out.map(x => ({ title: x.title, body: x.lines.join('\n').replace(/^\n+|\s+$/g, '') }));
+    return out.map(x => { const m = x.title.match(/^\[([^\]]{2,20})\]\s*(.*)$/); return { title: m ? (m[2] || m[1]) : x.title, site: m && !/^genel$/i.test(m[1]) ? m[1] : '', body: x.lines.join('\n').replace(/^\n+|\s+$/g, '') }; });
   }
   function importScratch(items) {
     if (!STORE.ready) { noteImportQ = items; return; }
@@ -2246,7 +2260,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
         const id = 'sa-' + (it.src || 'x') + '-' + hashStr(sec.title + '\n' + sec.body);
         if (seen.has(id) || noteOf(id)) { seen.add(id); return; }
         const now = new Date().toISOString();
-        const note = normNote({ id, title: sec.title, body: sec.body, created: now, updated: new Date(Date.now() - i * 1000).toISOString(), src: 'sa-' + (it.src || '') });
+        const note = normNote({ id, title: sec.title, body: sec.body, site: sec.site, created: now, updated: new Date(Date.now() - i * 1000).toISOString(), src: 'sa-' + (it.src || '') });
         S.notes.push(note); putNote(note); seen.add(id); n++;
       });
     });
@@ -2259,6 +2273,66 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     importScratch(d.items);
   });
+  // Site Asistan Görevler (Kişisel / Ekip): görevler saha koduyla birlikte görev olarak, saha notları not olarak bir kez taşınır.
+  const KEY_TIMP = 'ritim.tasksImported';
+  let taskImportQ = null;
+  const SA_PRI = { 'Acil': 'high', 'Yüksek': 'high', 'Normal': 'med', 'Düşük': 'low' };
+  const SA_REP = { daily: 'daily', weekly: 'weekly', monthly: 'monthly', weekdays: 'weekdays' };
+  const isoDay = v => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) ? v.slice(0, 10) : null;
+  const siteCode = v => { const c = String(v || '').trim().toLocaleUpperCase('tr-TR'); return c === 'GENEL' ? '' : c.slice(0, 20); };
+  function importSaTasks(items) {
+    if (!STORE.ready) { taskImportQ = items; return; }
+    let done = []; try { done = JSON.parse(lsGet(KEY_TIMP) || '[]'); } catch (e) {}
+    const seen = new Set(done); let nt = 0, nn = 0;
+    materializeLists();
+    (items || []).forEach(it => {
+      if (!it || !it.src) return;
+      const lid = 'sa-' + it.src, lname = it.src === 'gp' ? 'Ekip görevleri' : 'Kişisel görevler';
+      const tasks = Array.isArray(it.tasks) ? it.tasks.filter(t => t && (t.title || '').trim()) : [];
+      if (tasks.length && !S.lists.some(l => l.id === lid) && !seen.has(lid)) { const l = { id: lid, name: lname, color: it.src === 'gp' ? 'p6' : 'p2' }; S.lists.push(l); putList(l); }
+      seen.add(lid);
+      tasks.forEach(o => {
+        const id = 'sa-' + it.src + '-' + String(o.id);
+        if (seen.has(id) || byId(id)) { seen.add(id); return; }
+        const extra = [];
+        if (o.person) extra.push(`Kişi: ${o.person}`);
+        if (o.project) extra.push(`Proje: ${o.project}`);
+        if (o.url) extra.push(`Bağlantı: ${o.url}`);
+        if (o.status && !/^(Başlamadı|Tamamlandı)$/.test(o.status)) extra.push(`Durum: ${o.status}`);
+        if (o.estimate || o.spent) extra.push(`Süre: ${o.spent || 0} / ${o.estimate || '?'}`);
+        const notes = [String(o.notes || '').trim(), extra.join('\n')].filter(Boolean).join('\n\n');
+        const subsRaw = Array.isArray(o.subtasks) ? o.subtasks : typeof o.subtasks === 'string' ? o.subtasks.split('\n') : [];
+        const subs = subsRaw.map((x, i) => typeof x === 'string' ? { id: 's' + i, t: x.replace(/^\s*[-*]\s*(\[[ xX]\]\s*)?/, '').trim(), d: /\[[xX]\]/.test(x) } : { id: 's' + i, t: String(x.text || x.t || x.title || '').trim(), d: !!(x.done || x.d) }).filter(x => x.t);
+        const isDone = !!o.done || !!o.archived || o.status === 'Tamamlandı';
+        const t = normTask({ id, title: String(o.title).trim().slice(0, 140), site: siteCode(o.siteId), cat: lid, pri: SA_PRI[o.priority] || 'med', star: o.priority === 'Acil',
+          due: isoDay(o.date), remind: /^\d{2}:\d{2}$/.test(o.reminderTime || '') ? o.reminderTime : null, repeat: SA_REP[o.repeat] || null,
+          done: isDone, doneAt: isDone ? (o.completedAt || new Date().toISOString()) : null, notes, subs, pomo: 0, createdAt: Number(o.id) > 1e12 ? Number(o.id) : Date.now() });
+        S.tasks.push(t); putTask(t); seen.add(id); nt++;
+      });
+      Object.entries(it.sites || {}).forEach(([code, sv]) => {
+        if (!sv) return;
+        const sn = Array.isArray(sv.notes) ? sv.notes.filter(x => x && String(x.text || '').trim()) : [];
+        if (!sn.length) return;
+        const id = 'sa-' + it.src + '-site-' + hashStr(code);
+        if (seen.has(id) || noteOf(id)) { seen.add(id); return; }
+        const info = [sv.name && `- Saha: ${sv.name}`, sv.location && `- Konum: ${sv.location}`, sv.kind && `- Tür: ${sv.kind}`, sv.landlord && `- Lehtar: ${sv.landlord}`, sv.phone && `- Telefon: ${sv.phone}`, sv.contractEnd && `- Sözleşme bitişi: ${sv.contractEnd}`, sv.rent && `- Kira: ${sv.rent}`].filter(Boolean);
+        const lines = sn.slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || ''))).map(x => { const d = x.at ? new Date(x.at) : null; return `- ${d && !isNaN(d) ? d.toLocaleDateString('tr-TR') + ' · ' : ''}${String(x.text).trim()}`; });
+        const body = (info.length ? info.join('\n') + '\n\n' : '') + '## Saha notları\n' + lines.join('\n');
+        const last = sn.map(x => x.at).filter(Boolean).sort().pop() || new Date().toISOString();
+        const note = normNote({ id, title: sv.name ? `${sv.name}` : `Saha ${code}`, site: siteCode(code) || code, body, created: last, updated: last, src: 'sa-site' });
+        S.notes.push(note); putNote(note); seen.add(id); nn++;
+      });
+    });
+    lsSet(KEY_TIMP, JSON.stringify([...seen]));
+    if (nt || nn) { render(); toast(`Görevler'den ${nt} görev${nn ? ` ve ${nn} saha notu` : ''} Ritim'e taşındı`); }
+  }
+  addEventListener('message', e => {
+    const d = e.data; if (!EMBED || !d || d.type !== 'sa-tasks') return;
+    let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
+    if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    importSaTasks(d.items);
+  });
+  setInterval(() => { if (taskImportQ && STORE.ready) { const q = taskImportQ; taskImportQ = null; importSaTasks(q); } }, 700);
   setInterval(() => { if (noteImportQ && STORE.ready) { const q = noteImportQ; noteImportQ = null; importScratch(q); } }, 700);
 
   // ---------- Lists ----------
@@ -2532,6 +2606,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     const t = byId(ui.open); if (!t) return closeDrawer();
     if (document.activeElement !== $('#dTitle')) $('#dTitle').value = t.title;
     if (document.activeElement !== $('#dNotes')) $('#dNotes').value = t.notes;
+    if (document.activeElement !== $('#dSite')) $('#dSite').value = t.site || '';
     $('#dCat').value = t.cat; $('#dPri').value = t.pri; $('#dDue').value = t.due || '';
     $('#dRemind').value = t.remind || ''; $('#dRepeat').value = t.repeat || '';
     $('#dDone').setAttribute('aria-checked', String(t.done));
@@ -2555,6 +2630,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   $('#scrim').addEventListener('click', closeDrawer);
   $('#dTitle').addEventListener('input', e => edit(t => { t.title = e.target.value.trim() || 'Adsız görev'; }));
   $('#dNotes').addEventListener('input', e => edit(t => { t.notes = e.target.value; }));
+  $('#dSite').addEventListener('input', e => edit(t => { t.site = e.target.value.trim().toLocaleUpperCase('tr-TR'); }));
   $('#dCat').addEventListener('change', e => edit(t => { t.cat = e.target.value; }));
   $('#dPri').addEventListener('change', e => edit(t => { t.pri = e.target.value; }));
   $('#dDue').addEventListener('change', e => edit(t => { t.due = e.target.value || null; t.reminded = null; delete t.order; }));
