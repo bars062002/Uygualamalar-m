@@ -2997,14 +2997,19 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   else if (/^https?:$/.test(location.protocol)) {
     // Çerçevede ve giriş anahtarı yoksa: önce Site Asistan'a emanet edilen oturumu iste (en fazla 1,2 sn bekle).
     if (IN_HOST && !lsGet(KEY_PW)) {
-      let go = () => { go = () => {}; startApi(); };
+      let started = false;
+      const go = () => { if (started) return; started = true; startApi(); };
       addEventListener('message', e => {
         const d = e.data; if (!d || d.type !== 'sa-store' || !HOST_OK(e.origin)) return;
+        const had = !!lsGet(KEY_PW);
         Object.entries(d.store || {}).forEach(([k, v]) => { if (MIRROR.test(k) && typeof v === 'string' && lsGet(k) === null) lsSet(k, v, true); });
-        go();
+        if (!started) return go();
+        // Cevap geç geldiyse (açılış zaten giriş penceresine düştüyse): emanet anahtarla yeniden bağlan.
+        if (!had && lsGet(KEY_PW)) { $('#loginModal').hidden = true; api('sync?since=0').then(handleFirstSync).catch(() => {}); }
       });
-      try { parent.postMessage({ type: 'rt-hello' }, hostOrigin); } catch (e) {}
-      setTimeout(() => go(), 1200);
+      const hello = () => { try { parent.postMessage({ type: 'rt-hello' }, hostOrigin); } catch (e) {} };
+      hello(); setTimeout(() => { if (!started) hello(); }, 400);
+      setTimeout(go, 2500);
     } else {
       // Önceden girilmiş oturum: Site Asistan'a da emanet et (sonraki açılışlarda kaybolmasın).
       if (IN_HOST) ['ritim.key', 'ritim.user', 'ritim.name', 'ritim.tasksImported', 'ritim.notesImported'].forEach(k => { const v = lsGet(k); if (v !== null) try { parent.postMessage({ type: 'rt-store', k, v }, hostOrigin); } catch (e) {} });
