@@ -1533,7 +1533,16 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   });
   addEventListener('online', () => { flushApi(); pull(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { flushApi(); pull(); } });
-  setInterval(() => { pull(); if (pending.size) flushApi(); }, 20000);
+  addEventListener('focus', () => pull()); addEventListener('pageshow', () => pull());
+  // Hızlı eşitleme: kullanırken (son 2 dk'da dokunma/yazma) 4 sn'de bir, boşta 20 sn'de bir, arka planda hiç
+  let lastAct = Date.now(), lastPull = 0;
+  ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(ev => addEventListener(ev, () => { const was = Date.now() - lastAct > 120000; lastAct = Date.now(); if (was) pull(); }, { passive: true, capture: true }));
+  setInterval(() => {
+    if (document.hidden) return;
+    const gap = Date.now() - lastAct < 120000 ? 4000 : 20000;
+    if (Date.now() - lastPull >= gap - 250) { lastPull = Date.now(); pull(); }
+    if (pending.size) flushApi();
+  }, 1000);
 
   function registerSW() {
     if (EMBED) return;
@@ -1614,6 +1623,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!EMBED || !d || d.type !== 'sa-insets') return;
     let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    lastAct = Date.now(); pull();   // Site Asistan'da Ritim sekmesine geçildi: hemen eşitle
     const st = document.documentElement.style;
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] === 'number') st.setProperty({ t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], d[k] + 'px'); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
