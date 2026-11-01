@@ -1268,8 +1268,20 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // The device keeps a full copy of the data plus a queue of unsent changes, so the app also works offline.
   const KEY_PW = 'ritim.key', KEY_PENDING = 'ritim.pending', KEY_REV = 'ritim.rev', KEY_USER = 'ritim.user';
   const API = { rev: 0, pulling: false };
-  const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const lsSet = (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+  // Site Asistan içinde (başka adresten açılan çerçeve) tarayıcı kayıtları kalıcı olmayabilir: giriş anahtarı ve
+  // birkaç bayrak Site Asistan'a emanet edilir (rt-store), açılışta geri alınır (sa-store). Kayıt hiç yoksa bellekte tutulur.
+  const MEM = new Map();
+  const IN_HOST = /[?&]embed=1\b/.test(location.search) && window.parent !== window;
+  const MIRROR = /^ritim\.(key|user|name|tasksImported|notesImported)$/;
+  const HOST_OK = o => { try { return /^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(new URL(o).hostname); } catch (e) { return false; } };
+  const hostOrigin = (() => { const a = location.ancestorOrigins && location.ancestorOrigins[0]; if (a && HOST_OK(a)) return a;
+    try { const r = document.referrer && new URL(document.referrer).origin; if (r && HOST_OK(r)) return r; } catch (e) {} return 'https://site-asistan.brsakpnr.workers.dev'; })();
+  const lsGet = k => { let v = null; try { v = localStorage.getItem(k); } catch (e) {} return v !== null ? v : (MEM.has(k) ? MEM.get(k) : null); };
+  const lsSet = (k, v, quiet) => {
+    if (v === null) MEM.delete(k); else MEM.set(k, v);
+    try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {}
+    if (!quiet && IN_HOST && MIRROR.test(k)) try { parent.postMessage({ type: 'rt-store', k, v }, hostOrigin); } catch (e) {}
+  };
   const savePending = () => lsSet(KEY_PENDING, JSON.stringify([...pending]));
   const api = (path, opts = {}) => fetch('/api/' + path, { ...opts, cache: 'no-store',
     headers: { 'content-type': 'application/json', authorization: 'Bearer ' + (lsGet(KEY_PW) || '') } });
@@ -2982,7 +2994,23 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   applyTheme();
   route();
   if (window.claude && typeof window.claude.use === 'function') startCloud();
-  else if (/^https?:$/.test(location.protocol)) startApi();
+  else if (/^https?:$/.test(location.protocol)) {
+    // Çerçevede ve giriş anahtarı yoksa: önce Site Asistan'a emanet edilen oturumu iste (en fazla 1,2 sn bekle).
+    if (IN_HOST && !lsGet(KEY_PW)) {
+      let go = () => { go = () => {}; startApi(); };
+      addEventListener('message', e => {
+        const d = e.data; if (!d || d.type !== 'sa-store' || !HOST_OK(e.origin)) return;
+        Object.entries(d.store || {}).forEach(([k, v]) => { if (MIRROR.test(k) && typeof v === 'string' && lsGet(k) === null) lsSet(k, v, true); });
+        go();
+      });
+      try { parent.postMessage({ type: 'rt-hello' }, hostOrigin); } catch (e) {}
+      setTimeout(() => go(), 1200);
+    } else {
+      // Önceden girilmiş oturum: Site Asistan'a da emanet et (sonraki açılışlarda kaybolmasın).
+      if (IN_HOST) ['ritim.key', 'ritim.user', 'ritim.name', 'ritim.tasksImported', 'ritim.notesImported'].forEach(k => { const v = lsGet(k); if (v !== null) try { parent.postMessage({ type: 'rt-store', k, v }, hostOrigin); } catch (e) {} });
+      startApi();
+    }
+  }
   else startLocal();
   setInterval(checkReminders, 20000);
   setInterval(() => { if (!F.running && !document.body.classList.contains('dragging')) render(); }, 60000);
