@@ -18,8 +18,11 @@ const up = s => s.toLocaleUpperCase('tr-TR');
 export const onRequestGet = ctx => onRequestPost(ctx);
 export async function onRequestPost({ request, env }) {
   // Kişisel kestirme anahtarı: ?k=… (Ritim → Yedekle ve taşı penceresindeki adres)
-  const k = new URL(request.url).searchParams.get('k') || '';
-  const who = k.length >= 20 ? await env.DB.prepare('SELECT username FROM users WHERE qkey = ?').bind(k).first() : null;
+  let k = new URL(request.url).searchParams.get('k') || '', tail = '';
+  const findKey = key => key.length >= 20 ? env.DB.prepare('SELECT username FROM users WHERE qkey = ?').bind(key).first() : null;
+  let who = await findKey(k);
+  // Kestirmede değişken yanlışlıkla adresin sonuna eklendiyse (…k=ANAHTAR<metin>): anahtar 32 karakter, kalanı metin
+  if (!who && k.length > 32) { who = await findKey(k.slice(0, 32)); if (who) { tail = k.slice(32); k = k.slice(0, 32); } }
   if (!who) return json({ error: 'Kestirme adresi geçersiz. Ritim → Yedekle ve taşı penceresindeki kişisel adresi kullanın.' }, 401);
   const owner = who.username;
   let text = '';
@@ -40,6 +43,7 @@ export async function onRequestPost({ request, env }) {
   } catch { return json({ error: 'Metin okunamadı.' }, 400); }
   // "text=Not+deneme" gibi kodlanmış gövde gelirse çöz
   if (/^(text|metin|input)=/i.test(text)) { try { text = new URLSearchParams(text).get(text.split('=')[0]) || text; } catch {} }
+  if (!text.trim() && tail) text = tail;
   text = text.trim().slice(0, 2000);
   if (!text) return json({ error: 'Boş metin geldi. Kestirmede “URL İçeriğini Al” → Yöntem POST, İstek Gövdesi JSON, alan text değeri “Sağlanan Giriş” (Metin İste’nin sonucu) olmalı. Ya da İstek Gövdesi: Dosya → Sağlanan Giriş.' }, 400);
 
