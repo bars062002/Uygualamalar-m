@@ -450,6 +450,12 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .sw-bg.r{background:linear-gradient(90deg,#2e7d5b,#3f9b72); justify-content:flex-start; gap:10px}
 .sw-bg.l{background:linear-gradient(270deg,#b42318,#8f1c14); justify-content:flex-end; gap:10px}
 .sw-bg.arm .i{animation:pop .3s}
+#nePrev li{position:relative}
+#nePrev li>span{margin-right:6px}
+.to-task{display:inline-flex; align-items:center; gap:5px; vertical-align:middle; margin-left:4px; padding:5px 10px; border:0; border-radius:999px; font-family:inherit; font-size:.7rem; font-weight:600; line-height:1; letter-spacing:.02em; color:var(--accent); background:var(--surface); box-shadow:var(--raise-sm); cursor:pointer; white-space:nowrap}
+.to-task svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+.to-task:active{box-shadow:var(--inset)}
+@media (hover:hover){ .to-task{opacity:.55} #nePrev li:hover .to-task{opacity:1} }
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
 .d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
@@ -2418,10 +2424,10 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       if ((m = ln.match(/^\s*[-*]\s+\[([ xX])\]\s*(.*)$/))) {
         if (list !== 'ul') { close(); html += '<ul>'; list = 'ul'; }
         const on = m[1] !== ' ';
-        html += `<li class="chk${on ? ' done' : ''}"><input type="checkbox" data-line="${idx}"${on ? ' checked' : ''} aria-label="Tamamlandı"><span>${mdInline(m[2])}</span></li>`; return;
+        html += `<li class="chk${on ? ' done' : ''}"><input type="checkbox" data-line="${idx}"${on ? ' checked' : ''} aria-label="Tamamlandı"><span>${mdInline(m[2])}</span><button type="button" class="to-task" data-totask="${idx}" title="Bu satırdan görev oluştur" aria-label="Görev yap"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Görev yap</span></button></li>`; return;
       }
-      if ((m = ln.match(/^\s*[-*]\s+(.*)$/))) { if (list !== 'ul') { close(); html += '<ul>'; list = 'ul'; } html += `<li>${mdInline(m[1])}</li>`; return; }
-      if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); html += '<ol>'; list = 'ol'; } html += `<li>${mdInline(m[1])}</li>`; return; }
+      if ((m = ln.match(/^\s*[-*]\s+(.*)$/))) { if (list !== 'ul') { close(); html += '<ul>'; list = 'ul'; } html += `<li><span>${mdInline(m[1])}</span><button type="button" class="to-task" data-totask="${idx}" title="Bu satırdan görev oluştur" aria-label="Görev yap"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Görev yap</span></button></li>`; return; }
+      if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); html += '<ol>'; list = 'ol'; } html += `<li><span>${mdInline(m[1])}</span><button type="button" class="to-task" data-totask="${idx}" title="Bu satırdan görev oluştur" aria-label="Görev yap"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Görev yap</span></button></li>`; return; }
       close();
       if ((m = ln.match(/^(#{1,3})\s+(.*)$/))) { const h = m[1].length; html += `<h${h}>${mdInline(m[2])}</h${h}>`; return; }
       if (/^\s*(-{3,}|\*{3,})\s*$/.test(ln)) { html += '<hr>'; return; }
@@ -2472,6 +2478,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   }
   function openNote(id, focusBody) {
     nui.sel = id; nui.mobileOpen = true;
+    { const nn = noteOf(id); if (nn && nn.src === 'scratch' && !focusBody) nui.mode = 'prev'; }
     if (ui.route !== 'notlar') go('notlar'); else renderNotes();
     paintNoteEditor(true);
     if (focusBody) setTimeout(() => { const b = $('#neBody'); if (!b.hidden) { b.focus(); b.setSelectionRange(b.value.length, b.value.length); } }, 60);
@@ -2510,6 +2517,37 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     const cb = e.target.closest('input[data-line]'), n = noteOf(nui.sel); if (!cb || !n) return;
     const ls = n.body.split('\n'), i = +cb.dataset.line;
     ls[i] = ls[i].replace(/\[([ xX])\]/, cb.checked ? '[x]' : '[ ]'); n.body = ls.join('\n'); touchNote(n); paintNoteEditor();
+  });
+  // Not satırından görev: "- 01.11 12:50 · KSEMR32087 lehtarı ara yarın 14:30" → saha kodlu, tarihli görev.
+  // Karalamalar'da satır nottan çıkar (Geri al ile ikisi de geri gelir); diğer notlarda satır yerinde kalır.
+  function lineToTask(n, i) {
+    const ls = n.body.split('\n'); const raw = ls[i]; if (raw == null) return;
+    let rest = raw.replace(/^\s*(?:[-*]|\d+[.)])\s+(?:\[[ xX]\]\s*)?/, '').replace(/^\d{2}\.\d{2}\s+\d{2}:\d{2}\s*·\s*/, '').trim();
+    if (!rest) return;
+    let site = '', due = null, remind = null;
+    const sm = rest.match(/^\[?([A-Za-zÇĞİÖŞÜçğıöşü]{2,}-?\d{2,})\]?[\s:,-]+(.+)$/s);
+    if (sm) { site = sm[1].toLocaleUpperCase('tr-TR'); rest = sm[2]; }
+    else if (n.site) site = n.site;
+    const dm = rest.match(/(^|\s)(bugün|yarın)(?=\s|$)/i);
+    if (dm) { const d = new Date(); if (/yarın/i.test(dm[2])) d.setDate(d.getDate() + 1); due = ymd(d); rest = rest.replace(dm[0], ' '); }
+    const tm = rest.match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
+    if (tm) { remind = tm[1].padStart(2, '0') + ':' + tm[2]; if (!due) due = today(); rest = rest.replace(tm[0], ' '); }
+    const title = rest.replace(/\s+/g, ' ').replace(/^[\s,:-]+|[\s,:-]+$/g, '').slice(0, 140) || raw.slice(0, 140);
+    const cat = (lists().find(l => l.id === 'is') || lists()[0] || { id: 'is' }).id;
+    const t = normTask({ id: uid(), title, site, cat, pri: 'med', due, remind, notes: '', star: false, done: false, doneAt: null, repeat: null, subs: [], pomo: 0, createdAt: Date.now(), src: 'note' });
+    S.tasks.push(t); putTask(t);
+    const scratch = n.src === 'scratch', before = n.body;
+    if (scratch) { ls.splice(i, 1); n.body = ls.join('\n'); n.updated = new Date().toISOString(); putNote(n); }
+    render(); paintNoteEditor(true);
+    toast(`Görev oluşturuldu: ${site ? site + ' · ' : ''}${title}`, () => {
+      const k = S.tasks.findIndex(x => x.id === t.id); if (k >= 0) { S.tasks.splice(k, 1); dropTask(t.id); }
+      if (scratch) { n.body = before; putNote(n); }
+      render(); paintNoteEditor(true);
+    });
+  }
+  $('#nePrev').addEventListener('click', e => {
+    const b = e.target.closest('[data-totask]'); if (!b) return;
+    e.preventDefault(); const n = noteOf(nui.sel); if (n) lineToTask(n, +b.dataset.totask);
   });
   $('#nePin').addEventListener('click', () => { const n = noteOf(nui.sel); if (!n) return; n.pinned = !n.pinned; putNote(n); renderNotes(); toast(n.pinned ? 'Not sabitlendi' : 'Sabitleme kaldırıldı'); });
   $('#neCopy').addEventListener('click', () => {
