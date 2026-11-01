@@ -1140,6 +1140,9 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   const fmtDay = new Intl.DateTimeFormat('tr-TR', { weekday: 'short' });
   const fmtMonth = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' });
   const fmtTime = new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  // Eklenme etiketi: bugün → "13:20", dün → "Dün 13:20", daha eski → "1 Kas 13:20"
+  const addedLabel = ms => { const d = new Date(ms), k = ymd(d), y = new Date(); y.setDate(y.getDate() - 1);
+    return (k === today() ? '' : k === ymd(y) ? 'Dün ' : fmtShort.format(d) + ' ') + fmtTime.format(d); };
   const cap = s => s.replace(/^./, c => c.toLocaleUpperCase('tr-TR'));
   function dueLabel(s) {
     const n = diffDays(s);
@@ -1551,6 +1554,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 
   // ---------- Icons ----------
   const ICO = {
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
     trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     clip: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
@@ -1941,6 +1945,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
           ${t.repeat ? `<span class="chip">${ico('repeat')}${REPEAT[t.repeat]}</span>` : ''}
           ${t.subs.length ? `<span class="chip num">${ico('subs')}${sd}/${t.subs.length}</span>` : ''}
           ${t.pomo ? `<span class="chip num">${ico('timer')}${t.pomo} seans</span>` : ''}
+          ${(t.src === 'quick' || t.src === 'note') && t.createdAt ? `<span class="chip num" title="${t.src === 'quick' ? 'Eylem Düğmesi ile eklendi' : 'Nottan eklendi'}">${ico(t.src === 'quick' ? 'mic' : 'note')}${addedLabel(t.createdAt)}</span>` : ''}
           ${t.notes ? `<span class="chip">${ico('note')}Not</span>` : ''}
           ${t.files && t.files.length ? `<span class="chip num">${ico('clip')}${t.files.length}</span>` : ''}
           ${t.person ? `<span class="chip">${ico('user')}${esc(t.person)}</span>` : t.phone ? `<span class="chip">${ico('phone')}</span>` : ''}
@@ -2975,7 +2980,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       <button class="rm" data-subrm aria-label="Alt görevi sil">${ico('x')}</button></li>`).join('');
     const created = new Date(t.createdAt);
     $('#dMeta').textContent = t.done && t.doneAt ? `Tamamlandı: ${fmtShort.format(new Date(t.doneAt))} ${fmtTime.format(new Date(t.doneAt))}`
-      : `Oluşturuldu: ${fmtShort.format(created)}${t.pomo ? ` · ${t.pomo} odak seansı` : ''}`;
+      : `${t.src === 'quick' ? 'Eylem Düğmesi ile eklendi' : t.src === 'note' ? 'Nottan eklendi' : 'Oluşturuldu'}: ${fmtShort.format(created)} ${fmtTime.format(created)}${t.pomo ? ` · ${t.pomo} odak seansı` : ''}`;
   }
   const cur = () => byId(ui.open);
   let savedTm;
