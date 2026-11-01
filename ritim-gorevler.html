@@ -438,6 +438,10 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .to-task svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
 .to-task:active{box-shadow:var(--inset)}
 @media (hover:hover){ .to-task{opacity:.55} #nePrev li:hover .to-task{opacity:1} }
+.group-head[data-group="inbox"]{color:var(--accent)}
+.group-head[data-group="inbox"]::after{content:"Dokununca listeye yerleşir"; margin-left:auto; font-size:.68rem; font-weight:500; letter-spacing:.02em; text-transform:none; color:var(--ink-3)}
+.inbox-link{display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:7px 12px; border-radius:999px; color:var(--accent); text-decoration:none; font-size:.85rem; box-shadow:var(--raise-sm); background:var(--surface)}
+.inbox-link .i{width:15px; height:15px}
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
 .d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
@@ -1857,6 +1861,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       : !tt.length ? 'Bugün için planlanmış görev yok. Görevlere bir son tarih ekleyerek gününüzü planlayın.'
       : left === 0 ? '<b>Bugünün tüm görevleri tamam.</b> Yarının listesine göz atabilir ya da mola verebilirsiniz.'
       : `Bugün <b>${left} görev</b> kaldı${late.length ? `, bunların <b>${late.length} tanesi gecikmiş</b>` : ''}.${next ? ` Sıradaki: <b>${esc(next.title)}</b>.` : ''}`;
+    { const nIn = S.tasks.filter(isInbox).length;
+      if (STORE.ready && nIn) $('#dashMsg').innerHTML += ` <a href="#gorevler" class="inbox-link">${ico('mic')}Eylem Düğmesi’nden <b>${nIn} yeni görev</b> →</a>`; }
 
     const stats = [
       { k: 'Bugün kalan', v: left, n: tt.length ? `${tt.length} görevden` : 'Plan yok' },
@@ -1904,9 +1910,12 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (ao !== bo) return ao ? -1 : 1;
     return byDate(a, b);
   }
-  const GROUPS = [['late', 'Gecikmiş'], ['today', 'Bugün'], ['tomorrow', 'Yarın'], ['week', 'Bu hafta'], ['later', 'Daha sonra'], ['none', 'Tarihsiz'], ['done', 'Tamamlanan']];
+  const GROUPS = [['inbox', 'Yeni gelenler'], ['late', 'Gecikmiş'], ['today', 'Bugün'], ['tomorrow', 'Yarın'], ['week', 'Bu hafta'], ['later', 'Daha sonra'], ['none', 'Tarihsiz'], ['done', 'Tamamlanan']];
+  // Eylem Düğmesi ile gelen ve henüz açılmamış görevler en üstte "Yeni gelenler"de durur
+  const isInbox = t => t.src === 'quick' && !t.seen && !t.done;
   function groupOf(t) {
     if (t.done) return 'done';
+    if (isInbox(t)) return 'inbox';
     if (!t.due) return 'none';
     const n = diffDays(t.due);
     return n < 0 ? 'late' : n === 0 ? 'today' : n === 1 ? 'tomorrow' : n < 7 ? 'week' : 'later';
@@ -1964,6 +1973,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       return;
     }
     const by = {}; list.forEach(t => (by[groupOf(t)] ||= []).push(t));
+    if (by.inbox) by.inbox.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     const dragOn = !!window.Sortable && !q && ui.filter === 'all';
     // While dragging is possible, keep "Bugün" and "Yarın" visible as drop targets even when empty.
     const show = GROUPS.filter(([k]) => by[k] || (dragOn && ['today', 'tomorrow'].includes(k)));
@@ -2003,7 +2013,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     const to = evt.to.dataset.group, from = evt.from.dataset.group;
     const moved = byId(evt.item.dataset.id);
     const changedGroup = moved && to !== from;
-    if (changedGroup) { moved.due = dueForGroup(to, moved.due); moved.reminded = null; }
+    if (changedGroup) { moved.due = dueForGroup(to, moved.due); moved.reminded = null; if (from === 'inbox') moved.seen = true; }
     [...evt.to.children].forEach((li, i) => {
       const t = byId(li.dataset.id); if (!t) return;
       if (t.order !== i || t === moved) { t.order = i; putTask(t); }
@@ -2927,6 +2937,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   }
   function openDrawer(id) {
     if (ui.open !== id) commitPendingSub();
+    { const t0 = byId(id); if (t0 && isInbox(t0)) { t0.seen = true; putTask(t0); setTimeout(render, 450); } }
     ui.open = id; syncDrawer();
     drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); $('#scrim').hidden = false;
     if (motionOK()) $$('#drawer .d-body > *').forEach((el, i) => el.animate(ENTER, { duration: 480, delay: 90 + i * 45, easing: EASE, fill: 'backwards' }));
