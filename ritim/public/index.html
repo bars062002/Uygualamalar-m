@@ -421,8 +421,13 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .subs .rm{color:var(--ink-3); width:28px; height:28px; border-radius:50%; display:grid; place-items:center}
 .subs .rm:hover{color:var(--bad)}
 .subs .rm svg.i{width:14px; height:14px}
-.d-foot{display:flex; gap:12px; justify-content:space-between; align-items:center; padding:16px 26px 22px}
-.d-meta{font-size:.75rem; color:var(--ink-3)}
+.d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
+.d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
+.d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
+.d-meta{flex:1 0 100%; display:flex; justify-content:space-between; gap:10px; font-size:.75rem; color:var(--ink-3)}
+.d-saved{display:inline-flex; align-items:center; gap:5px; color:var(--ink-3); transition:color .3s}
+.d-saved.on{color:var(--accent)}
+.d-saved svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
 
 .modal{position:fixed; inset:0; z-index:55; display:grid; place-items:center; background:var(--scrim); backdrop-filter:blur(3px);
   padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
@@ -967,7 +972,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     </div>
   </div>
   <div class="d-foot">
-    <span class="d-meta num" id="dMeta"></span>
+    <div class="d-meta"><span class="num" id="dMeta"></span><span class="d-saved" id="dSaved" title="Değişiklikler yazdıkça kaydedilir"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="dSavedT">Otomatik kaydedilir</span></span></div>
     <button class="btn sm" id="dToNote" title="Görevi nota aktar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Nota aktar</span></button>
     <button class="btn sm" id="dFocus"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odaklan</span></button>
     <button class="btn sm danger" id="dDelete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>Sil</span></button>
@@ -2810,7 +2815,10 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       : `Oluşturuldu: ${fmtShort.format(created)}${t.pomo ? ` · ${t.pomo} odak seansı` : ''}`;
   }
   const cur = () => byId(ui.open);
-  const edit = fn => { const t = cur(); if (!t) return; fn(t); putTask(t); render(); syncDrawer(); };
+  let savedTm;
+  const flashSaved = () => { const b = $('#dSaved'); if (!b) return; b.classList.add('on'); $('#dSavedT').textContent = 'Kaydedildi';
+    clearTimeout(savedTm); savedTm = setTimeout(() => { b.classList.remove('on'); $('#dSavedT').textContent = 'Otomatik kaydedilir'; }, 1600); };
+  const edit = fn => { const t = cur(); if (!t) return; fn(t); putTask(t); render(); syncDrawer(); flashSaved(); };
   $('#dClose').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
   $('#dTitle').addEventListener('input', e => edit(t => { t.title = e.target.value.trim() || 'Adsız görev'; }));
