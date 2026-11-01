@@ -24,7 +24,13 @@ export async function onRequestPost({ request, env }) {
   const owner = who.username;
   let text = '';
   const ct = (request.headers.get('content-type') || '').toLowerCase();
-  const pick = o => { if (!o || typeof o !== 'object') return ''; const v = o.text ?? o.metin ?? o.input ?? o.not ?? Object.values(o)[0]; return v == null ? '' : String(v); };
+  const pick = o => {
+    if (!o || typeof o !== 'object') return '';
+    const v = o.text ?? o.metin ?? o.input ?? o.not ?? Object.values(o).find(x => x != null && String(x).trim());
+    if (v != null && String(v).trim()) return String(v);
+    // Değişken yanlışlıkla anahtar kutusuna girdiyse ("Metin<yazılan>": ""), anahtarın kendisini kullan
+    const k = Object.keys(o).find(x => x.trim()); return k ? k.replace(/^(metin|text)\s*/i, '') : '';
+  };
   try {
     // Kestirmeler İstek Gövdesi: JSON, Form ya da Dosya/düz metin — hepsi kabul edilir; GET'te ?text=
     if (request.method === 'GET') text = new URL(request.url).searchParams.get('text') || '';
@@ -35,7 +41,7 @@ export async function onRequestPost({ request, env }) {
   // "text=Not+deneme" gibi kodlanmış gövde gelirse çöz
   if (/^(text|metin|input)=/i.test(text)) { try { text = new URLSearchParams(text).get(text.split('=')[0]) || text; } catch {} }
   text = text.trim().slice(0, 2000);
-  if (!text) return json({ error: 'Boş metin geldi. Kestirmede “URL İçeriğini Al” → Yöntem POST, İstek Gövdesi JSON, alan text = Dikte Edilen Metin olmalı.' }, 400);
+  if (!text) return json({ error: 'Boş metin geldi. Kestirmede “URL İçeriğini Al” → Yöntem POST, İstek Gövdesi JSON, alan text değeri “Sağlanan Giriş” (Metin İste’nin sonucu) olmalı. Ya da İstek Gövdesi: Dosya → Sağlanan Giriş.' }, 400);
 
   const now = new Date(), rev = Date.now();
   const note = text.match(/^not(?:\b|(?=[\s:,.-]))[\s:,.-]*([\s\S]+)$/i);
