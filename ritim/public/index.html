@@ -2782,13 +2782,23 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 
   // ---------- Drawer ----------
   const drawer = $('#drawer');
+  // Alt görev kutusunda Enter'a basılmadan kalan yazı: panel kapanırken ya da başka göreve geçerken
+  // ait olduğu göreve eklenir, kutu boşaltılır (bir sonraki görevde görünmez).
+  function commitPendingSub() {
+    const inp = $('#dSubIn'); const v = inp.value.trim(); inp.value = '';
+    if (!v || !ui.open) return;
+    const t = byId(ui.open); if (!t) return;
+    (t.subs = t.subs || []).push({ id: uid(), t: v, d: false }); putTask(t); render();
+  }
   function openDrawer(id) {
+    if (ui.open !== id) commitPendingSub();
     ui.open = id; syncDrawer();
     drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); $('#scrim').hidden = false;
     if (motionOK()) $$('#drawer .d-body > *').forEach((el, i) => el.animate(ENTER, { duration: 480, delay: 90 + i * 45, easing: EASE, fill: 'backwards' }));
     setTimeout(() => $('#dTitle').focus(), 60);
   }
   function closeDrawer() {
+    commitPendingSub();
     ui.open = null; drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); $('#scrim').hidden = true; disarm();
   }
   function syncDrawer() {
