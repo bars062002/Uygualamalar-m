@@ -2532,6 +2532,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (dm) { const d = new Date(); if (/yarın/i.test(dm[2])) d.setDate(d.getDate() + 1); due = ymd(d); rest = rest.replace(dm[0], ' '); }
     const tm = rest.match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
     if (tm) { remind = tm[1].padStart(2, '0') + ':' + tm[2]; if (!due) due = today(); rest = rest.replace(tm[0], ' '); }
+    if (!due) due = today();
     const title = rest.replace(/\s+/g, ' ').replace(/^[\s,:-]+|[\s,:-]+$/g, '').slice(0, 140) || raw.slice(0, 140);
     const cat = (lists().find(l => l.id === 'is') || lists()[0] || { id: 'is' }).id;
     const t = normTask({ id: uid(), title, site, cat, pri: 'med', due, remind, notes: '', star: false, done: false, doneAt: null, repeat: null, subs: [], pomo: 0, createdAt: Date.now(), src: 'note' });

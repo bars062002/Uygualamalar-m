@@ -58,6 +58,7 @@ export async function onRequestPost({ request, env }) {
   if (dm) { const d = new Date(now); if (/yarın/i.test(dm[1])) d.setDate(d.getDate() + 1); due = dayStr(d); rest = rest.replace(dm[0], ' '); }
   const tm = rest.match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
   if (tm) { remind = tm[1].padStart(2, '0') + ':' + tm[2]; if (!due) due = dayStr(now); rest = rest.replace(tm[0], ' '); }
+  if (!due) due = dayStr(now);  // tarih söylenmediyse Bugün'e: Pano'da ve listenin üstünde görünür
   const title = rest.replace(/\s+/g, ' ').replace(/^[\s,:-]+|[\s,:-]+$/g, '').slice(0, 140) || text.slice(0, 140);
   const id = uid();
   const task = { id, title, site, cat: 'is', pri: 'med', due, remind, notes: '', star: false, done: false, doneAt: null, repeat: null, subs: [], pomo: 0, createdAt: Date.now(), src: 'quick' };
