@@ -423,6 +423,15 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li .fn small{font-size:.72rem; color:var(--ink-3)}
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
+/* Görev kartı kaydırma: sağa → tamamla, sola → sil */
+.task{touch-action:pan-y}
+.task.sw{transition:none!important; position:relative; z-index:2}
+.task.sw-back{transition:transform .35s cubic-bezier(.22,1.2,.36,1)!important}
+.sw-bg{position:absolute; z-index:1; border-radius:var(--r); display:flex; align-items:center; padding:0 26px; font:700 .82rem/1 inherit; letter-spacing:.08em; text-transform:uppercase; color:#fff; pointer-events:none; box-shadow:var(--inset)}
+.sw-bg .i{width:22px; height:22px; stroke-width:2.2}
+.sw-bg.r{background:linear-gradient(90deg,#2e7d5b,#3f9b72); justify-content:flex-start; gap:10px}
+.sw-bg.l{background:linear-gradient(270deg,#b42318,#8f1c14); justify-content:flex-end; gap:10px}
+.sw-bg.arm .i{animation:pop .3s}
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
 .d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
@@ -950,6 +959,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     <input class="d-title" id="dTitle" aria-label="Görev başlığı" maxlength="140">
     <div><span class="lbl">Saha kodu</span><label class="field" for="dSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="dSite" placeholder="Örn. KSEMR32087" maxlength="20" autocapitalize="characters" spellcheck="false"></label></div>
     <div class="ct" id="dCt">
+      <div><span class="lbl">Ad soyad</span><label class="field" for="dPerson"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="dPerson" autocomplete="off" placeholder="Görüşülecek kişi" maxlength="80"></label></div>
       <div><span class="lbl">Telefon</span><div class="ct-row"><label class="field" for="dPhone"><svg class="i" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><input id="dPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="05xx xxx xx xx" maxlength="24"></label>
         <a class="btn icon sm ct-go" id="dCall" aria-label="Ara" title="Ara" hidden><svg class="i" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a><a class="btn icon sm ct-go wa" id="dWa" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp ile yaz" hidden><svg class="i" viewBox="0 0 24 24"><path d="M3.5 20.5 5 16a8.5 8.5 0 1 1 3.2 3.1z"/><path d="M9 8.6c0 3 2.4 5.9 5.6 6.4.6.1 1.4-.3 1.6-.9l.2-.7-2-1-.8.8c-1.2-.5-2.1-1.4-2.6-2.6l.8-.8-1-2h-.7c-.6.1-1.1.6-1.1 1.2z"/></svg></a><a class="btn icon sm ct-go bip" id="dBip" aria-label="BiP" title="BiP ile yaz" hidden><b>BiP</b></a></div></div>
       <div><span class="lbl">E-posta</span><div class="ct-row"><label class="field" for="dMail"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><input id="dMail" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ornek@firma.com" maxlength="120"></label>
@@ -1138,7 +1148,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   const catDot = id => `<span class="dot" style="background:${catColor(id)}"></span>`;
 
   // Fill in fields that older or hand-made records may lack, so rendering never trips over them.
-  const normTask = t => ({ notes: '', phone: '', email: '', addr: '', files: [], pri: 'med', star: false, done: false, doneAt: null, pomo: 0, createdAt: 0, ...t,
+  const normTask = t => ({ notes: '', person: '', phone: '', email: '', addr: '', files: [], pri: 'med', star: false, done: false, doneAt: null, pomo: 0, createdAt: 0, ...t,
     title: String(t.title ?? 'Adsız görev'), subs: Array.isArray(t.subs) ? t.subs : [], files: Array.isArray(t.files) ? t.files : [], pri: PRI[t.pri] ? t.pri : 'med' });
 
   // Example data is used only when the page runs without the cloud store (opened as a standalone file).
@@ -1286,7 +1296,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // birkaç bayrak Site Asistan'a emanet edilir (rt-store), açılışta geri alınır (sa-store). Kayıt hiç yoksa bellekte tutulur.
   const MEM = new Map();
   const IN_HOST = /[?&]embed=1\b/.test(location.search) && window.parent !== window;
-  const MIRROR = /^ritim\.(key|user|name|tasksImported|notesImported)$/;
+  const MIRROR = /^ritim\.(key|user|name|quick|tasksImported|notesImported)$/;
   const HOST_OK = o => { try { return /^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(new URL(o).hostname); } catch (e) { return false; } };
   const hostOrigin = (() => { const a = location.ancestorOrigins && location.ancestorOrigins[0]; if (a && HOST_OK(a)) return a;
     try { const r = document.referrer && new URL(document.referrer).origin; if (r && HOST_OK(r)) return r; } catch (e) {} return 'https://site-asistan.brsakpnr.workers.dev'; })();
@@ -1433,6 +1443,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   async function offerServerLegacy() {
     if (legacyAsked || STORE.mode !== 'api' || !lsGet(KEY_PW)) return; legacyAsked = true;
     let me = null; try { const r = await api('me'); if (r.ok) me = await r.json(); } catch (e) {}
+    // Kişisel kestirme adresi (Eylem Düğmesi): Site Asistan Ayarlar'daki kurulum sayfası bunu gösterir
+    if (me && me.quickUrl && lsGet('ritim.quick') !== me.quickUrl) lsSet('ritim.quick', me.quickUrl);
     if (!me || !me.legacy) return;
     const m = $('#loginModal');
     $('#lgLegacyTxt').textContent = `Ritim'in hesaplardan önceki sürümünde kaydedilmiş ${me.legacy.tasks} görev ve ${me.legacy.notes} not var. Bunlar senin ise ${me.name || me.username} hesabına aktarayım mı? Yalnızca bir hesap alabilir.`;
@@ -1515,6 +1527,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 
   // ---------- Icons ----------
   const ICO = {
+    trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     clip: '<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
     phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
@@ -1905,7 +1919,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
           ${t.pomo ? `<span class="chip num">${ico('timer')}${t.pomo} seans</span>` : ''}
           ${t.notes ? `<span class="chip">${ico('note')}Not</span>` : ''}
           ${t.files && t.files.length ? `<span class="chip num">${ico('clip')}${t.files.length}</span>` : ''}
-          ${t.phone ? `<span class="chip">${ico('phone')}</span>` : ''}
+          ${t.person ? `<span class="chip">${ico('user')}${esc(t.person)}</span>` : t.phone ? `<span class="chip">${ico('phone')}</span>` : ''}
           ${t.addr ? `<span class="chip">${ico('pin')}</span>` : ''}
           <span class="chip"><span class="flag pri-${t.pri}"></span>${PRI[t.pri]}</span>
         </span>
@@ -1918,7 +1932,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   function renderTasks() {
     const q = ui.q.trim().toLocaleLowerCase('tr-TR');
     let list = S.tasks.filter(t => !ui.cat || t.cat === ui.cat);
-    if (q) list = list.filter(t => (t.title + ' ' + (t.site || '') + ' ' + t.notes + ' ' + t.subs.map(s => s.t).join(' ')).toLocaleLowerCase('tr-TR').includes(q));
+    if (q) list = list.filter(t => (t.title + ' ' + (t.site || '') + ' ' + t.notes + ' ' + (t.person || '') + ' ' + (t.phone || '') + ' ' + (t.addr || '') + ' ' + t.subs.map(s => s.t).join(' ')).toLocaleLowerCase('tr-TR').includes(q));
     if (ui.filter === 'today') list = list.filter(isToday);
     if (ui.filter === 'star') list = list.filter(t => t.star);
     if (ui.filter === 'done') list = list.filter(t => t.done);
@@ -2075,6 +2089,51 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   }
 
   // Tick a task in a list: show the check, sparks and strike line first, then let it slide to its new place.
+  // ---------- Görev kartı kaydırma eylemleri (dokunmatik ve fare) ----------
+  (() => {
+    let st = null, eatClick = false;
+    const TH = () => Math.min(120, st.w * .32);
+    document.addEventListener('pointerdown', e => {
+      if (e.button > 0) return;
+      const li = e.target.closest && e.target.closest('.task');
+      if (!li || e.target.closest('.grip, .check, [data-star], input, a') || li.dataset.busy) return;
+      st = { li, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, w: li.offsetWidth };
+    }, { passive: true });
+    document.addEventListener('pointermove', e => {
+      if (!st || e.pointerId !== st.id) return;
+      const dx = e.clientX - st.x, dy = e.clientY - st.y;
+      if (!st.on) {
+        if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }
+        if (Math.abs(dx) < 14 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+        st.on = true; const li = st.li;
+        if (getComputedStyle(li.parentNode).position === 'static') li.parentNode.style.position = 'relative';
+        const bg = document.createElement('div'); bg.className = 'sw-bg';
+        li.parentNode.insertBefore(bg, li);
+        bg.style.cssText = `left:${li.offsetLeft}px;top:${li.offsetTop}px;width:${li.offsetWidth}px;height:${li.offsetHeight}px`;
+        st.bg = bg; li.classList.add('sw'); li.classList.remove('sw-back');
+        try { li.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      st.dx = dx;
+      const t = byId(st.li.dataset.id), right = dx > 0, arm = Math.abs(dx) > TH();
+      st.li.style.transform = `translateX(${right ? Math.min(dx, st.w * .6) : Math.max(dx, -st.w * .6)}px)`;
+      const kind = right ? 'r' : 'l';
+      if (st.kind !== kind) { st.kind = kind; st.bg.className = 'sw-bg ' + kind;
+        st.bg.innerHTML = right ? `${ico('check')}<span>${t && t.done ? 'Geri al' : 'Tamamla'}</span>` : `<span>Sil</span>${ico('trash')}`; }
+      if (arm !== !!st.arm) { st.arm = arm; st.bg.classList.toggle('arm', arm); st.bg.style.opacity = arm ? '1' : '.75'; if (arm && navigator.vibrate) try { navigator.vibrate(8); } catch (_) {} }
+    }, { passive: true });
+    const end = e => {
+      if (!st || (e && e.pointerId !== st.id)) return;
+      const s0 = st; st = null; if (!s0.on) return;
+      eatClick = true; setTimeout(() => { eatClick = false; }, 350);
+      const li = s0.li, bg = s0.bg, id = li.dataset.id, fire = Math.abs(s0.dx) > Math.min(120, s0.w * .32);
+      li.classList.add('sw-back');
+      if (fire && s0.dx < 0) { li.style.transform = `translateX(${-s0.w - 40}px)`; setTimeout(() => { bg.remove(); li.classList.remove('sw', 'sw-back'); li.style.transform = ''; deleteTask(id); }, 260); return; }
+      li.style.transform = '';
+      setTimeout(() => { bg.remove(); li.classList.remove('sw', 'sw-back'); if (fire && s0.dx > 0) { const b = li.querySelector('[data-toggle]'); if (b) completeFromList(li, b); } }, 300);
+    };
+    document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+    document.addEventListener('click', e => { if (eatClick && e.target.closest && e.target.closest('.task')) { e.stopPropagation(); e.preventDefault(); eatClick = false; } }, true);
+  })();
   function completeFromList(li, btn) {
     const t = byId(li.dataset.id); if (!t || li.dataset.busy) return;
     btn.classList.add('pop');
@@ -2839,6 +2898,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (document.activeElement !== $('#dTitle')) $('#dTitle').value = t.title;
     if (document.activeElement !== $('#dNotes')) $('#dNotes').value = t.notes;
     if (document.activeElement !== $('#dSite')) $('#dSite').value = t.site || '';
+    if (document.activeElement !== $('#dPerson')) $('#dPerson').value = t.person || '';
     if (document.activeElement !== $('#dPhone')) $('#dPhone').value = t.phone || '';
     if (document.activeElement !== $('#dMail')) $('#dMail').value = t.email || '';
     if (document.activeElement !== $('#dAddr')) $('#dAddr').value = t.addr || '';
@@ -2888,6 +2948,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     showA($('#dNav'), ad.length > 3 ? navUrl(ad) : '');
     const L = $('#dAddrLink'); showA(L, ad.length > 3 ? navUrl(ad) : ''); L.querySelector('span').textContent = ad ? ad + ' · Yol tarifi' : '';
   }
+  $('#dPerson').addEventListener('input', e => edit(t => { t.person = e.target.value.trim(); }));
   $('#dPhone').addEventListener('input', e => edit(t => { t.phone = e.target.value.trim(); }));
   $('#dMail').addEventListener('input', e => edit(t => { t.email = e.target.value.trim(); }));
   $('#dAddr').addEventListener('input', e => edit(t => { t.addr = e.target.value.trim(); }));
@@ -3098,7 +3159,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       setTimeout(go, 2500);
     } else {
       // Önceden girilmiş oturum: Site Asistan'a da emanet et (sonraki açılışlarda kaybolmasın).
-      if (IN_HOST) ['ritim.key', 'ritim.user', 'ritim.name', 'ritim.tasksImported', 'ritim.notesImported'].forEach(k => { const v = lsGet(k); if (v !== null) try { parent.postMessage({ type: 'rt-store', k, v }, hostOrigin); } catch (e) {} });
+      if (IN_HOST) ['ritim.key', 'ritim.user', 'ritim.name', 'ritim.quick', 'ritim.tasksImported', 'ritim.notesImported'].forEach(k => { const v = lsGet(k); if (v !== null) try { parent.postMessage({ type: 'rt-store', k, v }, hostOrigin); } catch (e) {} });
       startApi();
     }
   }
