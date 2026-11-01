@@ -1,4 +1,7 @@
-import { json } from '../../lib/http.js';
+import { json as jsonRes } from '../../lib/http.js';
+// Kestirme bildirimi düz cümle göstersin: yanıt düz metin (hata da)
+const json = (b, status = 200) => new Response(b.message || b.error || (b.ok ? 'Tamam' : 'Hata'), { status, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' } });
+void jsonRes;
 import { ensureSchema } from '../../lib/auth.js';
 
 // POST /api/quick — iPhone Kestirmeler / Eylem Düğmesi için hızlı ekleme.
@@ -12,6 +15,7 @@ const stamp = d => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const up = s => s.toLocaleUpperCase('tr-TR');
 
+export const onRequestGet = ctx => onRequestPost(ctx);
 export async function onRequestPost({ request, env }) {
   // Kişisel kestirme anahtarı: ?k=… (Ritim → Yedekle ve taşı penceresindeki adres)
   const k = new URL(request.url).searchParams.get('k') || '';
@@ -19,16 +23,22 @@ export async function onRequestPost({ request, env }) {
   if (!who) return json({ error: 'Kestirme adresi geçersiz. Ritim → Yedekle ve taşı penceresindeki kişisel adresi kullanın.' }, 401);
   const owner = who.username;
   let text = '';
-  const ct = request.headers.get('content-type') || '';
+  const ct = (request.headers.get('content-type') || '').toLowerCase();
+  const pick = o => { if (!o || typeof o !== 'object') return ''; const v = o.text ?? o.metin ?? o.input ?? o.not ?? Object.values(o)[0]; return v == null ? '' : String(v); };
   try {
-    if (ct.includes('json')) { const b = await request.json(); text = String((b && (b.text ?? b.metin ?? b.input)) ?? ''); }
+    // Kestirmeler İstek Gövdesi: JSON, Form ya da Dosya/düz metin — hepsi kabul edilir; GET'te ?text=
+    if (request.method === 'GET') text = new URL(request.url).searchParams.get('text') || '';
+    else if (ct.includes('json')) { const raw = await request.text(); try { const b = JSON.parse(raw); text = typeof b === 'string' ? b : pick(b); } catch { text = raw; } }
+    else if (ct.includes('form')) { const f = await request.formData(); text = pick(Object.fromEntries([...f.entries()].filter(([, v]) => typeof v === 'string'))); }
     else text = await request.text();
   } catch { return json({ error: 'Metin okunamadı.' }, 400); }
+  // "text=Not+deneme" gibi kodlanmış gövde gelirse çöz
+  if (/^(text|metin|input)=/i.test(text)) { try { text = new URLSearchParams(text).get(text.split('=')[0]) || text; } catch {} }
   text = text.trim().slice(0, 2000);
-  if (!text) return json({ error: 'Boş metin.' }, 400);
+  if (!text) return json({ error: 'Boş metin geldi. Kestirmede “URL İçeriğini Al” → Yöntem POST, İstek Gövdesi JSON, alan text = Dikte Edilen Metin olmalı.' }, 400);
 
   const now = new Date(), rev = Date.now();
-  const note = text.match(/^not\b[\s:,.-]*([\s\S]+)$/i);
+  const note = text.match(/^not(?:\b|(?=[\s:,.-]))[\s:,.-]*([\s\S]+)$/i);
   if (note) {
     const rows = (await env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'notes' AND data IS NOT NULL").bind(owner).all()).results || [];
     let id = null, doc = null;
