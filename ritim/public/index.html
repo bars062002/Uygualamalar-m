@@ -618,6 +618,16 @@ html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 14px)}
 html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 16px)!important}
 html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 @media (max-width: 520px){ html.embed .embed-nav a span{display:none} html.embed .embed-nav a{flex:1 1 0; padding:0} }
+/* Tek elle kullanım: telefonda "+" başparmak bölgesinde (sağ alt, Site Asistan menüsünün üstünde) */
+@media (max-width: 760px){
+  html.embed .embed-nav .fab{position:fixed; right:calc(16px + env(safe-area-inset-right)); bottom:calc(var(--sa-bottom, 0px) + 16px); z-index:40;
+    width:56px; height:56px; border-radius:50%; box-shadow:0 12px 26px -8px var(--accent-glow), var(--raise-sm)}
+  html.embed .embed-nav .fab svg.i{width:24px; height:24px; stroke-width:2.4}
+  html.embed .embed-nav .fab:active{transform:scale(.92)}
+  html.embed .app{padding-bottom:calc(var(--sa-bottom, 0px) + 92px)!important}
+  html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 84px)!important}
+  html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 84px)}
+}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
