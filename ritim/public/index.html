@@ -1575,6 +1575,17 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   const byId = id => S.tasks.find(t => t.id === id);
   const isToday = t => (!t.done && t.due && t.due <= today()) || (t.done && doneDay(t) === today());
   const isLate = t => !t.done && t.due && t.due < today();
+  // Site Asistan ana sayfası "Günün özeti" için bugünün/gecikenlerin kısa özeti (yalnız Site Asistan içinde)
+  let sumSent = '';
+  function postSum() {
+    if (!IN_HOST || !STORE.ready) return;
+    const open = S.tasks.filter(t => !t.done && !t.sample && t.due && t.due <= today())
+      .sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : 0) || String(a.remind || '99').localeCompare(String(b.remind || '99')));
+    const sum = { today: open.filter(t => t.due === today()).length, late: open.filter(isLate).length,
+      items: open.slice(0, 3).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), site: t.site || '' })), day: today() };
+    const k = JSON.stringify(sum); if (k === sumSent) return; sumSent = k;
+    try { parent.postMessage({ type: 'rt-sum', sum }, hostOrigin); } catch (e) {}
+  }
 
   // ---------- Icons ----------
   const ICO = {
@@ -1842,6 +1853,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   }
   function renderNow() {
     renderSide();
+    try { postSum(); } catch (e) {}
     const hasSample = S.tasks.some(t => t.sample);
     const imp = importable();
     $$('[data-import-banner]').forEach(b => { b.hidden = !imp.length; });
@@ -2251,9 +2263,12 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   }
   setInterval(() => { if (saQ && STORE.ready) { const q = saQ; saQ = null; applySaSearch(q); } }, 300);
   addEventListener('message', e => {
-    const d = e.data; if (!EMBED || !d || d.type !== 'sa-search' || typeof d.q !== 'string') return;
+    const d = e.data; if (!EMBED || !d) return;
     let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    if (d.type === 'sa-sum') { sumSent = ''; postSum(); return; }
+    if (d.type === 'sa-open-task' && typeof d.id === 'string') { const go = () => { if (!STORE.ready) return setTimeout(go, 300); location.hash = '#gorevler'; if (S.tasks.some(t => t.id === d.id)) setTimeout(() => openDrawer(d.id), 120); }; go(); return; }
+    if (d.type !== 'sa-search' || typeof d.q !== 'string') return;
     applySaSearch(d.q.trim().slice(0, 60));
   });
   $('#segFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.filter = b.dataset.f; renderTasks(); });
