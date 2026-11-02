@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
 /* Layout: soft-clay workspace. A raised sidebar rail beside a content grid; the round sign-in card becomes the progress disc and the focus timer. */
@@ -51,6 +51,39 @@
   --scrim:rgba(0,0,0,.55);
   color-scheme:dark;
 }
+
+/* ---------- Site Asistan tema derileri (Cam, Kâğıt, Neo-brütalist) — yalnız Site Asistan içinde, kabuk seçince ---------- */
+:root[data-saskin]:not(#x) body{background:var(--page,var(--bg)); background-attachment:fixed}
+:root[data-saskin] :is(h1,h2,h3,.big,.num){text-shadow:none!important}
+:root[data-saskin="kagit"]:not(#x){
+  --bg:#ffffff; --surface:#ffffff; --page:#ffffff; --hi:transparent; --lo:rgba(55,53,47,.10); --track:#f1f0ed;
+  --ink:#2f2e2a; --ink-2:#55534e; --ink-3:#787671; --ok:#2b7a4b; --warn:#946200; --bad:#c4321c; --scrim:rgba(15,15,15,.32);
+  --raise:0 0 0 1px rgba(55,53,47,.13),0 1px 2px rgba(55,53,47,.04); --raise-sm:0 0 0 1px rgba(55,53,47,.13);
+  --inset:inset 0 0 0 1px rgba(55,53,47,.10),inset 0 0 0 100px rgba(55,53,47,.035); --inset-sm:inset 0 0 0 1px rgba(55,53,47,.10);
+  --font:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:light;
+}
+:root[data-saskin="kagit"][data-saskin-acc="tema"]:not(#x){--accent:#2f2e2a; --accent-2:#141412; --accent-soft:rgba(47,46,42,.08); --accent-glow:rgba(47,46,42,.22); --on-accent:#ffffff}
+:root[data-saskin="brut"]:not(#x){
+  --bg:#fff4d6; --surface:#fffdf6; --page:#fff4d6; --hi:transparent; --lo:#111111; --track:#fff0c2;
+  --ink:#111111; --ink-2:#2e2e2e; --ink-3:#4a4a4a; --ok:#0f7a3f; --warn:#7a5200; --bad:#c21a3f; --scrim:rgba(17,17,17,.35);
+  --raise:4px 4px 0 #111,0 0 0 2px #111; --raise-sm:3px 3px 0 #111,0 0 0 2px #111;
+  --inset:inset 0 0 0 2px #111,inset 0 0 0 100px rgba(255,212,59,.35); --inset-sm:inset 0 0 0 2px #111;
+  --font:'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:light;
+}
+:root[data-saskin="brut"][data-saskin-acc="tema"]:not(#x){--accent:#c21a4e; --accent-2:#8e0f36; --accent-soft:rgba(194,26,78,.10); --accent-glow:rgba(194,26,78,.25); --on-accent:#ffffff}
+:root[data-saskin="cam"]:not(#x){
+  --bg:#2a4266; --surface:rgba(255,255,255,.14); --hi:transparent; --lo:rgba(0,0,0,.28); --track:rgba(255,255,255,.10);
+  --page:radial-gradient(60% 45% at 15% 10%,rgba(214,132,96,.85) 0%,transparent 70%),radial-gradient(55% 45% at 95% 35%,rgba(92,146,196,.9) 0%,transparent 70%),radial-gradient(70% 55% at 40% 100%,rgba(52,104,84,.95) 0%,transparent 70%),linear-gradient(180deg,#3b5a8a,#1e3152);
+  --ink:#ffffff; --ink-2:#e4eaf3; --ink-3:#c3cedd; --ok:#8ee3b5; --warn:#ffd98a; --bad:#ffb0a6; --scrim:rgba(8,16,32,.45);
+  --raise:inset 0 1px 0 rgba(255,255,255,.32),0 0 0 1px rgba(255,255,255,.22),0 18px 36px -18px rgba(0,0,0,.45);
+  --raise-sm:inset 0 1px 0 rgba(255,255,255,.28),0 0 0 1px rgba(255,255,255,.2);
+  --inset:inset 0 0 0 1px rgba(255,255,255,.26),inset 0 0 0 100px rgba(255,255,255,.10); --inset-sm:inset 0 0 0 1px rgba(255,255,255,.24);
+  --font:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:dark;
+}
+:root[data-saskin="cam"][data-saskin-acc="tema"]:not(#x){--accent:#ffd89e; --accent-2:#e8a75a; --accent-soft:rgba(255,216,158,.16); --accent-glow:rgba(255,216,158,.35); --on-accent:#1e3152}
+:root[data-saskin="cam"] :is(.modal .sheet,.drawer,.modal>div,.pop,.menu){background-color:rgba(30,49,82,.97)!important}
+:root[data-saskin="kagit"] :is(.drawer,.modal>div){background-color:#ffffff}
+:root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#fffdf6}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -1623,7 +1656,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   // Inside Site Asistan: follow the host's theme and safe insets (not saved, so Ritim on its own keeps the user's choice).
   const EMBED = /[?&]embed=1\b/.test(location.search);
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest' };
+  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light' };
+  const HOST_SKINS = new Set(['cam', 'kagit', 'brut']); let skin = null;
   addEventListener('message', e => {
     const d = e.data;
     if (!EMBED || !d || d.type !== 'sa-insets') return;
@@ -1634,7 +1668,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     const st = document.documentElement.style;
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
-    if ((nt && nt !== theme) || na !== accent) { if (nt) theme = nt; accent = na; applyTheme(); }
+    const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
+    if ((nt && nt !== theme) || na !== accent || ns !== skin) { if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
   });
   const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const lum = h => { const [r, g, b] = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
@@ -1643,6 +1678,12 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   function applyTheme() {
     const root = document.documentElement;
     if (theme) root.setAttribute('data-theme', theme); else root.removeAttribute('data-theme');
+    if (EMBED && skin) root.setAttribute('data-saskin', skin); else root.removeAttribute('data-saskin');
+    /* derili temada vurgu seçilmemişse temanın kendi rengi (CSS) */
+    if (EMBED && skin && !accent) { root.setAttribute('data-saskin-acc', 'tema'); ['--accent', '--accent-2', '--accent-soft', '--accent-glow', '--on-accent'].forEach(k => root.style.removeProperty(k));
+      const bg0 = getComputedStyle(root).getPropertyValue('--bg').trim(); $$('meta[name="theme-color"]').forEach(m => m.setAttribute('content', bg0));
+      const t0 = THEMES.find(x => x.id === theme) || THEMES[0]; $('#lookName').textContent = t0.name; return; }
+    root.removeAttribute('data-saskin-acc');
     const dark = isDarkTheme();
     const c = ACCENTS.find(a => a.id === accentId()) || ACCENTS[0];
     const [a1, a2] = dark ? c.dark : c.light, rgb = hexRgb(a1).join(',');
