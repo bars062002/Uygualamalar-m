@@ -275,6 +275,8 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 
 /* ---------- Tasks ---------- */
 .add{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto auto auto; gap:14px; align-items:center}
+.add .add-x{justify-content:center}
+@keyframes addIn{from{opacity:0; transform:translateY(-8px)}to{opacity:1; transform:none}}
 .add .rem-f input{min-width:5.6em; font-variant-numeric:tabular-nums}
 .add .field.grow{grid-column:1 / -1}
 .add .site-f{width:auto; min-width:0}
@@ -566,6 +568,11 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   :root{--dock-h:62px; --dock-pad:max(8px, calc(env(safe-area-inset-bottom, 0px) - 12px))}
   .side{display:none}
   .m-only{display:flex!important}
+  /* Telefonda Görevler önce kartları gösterir; ekleme formu + ile açılır */
+  #addForm:not(.open){display:none}
+  #segFilter{flex-wrap:nowrap; width:100%}
+  #segFilter button{flex:1 1 auto; min-width:0; padding-inline:10px; white-space:nowrap}
+  #addForm.open{animation:addIn .28s var(--spring, ease) both}
   .tabbar{display:flex; position:fixed; z-index:30; left:0; right:0; bottom:0; align-items:flex-start; gap:2px;
     padding:6px max(10px, env(safe-area-inset-right, 0px)) var(--dock-pad) max(10px, env(safe-area-inset-left, 0px));
     border-radius:28px 28px 0 0; background:var(--surface);
@@ -856,6 +863,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         <label class="field small" for="addDue"><input type="date" id="addDue" aria-label="Son tarih"></label>
         <label class="field small rem-f" for="addRem" title="Hatırlatma saati: o saatte telefonuna bildirim gelir"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><input type="time" id="addRem" aria-label="Hatırlatma saati" step="300"></label>
         <button class="btn primary" type="submit">Ekle</button>
+        <button class="btn m-only add-x" type="button" id="addClose">Vazgeç</button>
       </form>
       <div class="toolbar">
         <label class="field" for="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="search" type="search" placeholder="Görevlerde ara… ( / )"></label>
@@ -2300,8 +2308,9 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     const nm = title.match(/^not\b[\s:,.-]*(.+)$/is);
     if (nm) { quickNote(nm[1].trim()); $('#addTitle').value = ''; return; }
     addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value, $('#addSite').value, $('#addRem').value);
-    $('#addTitle').value = ''; $('#addSite').value = ''; $('#addRem').value = '';
+    $('#addTitle').value = ''; $('#addSite').value = ''; $('#addRem').value = ''; closeAdd();
   });
+  $('#addClose').addEventListener('click', () => { $('#addTitle').value = ''; $('#addSite').value = ''; $('#addRem').value = ''; closeAdd(); });
   $('#search').addEventListener('input', e => { ui.q = e.target.value; renderTasks(); });
   // Site Asistan genel aramasından gelen sorgu ("Ritim'de “KSILE”"): eşleşen görevleri, yoksa notları göster
   let saQ = null;
@@ -2346,7 +2355,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
     }
-    if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); if (typeof d.title === 'string' && d.title) $('#addTitle').value = d.title.slice(0, 140); if (typeof d.due === 'string') $('#addDue').value = d.due; $('#addTitle').focus(); }, 120); }; f(); return; }
+    if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); openAdd(); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); if (typeof d.title === 'string' && d.title) $('#addTitle').value = d.title.slice(0, 140); if (typeof d.due === 'string') $('#addDue').value = d.due; $('#addTitle').focus(); }, 120); }; f(); return; }
     /* Site Asistan › hızlı görev: Ritim'e geçmeden doğrudan ekle (saat verilirse hatırlatma) */
     if (d.type === 'sa-add-task' && typeof d.title === 'string' && d.title.trim()) {
       const f = () => { if (!STORE.ready) return setTimeout(f, 300);
@@ -2369,11 +2378,13 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     e.preventDefault(); e.stopPropagation();
     try { parent.postMessage({ type: 'rt-site-open', code }, hostOrigin); } catch (_) {}
   }, true);
+  function openAdd() { const f = $('#addForm'); f.classList.add('open'); try { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {} }
+  function closeAdd() { $('#addForm').classList.remove('open'); }
   function focusNew() {
     if (ui.route === 'alisveris') return $('#shopIn').focus();
     if (ui.route === 'notlar') return newNote();
     if (ui.route === 'takvim') return $('#dayAddIn').focus();
-    go('gorevler');
+    go('gorevler'); openAdd();
     if (ui.cat) $('#addCat').value = ui.cat;
     setTimeout(() => $('#addTitle').focus(), 30);
   }
