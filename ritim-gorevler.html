@@ -2264,6 +2264,16 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
       };
       reply(); return;
     }
+    /* Bildirimler: Site Asistan aboneliği Ritim hesabına bağlanır (istekler Ritim'in kendi adresinden, oturum anahtarıyla) */
+    if (/^sa-push-(key|sub|unsub|test)$/.test(d.type)) {
+      const kind = d.type.slice(8), rid = d.rid;
+      const reply = (ok, data) => { try { e.source.postMessage({ type: 'rt-push', rid, ok, data }, e.origin); } catch (_) {} };
+      const path = kind === 'key' ? 'push/key' : 'push/' + kind;
+      const body = kind === 'sub' ? JSON.stringify({ sub: d.sub, contracts: d.contracts || [] }) : kind === 'unsub' ? JSON.stringify({ endpoint: String(d.endpoint || '') }) : kind === 'test' ? '{}' : undefined;
+      api(path, kind === 'key' ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+        .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
+      return;
+    }
     if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); $('#addTitle').focus(); }, 120); }; f(); return; }
     if (d.type === 'sa-open-note' && typeof d.id === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); location.hash = '#notlar'; setTimeout(() => { if (noteOf(d.id)) openNote(d.id); }, 150); }; f(); return; }
     if (d.type !== 'sa-search' || typeof d.q !== 'string') return;

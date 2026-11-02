@@ -3,7 +3,7 @@ import { ensureSchema, userFromToken, bearer } from '../../lib/auth.js';
 
 // Her /api isteği: tabloyu hazırlar; kayıt/giriş dışındaki istekler bir oturum ister.
 // Herkes yalnızca kendi belgelerini görür (udocs.owner = kullanıcı adı).
-const OPEN = new Set(['/api/register', '/api/login', '/api/quick']);
+const OPEN = new Set(['/api/register', '/api/login', '/api/quick', '/api/push/key']);
 
 export async function onRequest(ctx) {
   const { request, env, next } = ctx;

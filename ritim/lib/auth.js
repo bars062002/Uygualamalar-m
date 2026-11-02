@@ -32,6 +32,9 @@ export async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS files (id TEXT PRIMARY KEY, owner TEXT NOT NULL, k TEXT NOT NULL, name TEXT, type TEXT, size INTEGER, parts INTEGER, created INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS files_owner ON files (owner)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS file_parts (id TEXT NOT NULL, n INTEGER NOT NULL, data BLOB, PRIMARY KEY (id, n))'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS push_subs (endpoint TEXT PRIMARY KEY, owner TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, prefs TEXT, contracts TEXT, created INTEGER, updated INTEGER)'),
+    env.DB.prepare('CREATE INDEX IF NOT EXISTS push_subs_owner ON push_subs (owner)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS push_log (k TEXT PRIMARY KEY, at INTEGER)'),
   ]);
   schemaReady = true;
 }
