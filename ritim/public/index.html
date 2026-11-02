@@ -225,6 +225,17 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .chip svg.i{width:14px; height:14px}
 .pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:.72rem; font-weight:600; box-shadow:var(--inset-sm); color:var(--ink-2); white-space:nowrap}
 .pill.late{color:var(--bad)}
+/* Kayıt yaşı: görev ne zaman eklendi, üstünden kaç gün geçti */
+.pill.age{color:var(--ink-3); font-weight:600}.pill.age.old{color:var(--warn)}.pill.age.vold{color:var(--bad)}
+.d-age{display:grid; grid-template-columns:1.5fr 1fr; gap:10px}
+.d-age.done3{grid-template-columns:1fr 1fr}
+.d-age>div{border-radius:var(--r-sm); box-shadow:var(--inset); padding:12px 14px; min-width:0}
+.d-age small{display:block; font-size:.66rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:4px}
+.d-age b{display:block; font-size:.98rem; font-weight:600; color:var(--ink); line-height:1.3}
+.d-age b i{display:block; font-style:normal; font-size:.78rem; font-weight:500; color:var(--ink-3)}
+.d-age .n b{font-size:1.5rem; font-weight:700; letter-spacing:-.02em; line-height:1.1}.d-age .n b em{font-style:normal; font-size:.8rem; font-weight:600; color:var(--ink-3); margin-left:4px}
+.d-age .n.old b{color:var(--warn)}.d-age .n.vold b{color:var(--bad)}
+.d-age .full{grid-column:1/-1}
 .pill.today{color:var(--accent)}
 .pill svg.i{width:13px; height:13px}
 
@@ -1040,6 +1051,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   </div>
   <div class="d-body">
     <input class="d-title" id="dTitle" aria-label="Görev başlığı" maxlength="140">
+    <div class="d-age" id="dAge"></div>
     <div><span class="lbl">Saha kodu</span><label class="field" for="dSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="dSite" placeholder="Örn. KSEMR32087" maxlength="20" autocapitalize="characters" spellcheck="false"></label></div>
     <div class="ct" id="dCt">
       <div><span class="lbl">Ad soyad</span><label class="field" for="dPerson"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="dPerson" autocomplete="off" placeholder="Görüşülecek kişi" maxlength="80"></label></div>
@@ -1202,6 +1214,12 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   // Eklenme etiketi: bugün → "13:20", dün → "Dün 13:20", daha eski → "1 Kas 13:20"
   const addedLabel = ms => { const d = new Date(ms), k = ymd(d), y = new Date(); y.setDate(y.getDate() - 1);
     return (k === today() ? '' : k === ymd(y) ? 'Dün ' : fmtShort.format(d) + ' ') + fmtTime.format(d); };
+  /* Kaç takvim günü önce eklendi (bugün = 0) */
+  const ageDays = ms => { const a = new Date(ms); a.setHours(0, 0, 0, 0); const b = new Date(); b.setHours(0, 0, 0, 0); return Math.max(0, Math.round((b - a) / 864e5)); };
+  const validAt = ms => typeof ms === 'number' && ms > 1.5e12 && ms <= Date.now() + 864e5;
+  const ageTxt = n => n === 0 ? 'Bugün' : n === 1 ? 'Dün' : n + ' gün önce';
+  const ageCls = n => n >= 30 ? 'vold' : n >= 7 ? 'old' : '';
+  const fmtAge = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'short' });
   const cap = s => s.replace(/^./, c => c.toLocaleUpperCase('tr-TR'));
   function dueLabel(s) {
     const n = diffDays(s);
@@ -1642,6 +1660,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     check: '<path d="m5 12 5 5L20 7"/>',
     star: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3l-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    added: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 13v5M9.5 15.5h5"/>',
     subs: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11"/>',
     chev: '<path d="m6 9 6 6 6-6"/>',
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
@@ -2043,7 +2062,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
           ${t.repeat ? `<span class="chip">${ico('repeat')}${REPEAT[t.repeat]}</span>` : ''}
           ${t.subs.length ? `<span class="chip num">${ico('subs')}${sd}/${t.subs.length}</span>` : ''}
           ${t.pomo ? `<span class="chip num">${ico('timer')}${t.pomo} seans</span>` : ''}
-          ${(t.src === 'quick' || t.src === 'note') && t.createdAt ? `<span class="chip num" title="${t.src === 'quick' ? 'Eylem Düğmesi ile eklendi' : 'Nottan eklendi'}">${ico(t.src === 'quick' ? 'mic' : 'note')}${addedLabel(t.createdAt)}</span>` : ''}
+          ${validAt(t.createdAt) && !t.sample ? (n => `<span class="pill age num ${t.done ? '' : ageCls(n)}" title="${t.src === 'quick' ? 'Eylem Düğmesi ile eklendi' : t.src === 'note' ? 'Nottan eklendi' : 'Eklendi'}: ${fmtShort.format(new Date(t.createdAt))} ${fmtTime.format(new Date(t.createdAt))}">${ico(t.src === 'quick' ? 'mic' : t.src === 'note' ? 'note' : 'added')}${n === 0 ? 'Bugün eklendi' : n === 1 ? 'Dün eklendi' : n + ' gün önce'}</span>`)(ageDays(t.createdAt)) : ''}
           ${t.notes ? `<span class="chip">${ico('note')}Not</span>` : ''}
           ${t.files && t.files.length ? `<span class="chip num">${ico('clip')}${t.files.length}</span>` : ''}
           ${t.person ? `<span class="chip">${ico('user')}${esc(t.person)}</span>` : t.phone ? `<span class="chip">${ico('phone')}</span>` : ''}
@@ -3143,8 +3162,13 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       <button class="check" data-subtoggle aria-label="Alt görevi işaretle">${ico('check')}</button><span>${esc(s.t)}</span>
       <button class="rm" data-subrm aria-label="Alt görevi sil">${ico('x')}</button></li>`).join('');
     const created = new Date(t.createdAt);
-    $('#dMeta').textContent = t.done && t.doneAt ? `Tamamlandı: ${fmtShort.format(new Date(t.doneAt))} ${fmtTime.format(new Date(t.doneAt))}`
-      : `${t.src === 'quick' ? 'Eylem Düğmesi ile eklendi' : t.src === 'note' ? 'Nottan eklendi' : 'Oluşturuldu'}: ${fmtShort.format(created)} ${fmtTime.format(created)}${t.pomo ? ` · ${t.pomo} odak seansı` : ''}`;
+    const okAge = validAt(t.createdAt), n = okAge ? ageDays(t.createdAt) : 0, done = t.done && t.doneAt ? new Date(t.doneAt) : null;
+    const took = done && okAge ? Math.max(0, Math.round((new Date(done).setHours(0, 0, 0, 0) - new Date(t.createdAt).setHours(0, 0, 0, 0)) / 864e5)) : null;
+    $('#dAge').hidden = !okAge;
+    $('#dAge').innerHTML = !okAge ? '' : `<div><small>${t.src === 'quick' ? 'Eylem Düğmesi ile' : t.src === 'note' ? 'Nottan' : 'Kayıt tarihi'}</small><b>${fmtAge.format(created)}<i>saat ${fmtTime.format(created)}</i></b></div>`
+      + (done ? `<div class="n"><small>Tamamlandı</small><b>${took === 0 ? 'Aynı gün' : took + '<em>günde</em>'}</b></div><div class="full"><small>Bitiş</small><b>${fmtAge.format(done)}<i>saat ${fmtTime.format(done)}</i></b></div>`
+      : `<div class="n ${ageCls(n)}"><small>Geçen süre</small><b>${n === 0 ? 'Bugün' : n === 1 ? '1<em>gün</em>' : n + '<em>gün</em>'}</b></div>`);
+    $('#dMeta').textContent = t.pomo ? `${t.pomo} odak seansı` : '';
   }
   const cur = () => byId(ui.open);
   let savedTm;
