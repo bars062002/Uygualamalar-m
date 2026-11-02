@@ -9,9 +9,9 @@
 :root{
   --spring:cubic-bezier(.34,1.45,.64,1); --ease-out:cubic-bezier(.2,.8,.2,1); --ease-io:cubic-bezier(.65,0,.35,1);
   --bg:#e4e5e9; --surface:#e4e5e9; --hi:#ffffff; --lo:#b9bcc4; --track:#d2d4da;
-  --ink:#2e2f35; --ink-2:#5f616a; --ink-3:#8f919a;
+  --ink:#2e2f35; --ink-2:#4c4e55; --ink-3:#64656c;
   --accent:#9b1c1c; --accent-2:#5e0f12; --accent-soft:rgba(155,28,28,.10); --accent-glow:rgba(155,28,28,.32); --on-accent:#fff6f4;
-  --ok:#2e7d5b; --warn:#a2670f; --bad:#b42318;
+  --ok:#297052; --warn:#8d5a0d; --bad:#b42318;
   --p1:#9b1c1c; --p2:#46679a; --p3:#3b8063; --p4:#a26f15; --p5:#7a4fa0; --p6:#257f80; --p7:#bf5d1c; --p8:#5d6470;
   --scrim:rgba(40,40,48,.34);
   --font:'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -24,7 +24,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-theme="forest"]){
     --bg:#26272c; --surface:#26272c; --hi:#313238; --lo:#17181b; --track:#1d1e22;
-    --ink:#ececef; --ink-2:#a9abb4; --ink-3:#72747e;
+    --ink:#ececef; --ink-2:#b0b2ba; --ink-3:#8e9098;
     --accent:#c63a30; --accent-2:#7a1414; --accent-soft:rgba(226,80,68,.14); --accent-glow:rgba(198,58,48,.38); --on-accent:#fff6f4;
     --ok:#5cc497; --warn:#e2aa4c; --bad:#ff6e61;
     --p1:#e2645c; --p2:#86a5d8; --p3:#6cc29b; --p4:#dcaa50; --p5:#b393d8; --p6:#5cc3c3; --p7:#ec9459; --p8:#a3a9b5;
@@ -34,7 +34,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#26272c; --surface:#26272c; --hi:#313238; --lo:#17181b; --track:#1d1e22;
-  --ink:#ececef; --ink-2:#a9abb4; --ink-3:#72747e;
+  --ink:#ececef; --ink-2:#b0b2ba; --ink-3:#8e9098;
   --accent:#c63a30; --accent-2:#7a1414; --accent-soft:rgba(226,80,68,.14); --accent-glow:rgba(198,58,48,.38); --on-accent:#fff6f4;
   --ok:#5cc497; --warn:#e2aa4c; --bad:#ff6e61;
   --p1:#e2645c; --p2:#86a5d8; --p3:#6cc29b; --p4:#dcaa50; --p5:#b393d8; --p6:#5cc3c3; --p7:#ec9459; --p8:#a3a9b5;
@@ -409,7 +409,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .ct-row .field input{min-width:0}
 .ct-go{flex:none; width:46px!important; height:46px; color:var(--accent)}
 .ct-go.wa{color:#1fa855}
-.ct-go.bip b{font:800 .72rem/1 inherit; letter-spacing:-.02em; color:#1b8ef2}
+.ct-go.bip b{font:800 .72rem/1 inherit; letter-spacing:-.02em; color:#1366ae}
+:root[data-theme="dark"] .ct-go.bip b,:root[data-theme="forest"] .ct-go.bip b{color:#5aa9f2}
 .addr-link{display:flex; gap:8px; align-items:flex-start; margin-top:8px; font-size:.82rem; line-height:1.4; color:var(--accent); text-decoration:none; font-weight:600}
 .addr-link .i{flex:none; width:16px; height:16px; margin-top:1px}
 .files{list-style:none; margin:0 0 10px; padding:0; display:flex; flex-direction:column; gap:8px}
@@ -440,7 +441,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 @media (hover:hover){ .to-task{opacity:.55} #nePrev li:hover .to-task{opacity:1} }
 .group-head[data-group="inbox"]{color:var(--accent)}
 .group-head[data-group="inbox"]::after{content:"Dokununca listeye yerleşir"; margin-left:auto; font-size:.68rem; font-weight:500; letter-spacing:.02em; text-transform:none; color:var(--ink-3)}
-.inbox-link{display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:7px 12px; border-radius:999px; color:var(--accent); text-decoration:none; font-size:.85rem; box-shadow:var(--raise-sm); background:var(--surface)}
+.inbox-link{display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:11px 14px; border-radius:999px; color:var(--accent); text-decoration:none; font-size:.85rem; box-shadow:var(--raise-sm); background:var(--surface)}
 .inbox-link .i{width:15px; height:15px}
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
@@ -1581,13 +1582,13 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
   ];
   // Each accent has a deeper pair for light backgrounds and a brighter pair for dark ones.
   const ACCENTS = [
-    { id: 'bordo', name: 'Bordo', light: ['#9b1c1c', '#5e0f12'], dark: ['#d0473d', '#7a1414'] },
-    { id: 'mercan', name: 'Mercan', light: ['#c2410c', '#7c2d12'], dark: ['#f4845a', '#b4441c'] },
-    { id: 'altin', name: 'Altın', light: ['#a06a12', '#6b450a'], dark: ['#dfbd78', '#a8833d'] },
+    { id: 'bordo', name: 'Bordo', light: ['#9b1c1c', '#5e0f12'], dark: ['#db716a', '#7a1414'] },
+    { id: 'mercan', name: 'Mercan', light: ['#b43c0b', '#7c2d12'], dark: ['#f4845a', '#b4441c'] },
+    { id: 'altin', name: 'Altın', light: ['#8a5b0f', '#6b450a'], dark: ['#dfbd78', '#a8833d'] },
     { id: 'kahve', name: 'Kahve', light: ['#7c4a1e', '#4a2a10'], dark: ['#d6a06a', '#8a5a2b'] },
-    { id: 'yesil', name: 'Yeşil', light: ['#3f7d3a', '#1f4d1c'], dark: ['#7fce78', '#3b7d36'] },
-    { id: 'zumrut', name: 'Zümrüt', light: ['#047857', '#064e3b'], dark: ['#3fd3a0', '#0f7a5a'] },
-    { id: 'turkuaz', name: 'Turkuaz', light: ['#0e7490', '#164e63'], dark: ['#45c6dc', '#11788f'] },
+    { id: 'yesil', name: 'Yeşil', light: ['#397034', '#1f4d1c'], dark: ['#7fce78', '#3b7d36'] },
+    { id: 'zumrut', name: 'Zümrüt', light: ['#047354', '#064e3b'], dark: ['#3fd3a0', '#0f7a5a'] },
+    { id: 'turkuaz', name: 'Turkuaz', light: ['#0d6e89', '#164e63'], dark: ['#45c6dc', '#11788f'] },
     { id: 'mavi', name: 'Mavi', light: ['#1d4ed8', '#1e3a8a'], dark: ['#6b9cf5', '#2c55c4'] },
     { id: 'lacivert', name: 'Lacivert', light: ['#283593', '#141c5c'], dark: ['#8f9cf3', '#3f4bb8'] },
     { id: 'mor', name: 'Mor', light: ['#6d28d9', '#4c1d95'], dark: ['#b294fa', '#6d3ad9'] },
