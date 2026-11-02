@@ -634,6 +634,15 @@ html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 14px)}
 html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 16px)!important}
 html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 @media (max-width: 520px){ html.embed .embed-nav a span{display:none} html.embed .embed-nav a{flex:1 1 0; padding:0} }
+/* Site Asistan içinde Pano başlığı: üst menüde olan Notlar / Odak ve kabuğun yönettiği Tema düğmeleri gizli; Yeni görev vurgu renginde dolu */
+html.embed .vhead-actions :is(a[href="#notlar"],a[href="#odak"],[data-look]){display:none!important}
+html.embed .vhead-actions{flex:1 1 100%; gap:12px}
+html.embed .vhead-actions .btn.primary{flex:1; height:52px; border-radius:16px; letter-spacing:.06em;
+  background:linear-gradient(115deg,var(--accent) 0%,var(--accent-2) 100%); color:var(--on-accent);
+  box-shadow:0 14px 26px -12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.22)}
+html.embed .vhead-actions .btn.primary svg.i{stroke:var(--on-accent); width:20px; height:20px}
+html.embed .vhead-actions .btn.primary:active{transform:scale(.98); box-shadow:0 6px 14px -8px var(--accent-glow), inset 0 2px 6px rgba(0,0,0,.18)}
+html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 /* Tek elle kullanım: telefonda "+" başparmak bölgesinde (sağ alt, Site Asistan menüsünün üstünde) */
 @media (max-width: 760px){
   html.embed .embed-nav .fab{position:fixed; right:calc(16px + env(safe-area-inset-right)); bottom:calc(var(--sa-bottom, 0px) + 16px); z-index:40;
