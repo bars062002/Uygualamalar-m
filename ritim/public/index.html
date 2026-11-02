@@ -248,7 +248,8 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .pri-high{background:var(--bad)} .pri-med{background:var(--warn)} .pri-low{background:var(--ink-3)}
 
 /* ---------- Tasks ---------- */
-.add{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto auto; gap:14px; align-items:center}
+.add{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto auto auto; gap:14px; align-items:center}
+.add .rem-f input{min-width:5.6em; font-variant-numeric:tabular-nums}
 .add .field.grow{grid-column:1 / -1}
 .add .site-f{width:auto; min-width:0}
 .add .site-f input,#dSite,#neSite{text-transform:uppercase; letter-spacing:.04em; font-weight:600}
@@ -571,8 +572,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
   body:has(.mini-timer:not([hidden])) .toast{bottom:calc(var(--dock-h) + var(--dock-pad) + 76px)}
   @media (max-width: 360px){ :root{--dock-h:56px} .tabbar a{font-size:.56rem; height:48px} .tabbar a svg.i{width:19px; height:19px} .tabbar .fab{width:52px; height:52px; margin-top:-26px} }
   .add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .add .field.grow{grid-column:1 / -1}
-  .add input[type=date]{width:100%}
+  .add .field.grow,.add .site-f{grid-column:1 / -1}
+  .add input[type=date],.add input[type=time]{width:100%}
   .add .btn{grid-column:1 / -1}
   .card{padding:22px 18px}
   .dash{gap:22px}
@@ -818,6 +819,7 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
         <label class="field small" for="addCat"><select id="addCat" aria-label="Liste"></select></label>
         <label class="field small" for="addPri"><select id="addPri" aria-label="Öncelik"><option value="high">Yüksek</option><option value="med" selected>Orta</option><option value="low">Düşük</option></select></label>
         <label class="field small" for="addDue"><input type="date" id="addDue" aria-label="Son tarih"></label>
+        <label class="field small rem-f" for="addRem" title="Hatırlatma saati: o saatte telefonuna bildirim gelir"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><input type="time" id="addRem" aria-label="Hatırlatma saati" step="300"></label>
         <button class="btn primary" type="submit">Ekle</button>
       </form>
       <div class="toolbar">
@@ -2157,10 +2159,11 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (t.done) toast(made ? `Tamamlandı. Sonraki: ${dueLabel(made.due)}` : 'Görev tamamlandı', () => toggleDone(id));
   }
 
-  function addTask(title, cat, pri, due, site) {
-    const t = { id: uid(), title, site: (site || '').trim().toLocaleUpperCase('tr-TR'), cat, pri, due: due || null, notes: '', star: false, done: false, doneAt: null, repeat: null, remind: null, subs: [], pomo: 0, createdAt: Date.now() };
+  function addTask(title, cat, pri, due, site, remind) {
+    remind = /^\d{2}:\d{2}$/.test(remind || '') ? remind : null; if (remind && !due) due = today();
+    const t = { id: uid(), title, site: (site || '').trim().toLocaleUpperCase('tr-TR'), cat, pri, due: due || null, notes: '', star: false, done: false, doneAt: null, repeat: null, remind, subs: [], pomo: 0, createdAt: Date.now() };
     S.tasks.push(t); putTask(t); render();
-    toast(`“${title}” eklendi`);
+    toast(remind ? `“${title}” eklendi · ${remind}’de hatırlatılacak` : `“${title}” eklendi`);
     return t;
   }
 
@@ -2245,8 +2248,8 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     if (!title) { $('#addTitle').focus(); toast('Görev adı boş olamaz'); return; }
     const nm = title.match(/^not\b[\s:,.-]*(.+)$/is);
     if (nm) { quickNote(nm[1].trim()); $('#addTitle').value = ''; return; }
-    addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value, $('#addSite').value);
-    $('#addTitle').value = ''; $('#addSite').value = '';
+    addTask(title, $('#addCat').value || lists()[0].id, $('#addPri').value, $('#addDue').value, $('#addSite').value, $('#addRem').value);
+    $('#addTitle').value = ''; $('#addSite').value = ''; $('#addRem').value = '';
   });
   $('#search').addEventListener('input', e => { ui.q = e.target.value; renderTasks(); });
   // Site Asistan genel aramasından gelen sorgu ("Ritim'de “KSILE”"): eşleşen görevleri, yoksa notları göster
