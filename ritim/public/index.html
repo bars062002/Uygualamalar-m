@@ -2345,7 +2345,15 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
     }
-    if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); $('#addTitle').focus(); }, 120); }; f(); return; }
+    if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); if (typeof d.title === 'string' && d.title) $('#addTitle').value = d.title.slice(0, 140); if (typeof d.due === 'string') $('#addDue').value = d.due; $('#addTitle').focus(); }, 120); }; f(); return; }
+    /* Site Asistan › hızlı görev: Ritim'e geçmeden doğrudan ekle (saat verilirse hatırlatma) */
+    if (d.type === 'sa-add-task' && typeof d.title === 'string' && d.title.trim()) {
+      const f = () => { if (!STORE.ready) return setTimeout(f, 300);
+        const due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') ? d.due : '', rem = /^\d{2}:\d{2}$/.test(d.remind || '') ? d.remind : '';
+        const t = addTask(d.title.trim().slice(0, 140), ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, 'med', due, String(d.site || '').slice(0, 24), rem);
+        try { e.source.postMessage({ type: 'rt-added', rid: d.rid, ok: true, id: t.id, due: t.due, remind: t.remind }, e.origin); } catch (_) {} };
+      f(); return;
+    }
     if (d.type === 'sa-open-note' && typeof d.id === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); location.hash = '#notlar'; setTimeout(() => { if (noteOf(d.id)) openNote(d.id); }, 150); }; f(); return; }
     if (d.type !== 'sa-search' || typeof d.q !== 'string') return;
     applySaSearch(d.q.trim().slice(0, 60));
