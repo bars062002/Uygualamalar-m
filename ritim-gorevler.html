@@ -2208,6 +2208,25 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
     $('#addTitle').value = ''; $('#addSite').value = '';
   });
   $('#search').addEventListener('input', e => { ui.q = e.target.value; renderTasks(); });
+  // Site Asistan genel aramasından gelen sorgu ("Ritim'de “KSILE”"): eşleşen görevleri, yoksa notları göster
+  let saQ = null;
+  function applySaSearch(q) {
+    if (!STORE.ready) { saQ = q; return; }
+    const lq = lowerTr(q);
+    const tHit = S.tasks.filter(t => lowerTr([t.title, t.site, t.notes, t.person, t.phone, t.addr, ...(t.subs || []).map(x => x.t)].filter(Boolean).join(' ')).includes(lq));
+    const nHit = S.notes.filter(n => lowerTr(n.title + ' ' + (n.site || '') + ' ' + n.body).includes(lq));
+    ui.q = q; $('#search').value = q; ui.filter = 'all'; ui.cat = null;
+    nui.q = q; $('#noteQ').value = q;
+    if (tHit.length || !nHit.length) go('gorevler'); else if (nHit.length === 1) openNote(nHit[0].id); else go('notlar');
+    toast(`“${q}”: ${tHit.length} görev · ${nHit.length} not`);
+  }
+  setInterval(() => { if (saQ && STORE.ready) { const q = saQ; saQ = null; applySaSearch(q); } }, 300);
+  addEventListener('message', e => {
+    const d = e.data; if (!EMBED || !d || d.type !== 'sa-search' || typeof d.q !== 'string') return;
+    let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
+    if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
+    applySaSearch(d.q.trim().slice(0, 60));
+  });
   $('#segFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ui.filter = b.dataset.f; renderTasks(); });
 
   // The add button follows the current view: a shop item, a task for the selected day, or a new task.
