@@ -1,5 +1,5 @@
 // Keeps the app shell available offline. Data requests (/api) always go to the network.
-const CACHE = 'ritim-v2';
+const CACHE = 'ritim-v3';
 const SHELL = ['/', '/manifest.webmanifest', '/vendor/Sortable.min.js', '/icons/apple-touch-icon.png', '/icons/icon-192.png'];
 const NAV_TIMEOUT_MS = 4000;
 
@@ -30,13 +30,6 @@ self.addEventListener('activate', e => {
   );
 });
 
-function fetchWithTimeout(req, ms) {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('timeout')), ms);
-    fetch(req).then(r => { clearTimeout(t); resolve(r); }, err => { clearTimeout(t); reject(err); });
-  });
-}
-
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
@@ -44,15 +37,17 @@ self.addEventListener('fetch', e => {
 
   // Pages: network first so updates arrive; cached copy when the network is slow or down; a retry page as a last resort.
   if (req.mode === 'navigate') {
+    // Ağ yavaşsa (4 sn) kayıtlı kopya hemen açılır, ama indirme arkada sürer ve kopya yenilenir:
+    // böylece mobil veride bile bir sonraki açılışta yeni sürüm gelir.
+    const net = fetch(req);
+    e.waitUntil(net.then(async res => {
+      if (res.ok && !res.redirected) await (await caches.open(CACHE)).put('/', res.clone());
+    }).catch(() => {}));
     e.respondWith((async () => {
       try {
-        const res = await fetchWithTimeout(req, NAV_TIMEOUT_MS);
-        if (res.ok && !res.redirected) {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put('/', copy));
-          return res;
-        }
-        if (res.ok) return new Response(await res.blob(), { headers: res.headers });
+        const res = await Promise.race([net, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), NAV_TIMEOUT_MS))]);
+        if (res.ok && !res.redirected) return res.clone();
+        if (res.ok) return new Response(await res.clone().blob(), { headers: res.headers });
         return (await caches.match('/')) || res;
       } catch (err) {
         return (await caches.match('/')) ||
