@@ -182,7 +182,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .seg{display:inline-flex; gap:6px; padding:6px; border-radius:var(--r-sm); box-shadow:var(--inset-sm); flex-wrap:wrap; max-width:100%}
 .seg button{padding:8px 16px; border-radius:10px; font-size:.82rem; font-weight:500; color:var(--ink-2); transition:box-shadow .2s, color .2s}
 .seg button:hover{color:var(--ink)}
-.seg button.on{box-shadow:var(--raise-sm); color:var(--accent); font-weight:600}
+.seg button.on{box-shadow:var(--inset-sm); color:var(--accent); font-weight:600}  /* seçili: gömülü + vurgu rengi (kabarık değil) */
 
 .track{height:8px; border-radius:99px; box-shadow:var(--inset-sm); overflow:hidden}
 .track i{display:block; height:100%; transform-origin:left center; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .6s cubic-bezier(.2,.8,.2,1)}
@@ -267,7 +267,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .active-filter svg.i{width:14px; height:14px}
 .list-strip{display:flex; gap:10px; overflow-x:auto; padding:6px 4px 12px; margin:-6px -4px -12px; scrollbar-width:none}
 .list-strip button{display:inline-flex; align-items:center; gap:8px; flex:none; padding:8px 14px; border-radius:99px; box-shadow:var(--raise-sm); font-size:.8rem; font-weight:500; color:var(--ink-2)}
-.list-strip button.on{box-shadow:var(--inset-sm); color:var(--ink)}
+.list-strip button.on{box-shadow:var(--inset-sm); color:var(--accent); font-weight:600}
 .list-strip svg.i{width:14px; height:14px}
 
 .groups{display:flex; flex-direction:column; gap:26px}
