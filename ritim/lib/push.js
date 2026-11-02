@@ -59,7 +59,7 @@ export async function sendPush(env, sub, msg, ttl = 86400) {
   return r.status;
 }
 
-// ---------- Zamanlanmış bildirimler (5 dakikada bir) ----------
+// ---------- Zamanlanmış bildirimler (her dakika) ----------
 // Türkiye saati (UTC+3, yaz saati yok)
 const trNow = () => { const d = new Date(Date.now() + 3 * 3600e3); return { ymd: d.toISOString().slice(0, 10), hm: d.toISOString().slice(11, 16), min: d.getUTCHours() * 60 + d.getUTCMinutes() }; };
 const dayDiff = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 864e5);
@@ -82,7 +82,11 @@ export async function runSchedule(env) {
   if (!all.length) return;
   const byOwner = new Map(); for (const s of all) { if (!byOwner.has(s.owner)) byOwner.set(s.owner, []); byOwner.get(s.owner).push(s); }
   for (const [owner, subs] of byOwner) {
-    const rows = (await env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'tasks' AND data IS NOT NULL").bind(owner).all()).results || [];
+    const digest = now.min >= DIGEST_MIN && now.min < DIGEST_MIN + 30;
+    /* her dakika çalışır: özet saati dışında yalnız bugünün saatli görevleri okunur */
+    const rows = (await (digest
+      ? env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'tasks' AND data IS NOT NULL").bind(owner)
+      : env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'tasks' AND data IS NOT NULL AND json_extract(data, '$.due') = ? AND json_extract(data, '$.remind') IS NOT NULL").bind(owner, now.ymd)).all()).results || [];
     const tasks = rows.map(r => { try { return Object.assign(JSON.parse(r.data), { id: r.id }); } catch { return null; } }).filter(t => t && !t.done && !t.sample);
     // 1) Saatli hatırlatmalar: bugün, saati gelmiş (son 30 dk içinde) ve daha önce gönderilmemiş
     for (const t of tasks) {
@@ -93,7 +97,7 @@ export async function runSchedule(env) {
       await deliver(env, subs, { title: '⏰ ' + String(t.title || 'Görev').slice(0, 80), body: [t.remind, t.site].filter(Boolean).join(' · '), tag: 't' + t.id, url: './?m=rt' });
     }
     // 2) Sabah özeti 08:30: bugünün ve gecikenlerin sayısı + 7 gün içinde biten sözleşmeler
-    if (now.min >= DIGEST_MIN && now.min < DIGEST_MIN + 30 && await once(env, `d:${owner}:${now.ymd}`)) {
+    if (digest && await once(env, `d:${owner}:${now.ymd}`)) {
       const today = tasks.filter(t => t.due === now.ymd).length, late = tasks.filter(t => t.due && t.due < now.ymd).length;
       let con = []; for (const s of subs) { try { const c = JSON.parse(s.contracts || '[]'); if (c.length > con.length) con = c; } catch {} }
       const soon = con.map(c => ({ ...c, d: dayDiff(c.b, now.ymd) })).filter(c => c.d >= 0 && c.d <= 7).sort((a, b) => a.d - b.d);
@@ -103,6 +107,6 @@ export async function runSchedule(env) {
       if (parts.length) await deliver(env, subs, { title: 'Günaydın · Günün özeti', body: parts.join('\n'), tag: 'ozet', url: './?m=home' });
     }
   }
-  // eski kayıtları temizle (14 gün)
-  await env.DB.prepare('DELETE FROM push_log WHERE at < ?').bind(Date.now() - 14 * 864e5).run();
+  // eski kayıtları temizle (14 gün) — saatte bir
+  if (now.min % 60 === 0) await env.DB.prepare('DELETE FROM push_log WHERE at < ?').bind(Date.now() - 14 * 864e5).run();
 }
