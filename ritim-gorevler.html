@@ -493,6 +493,9 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
 .d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
+.d-foot .btn[hidden]{display:none}
+#drawer.is-draft #dToNote,#drawer.is-draft #dFocus,#drawer.is-draft #dDelete,#drawer.is-draft #dSaved{display:none}
+#drawer.is-draft #dSaveNew{flex:2 1 auto; background:linear-gradient(110deg,var(--accent) 0%,var(--accent-2) 100%); color:var(--on-accent); box-shadow:0 12px 24px -6px var(--accent-glow)}
 .d-meta{flex:1 0 100%; display:flex; justify-content:space-between; gap:10px; font-size:.75rem; color:var(--ink-3)}
 .d-saved{display:inline-flex; align-items:center; gap:5px; color:var(--ink-3); transition:color .3s}
 .d-saved.on{color:var(--accent)}
@@ -1084,6 +1087,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     <div class="d-meta"><span class="num" id="dMeta"></span><span class="d-saved" id="dSaved" title="Değişiklikler yazdıkça kaydedilir"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="dSavedT">Otomatik kaydedilir</span></span></div>
     <button class="btn sm" id="dToNote" title="Görevi nota aktar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Nota aktar</span></button>
     <button class="btn sm" id="dFocus"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odaklan</span></button>
+    <button class="btn sm primary" id="dSaveNew" hidden><svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Görevi kaydet</span></button>
+    <button class="btn sm" id="dCancelNew" hidden><span>Vazgeç</span></button>
     <button class="btn sm danger" id="dDelete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>Sil</span></button>
   </div>
 </aside>
@@ -2378,13 +2383,20 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     e.preventDefault(); e.stopPropagation();
     try { parent.postMessage({ type: 'rt-site-open', code }, hostOrigin); } catch (_) {}
   }, true);
+  /* Yeni görev taslağı: ayrıntı panelinde açılır; ad yazılmadan kapatılırsa iz bırakmadan silinir */
+  function newTaskDrawer(site) {
+    const t = normTask({ id: uid(), title: '', site: (site || '').toLocaleUpperCase('tr-TR'), cat: ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, pri: 'med', due: today(), remind: null, repeat: null, subs: [], createdAt: Date.now(), draft: true });
+    S.tasks.push(t); render(); openDrawer(t.id);
+  }
   function openAdd() { const f = $('#addForm'); f.classList.add('open'); try { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {} }
   function closeAdd() { $('#addForm').classList.remove('open'); }
   function focusNew() {
     if (ui.route === 'alisveris') return $('#shopIn').focus();
     if (ui.route === 'notlar') return newNote();
     if (ui.route === 'takvim') return $('#dayAddIn').focus();
-    go('gorevler'); openAdd();
+    go('gorevler');
+    /* Telefonda + tam görev formunu açar (kişi, telefon, e-posta, adres, dosya, tarih, hatırlatma…) */
+    if (matchMedia('(max-width: 860px)').matches) return newTaskDrawer();
     if (ui.cat) $('#addCat').value = ui.cat;
     setTimeout(() => $('#addTitle').focus(), 30);
   }
@@ -3128,6 +3140,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   }
   function closeDrawer() {
     commitPendingSub();
+    { const d = ui.open && byId(ui.open);
+      if (d && d.draft) { if (!d.title.trim() || d.title === 'Adsız görev') { S.tasks = S.tasks.filter(x => x !== d); dropTask(d.id); setTimeout(render, 0); } else { delete d.draft; putTask(d); toast(d.remind && d.due ? `“${d.title}” eklendi · ${d.remind}’de hatırlatılacak` : `“${d.title}” eklendi`); } } }
     ui.open = null; drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); $('#scrim').hidden = true; disarm();
   }
   function syncDrawer() {
@@ -3146,6 +3160,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     $('#dDone').setAttribute('aria-checked', String(t.done));
     $('#dStar').setAttribute('aria-checked', String(t.star));
     $('#dEyebrow').textContent = `${catName(t.cat)} · ${t.done ? 'Tamamlandı' : t.due ? dueLabel(t.due) : 'Tarihsiz'}`;
+    { const dr = !!t.draft; drawer.classList.toggle('is-draft', dr); $('#dSaveNew').hidden = !dr; $('#dCancelNew').hidden = !dr; $('#dTitle').placeholder = dr ? 'Görev adı yazın…' : '';
+      if (dr) $('#dEyebrow').textContent = 'Yeni görev · ' + catName(t.cat); }
     $('#dHint').textContent = t.remind && !t.due ? 'Hatırlatıcının çalışması için bir son tarih seçin.'
       : t.repeat ? `Tamamladığınızda bir sonraki görev otomatik oluşturulur (${REPEAT[t.repeat].toLocaleLowerCase('tr-TR')}).`
       : t.remind ? 'Hatırlatıcı, sayfa açıkken seçtiğiniz saatte ekranda çıkar.' : '';
@@ -3170,6 +3186,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   const edit = fn => { const t = cur(); if (!t) return; fn(t); putTask(t); render(); syncDrawer(); flashSaved(); };
   $('#dClose').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
+  $('#dSaveNew').addEventListener('click', () => { const t = cur(); if (!t) return; if (!$('#dTitle').value.trim()) { $('#dTitle').focus(); toast('Görev adı boş olamaz'); return; } closeDrawer(); });
+  $('#dCancelNew').addEventListener('click', () => { const t = cur(); if (t) t.title = ''; closeDrawer(); });
   $('#dTitle').addEventListener('input', e => edit(t => { t.title = e.target.value.trim() || 'Adsız görev'; }));
   $('#dNotes').addEventListener('input', e => edit(t => { t.notes = e.target.value; }));
   // ---------- Görev iletişim bilgileri ve ekler ----------
