@@ -213,7 +213,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .disc-txt .big small{font-size:1.3rem; font-weight:700; color:var(--ink-3); margin-left:2px}
 .disc-txt .sub{margin-top:8px}
 .stats{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:20px}
-.stat{padding:20px 22px; border-radius:var(--r); box-shadow:var(--raise-sm); display:flex; flex-direction:column; gap:4px; min-width:0}
+.stat{padding:20px 22px; border-radius:var(--r); box-shadow:var(--inset-sm); display:flex; flex-direction:column; gap:4px; min-width:0}
 .stat .k{font-size:.74rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
 .stat .v{font-size:2rem; font-weight:700; letter-spacing:-.02em; line-height:1.15}
 .stat .n{font-size:.8rem; color:var(--ink-3); font-weight:500}
@@ -281,7 +281,7 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .tlist{display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; min-height:12px}
 .dragging .tlist{min-height:56px; border-radius:var(--r); box-shadow:var(--inset-sm); padding:6px}
 .task{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px 18px 16px 8px; border-radius:var(--r); box-shadow:var(--raise-sm); background:var(--surface); transition:box-shadow .25s, opacity .3s, transform .3s var(--ease-out)}
-@media (hover:hover){ .task:hover{transform:translateY(-2px)} .stat{transition:transform .3s var(--ease-out), box-shadow .3s} .stat:hover{transform:translateY(-3px); box-shadow:var(--raise)} }
+@media (hover:hover){ .task:hover{transform:translateY(-2px)} }
 .task:hover{box-shadow:var(--raise)}
 .task.done{opacity:.62}
 .task.done .ttl{color:var(--ink-3)}
