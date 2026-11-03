@@ -1,5 +1,5 @@
 import { json } from '../../lib/http.js';
-import { vapid, sendPush } from '../../lib/push.js';
+import { vapid, sendPush, pushStatus, note } from '../../lib/push.js';
 
 // GET /api/push/key → { key } (VAPID genel anahtarı; açık)
 export async function onRequestGetKey({ env }) { return json({ key: (await vapid(env)).pub }); }
@@ -29,5 +29,9 @@ export async function onRequestPostTest({ env, data: ctx }) {
   if (!subs.length) return json({ error: 'Bu hesapta bildirim açık cihaz yok.' }, 404);
   let ok = 0; const st = [];
   for (const s of subs) { try { const c = await sendPush(env, s, { title: 'Site Asistan', body: 'Bildirimler çalışıyor ✓', tag: 'deneme', url: './?m=home' }, 600); st.push(c); if (c >= 200 && c < 300) ok++; if (c === 404 || c === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run(); } catch (e) { st.push(0); } }
+  await note(env, ctx.user.username, 'test', { status: st });
   return json({ ok, total: subs.length, status: st });
 }
+
+// GET /api/push/status → { devices, digest:{at,ymd,time,status,empty}, remind:{...}, test:{...} }
+export async function onRequestGetStatus({ env, data: ctx }) { return json(await pushStatus(env, ctx.user.username)); }

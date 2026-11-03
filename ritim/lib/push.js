@@ -69,12 +69,29 @@ async function once(env, k) {
   return !!(r.meta && r.meta.changes);
 }
 async function deliver(env, subs, msg) {
+  const res = [];
   for (const s of subs) {
-    try {
-      const st = await sendPush(env, s, msg);
-      if (st === 404 || st === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run();
-    } catch (e) { /* ağ hatası: bir sonraki turda yeniden denenmez, bildirim kaçabilir */ }
+    let st = 0;
+    for (let i = 0; i < 2 && !(st >= 200 && st < 300) && st !== 404 && st !== 410; i++) {  // geçici ağ hatasında bir kez daha dene
+      try { st = await sendPush(env, s, msg); } catch (e) { st = -1; console.log('push ağ hatası', String(e && e.message || e)); }
+    }
+    if (st === 404 || st === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run();
+    res.push(st);
   }
+  return res;
+}
+// Son gönderim durumu (Ayarlar'da gösterilir): meta 'ps:<kullanıcı>'
+export async function note(env, owner, kind, info) {
+  try {
+    const k = 'ps:' + owner; const row = await env.DB.prepare('SELECT v FROM meta WHERE k = ?').bind(k).first();
+    const cur = row ? JSON.parse(row.v) : {}; cur[kind] = { at: Date.now(), ...info };
+    await env.DB.prepare('INSERT INTO meta (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v').bind(k, JSON.stringify(cur)).run();
+  } catch (e) { console.log('durum kaydı', String(e)); }
+}
+export async function pushStatus(env, owner) {
+  const row = await env.DB.prepare('SELECT v FROM meta WHERE k = ?').bind('ps:' + owner).first();
+  const n = await env.DB.prepare('SELECT COUNT(*) AS n FROM push_subs WHERE owner = ?').bind(owner).first();
+  return { devices: (n && n.n) || 0, ...(row ? JSON.parse(row.v) : {}) };
 }
 export async function runSchedule(env) {
   const now = trNow();
@@ -94,7 +111,9 @@ export async function runSchedule(env) {
       const [h, m] = t.remind.split(':').map(Number); const at = h * 60 + m;
       if (at > now.min || now.min - at > 30) continue;
       if (!(await once(env, `t:${owner}:${t.id}:${t.due}:${t.remind}`))) continue;
-      await deliver(env, subs, { title: '⏰ ' + String(t.title || 'Görev').slice(0, 80), body: [t.remind, t.site].filter(Boolean).join(' · '), tag: 't' + t.id, url: './?m=rt' });
+      const st = await deliver(env, subs, { title: '⏰ ' + String(t.title || 'Görev').slice(0, 80), body: [t.remind, t.site].filter(Boolean).join(' · '), tag: 't' + t.id, url: './?m=rt' });
+      console.log('hatırlatma', owner, t.remind, st.join(','));
+      await note(env, owner, 'remind', { title: String(t.title || '').slice(0, 60), time: t.remind, status: st });
     }
     // 2) Sabah özeti 08:30: bugünün ve gecikenlerin sayısı + 7 gün içinde biten sözleşmeler
     if (digest && await once(env, `d:${owner}:${now.ymd}`)) {
@@ -104,7 +123,11 @@ export async function runSchedule(env) {
       const parts = [];
       if (today || late) parts.push(`${today} görev bugün${late ? `, ${late} gecikmiş` : ''}`);
       if (soon.length) parts.push(`${soon.length} sözleşme 7 gün içinde bitiyor: ` + soon.slice(0, 4).map(c => `${c.k} (${c.d ? c.d + ' gün' : 'bugün'})`).join(', ') + (soon.length > 4 ? '…' : ''));
-      if (parts.length) await deliver(env, subs, { title: 'Günaydın · Günün özeti', body: parts.join('\n'), tag: 'ozet', url: './?m=home' });
+      /* Söylenecek bir şey olmasa da özet gelir: sistemin çalıştığı her sabah görünür */
+      const body = parts.length ? parts.join('\n') : 'Bugün için planlı ya da geciken görev yok. 7 gün içinde biten sözleşme yok.';
+      const st = await deliver(env, subs, { title: 'Günaydın · Günün özeti', body, tag: 'ozet', url: './?m=home' });
+      console.log('günün özeti', owner, now.ymd, now.hm, st.join(','));
+      await note(env, owner, 'digest', { ymd: now.ymd, time: now.hm, status: st, empty: !parts.length });
     }
   }
   // eski kayıtları temizle (14 gün) — saatte bir

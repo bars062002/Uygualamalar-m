@@ -18,3 +18,7 @@ database_id = "c34b265d-5467-48a1-ab11-05c0182a0aee"
 # Bildirimler: her dakika saatli hatırlatma ve sabah özeti kontrolü (10:00 hatırlatması 10:00'da gelir)
 [triggers]
 crons = ["* * * * *"]
+
+# Sunucu kayıtları (Cloudflare → ritim-app → Observability): bildirim gönderimleri burada görünür
+[observability]
+enabled = true
