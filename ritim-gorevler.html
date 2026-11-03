@@ -1644,7 +1644,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     const open = S.tasks.filter(t => !t.done && !t.sample && t.due && t.due <= today())
       .sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : 0) || String(a.remind || '99').localeCompare(String(b.remind || '99')));
     const sum = { today: open.filter(t => t.due === today()).length, late: open.filter(isLate).length,
-      items: open.slice(0, 3).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), site: t.site || '' })), day: today() };
+      done: S.tasks.filter(t => t.done && !t.sample && doneDay(t) === today()).length,
+      items: open.slice(0, 6).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), rem: t.remind || '', site: t.site || '' })), day: today(), v: 2 };
     const k = JSON.stringify(sum); if (k === sumSent) return; sumSent = k;
     try { parent.postMessage({ type: 'rt-sum', sum }, hostOrigin); } catch (e) {}
   }
@@ -2340,6 +2341,14 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     if (d.type === 'sa-sum') { sumSent = ''; postSum(); return; }
+    /* Site Asistan ana sayfası: görevi tamamla / yarına ertele */
+    if ((d.type === 'sa-done-task' || d.type === 'sa-snooze-task') && typeof d.id === 'string') {
+      const f = () => { if (!STORE.ready) return setTimeout(f, 300); const t = byId(d.id); if (!t || t.done) { sumSent = ''; postSum(); return; }
+        if (d.type === 'sa-done-task') toggleDone(d.id);
+        else { const n = new Date(); n.setDate(n.getDate() + 1); t.due = ymd(n); t.reminded = null; putTask(t); render(); }
+        sumSent = ''; postSum(); };
+      f(); return;
+    }
     if (d.type === 'sa-open-task' && typeof d.id === 'string') { const go = () => { if (!STORE.ready) return setTimeout(go, 300); location.hash = '#gorevler'; if (S.tasks.some(t => t.id === d.id)) setTimeout(() => openDrawer(d.id), 120); }; go(); return; }
     /* Saha 360: bir saha koduna bağlı görev ve notlar; görev ekle; not aç */
     if (d.type === 'sa-site' && typeof d.code === 'string') {
