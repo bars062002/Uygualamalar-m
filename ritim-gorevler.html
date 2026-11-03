@@ -657,6 +657,11 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 /* UI/UX denetimi: telefonda simge + küçük etiket (Site Asistan alt menüsü gibi), 48 px dokunma alanı */
 @media (max-width: 520px){ html.embed .embed-nav a{flex:1 1 0; min-width:0; padding:0; flex-direction:column; gap:3px; height:52px}
   html.embed .embed-nav a span{display:block; font-size:10.5px; font-weight:600; line-height:1; letter-spacing:0; max-width:100%; overflow:hidden; text-overflow:ellipsis} }
+/* Sekmeler ayrı ayrı kartlar: zemin şeffaf (yapışkan kalırken altı sayfa rengiyle örtülür), her sekme kabarık, seçili olan gömülü */
+html.embed .embed-nav{background:var(--bg); box-shadow:none; border-radius:0; gap:8px; padding:8px 4px 10px; margin:0 -4px 14px; overflow:visible}
+html.embed .embed-nav a{background:var(--surface); box-shadow:var(--raise-sm); border-radius:16px}
+html.embed .embed-nav a.on{background:var(--surface); box-shadow:var(--inset-sm); color:var(--accent)}
+@media (max-width: 520px){ html.embed .embed-nav{gap:7px} html.embed .embed-nav a{border-radius:15px} }
 /* UI/UX denetimi: en az 44 px dokunma alanı ve klavye odak çerçevesi */
 html.embed #segFilter button,html.embed #listStrip button,html.embed .list-strip button{min-height:44px}
 :where(a,button,input,select,textarea,[role=button],[tabindex]):focus-visible{outline:2px solid var(--accent); outline-offset:2px}
