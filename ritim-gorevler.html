@@ -2350,7 +2350,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     if ((d.type === 'sa-done-task' || d.type === 'sa-snooze-task') && typeof d.id === 'string') {
       const f = () => { if (!STORE.ready) return setTimeout(f, 300); const t = byId(d.id); if (!t || t.done) { sumSent = ''; postSum(); return; }
         if (d.type === 'sa-done-task') toggleDone(d.id);
-        else { const n = new Date(); n.setDate(n.getDate() + 1); t.due = ymd(n); t.reminded = null; putTask(t); render(); }
+        else { const n = new Date(); n.setDate(n.getDate() + 1); t.due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') && d.due > today() ? d.due : ymd(n); t.reminded = null; putTask(t); render(); }
         sumSent = ''; postSum(); };
       f(); return;
     }
