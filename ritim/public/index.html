@@ -672,7 +672,12 @@ html.embed .embed-nav .fab{flex:none; width:38px; height:38px; border-radius:12p
 html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 14px)}
 html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 16px)!important}
 html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
-@media (max-width: 520px){ html.embed .embed-nav a span{display:none} html.embed .embed-nav a{flex:1 1 0; padding:0} }
+/* UI/UX denetimi: telefonda simge + küçük etiket (Site Asistan alt menüsü gibi), 48 px dokunma alanı */
+@media (max-width: 520px){ html.embed .embed-nav a{flex:1 1 0; min-width:0; padding:0; flex-direction:column; gap:3px; height:52px}
+  html.embed .embed-nav a span{display:block; font-size:10.5px; font-weight:600; line-height:1; letter-spacing:0; max-width:100%; overflow:hidden; text-overflow:ellipsis} }
+/* UI/UX denetimi: en az 44 px dokunma alanı ve klavye odak çerçevesi */
+html.embed #segFilter button,html.embed #listStrip button,html.embed .list-strip button{min-height:44px}
+:where(a,button,input,select,textarea,[role=button],[tabindex]):focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 /* Site Asistan içinde Pano başlığı: üst menüde olan Notlar / Odak ve kabuğun yönettiği Tema düğmeleri gizli; Yeni görev vurgu renginde dolu */
 html.embed .vhead-actions :is(a[href="#notlar"],a[href="#odak"],[data-look]){display:none!important}
 html.embed .vhead-actions{flex:1 1 100%; gap:12px}
@@ -778,12 +783,12 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     <nav class="nav" aria-label="Görünümler">
       <span class="nav-ind" aria-hidden="true"></span>
       <span class="nav-label">Menü</span>
-      <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
-      <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler<span class="count num" id="navCount">0</span></a>
-      <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş<span class="count num" id="navShop">0</span></a>
-      <a href="#notlar" data-route="notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Notlar<span class="count num" id="navNotes">0</span></a>
-      <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
-      <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak<span class="count num" id="navFocus" hidden>25:00</span></a>
+      <a href="#pano" data-route="pano" aria-label="Pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
+      <a href="#gorevler" data-route="gorevler" aria-label="Görevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler<span class="count num" id="navCount">0</span></a>
+      <a href="#alisveris" data-route="alisveris" aria-label="Alışveriş"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş<span class="count num" id="navShop">0</span></a>
+      <a href="#notlar" data-route="notlar" aria-label="Notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Notlar<span class="count num" id="navNotes">0</span></a>
+      <a href="#takvim" data-route="takvim" aria-label="Takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
+      <a href="#odak" data-route="odak" aria-label="Odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Odak<span class="count num" id="navFocus" hidden>25:00</span></a>
     </nav>
     <div class="nav">
       <span class="nav-label">Listeler<button data-newlist aria-label="Yeni liste"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span>
@@ -803,12 +808,12 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 
   <main class="main">
     <nav class="embed-nav" aria-label="Ritim bölümleri">
-      <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Pano</span></a>
-      <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>Görevler</span></a>
-      <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span>Alışveriş</span></a>
-      <a href="#notlar" data-route="notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Notlar</span></a>
-      <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Takvim</span></a>
-      <a href="#odak" data-route="odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odak</span></a>
+      <a href="#pano" data-route="pano" aria-label="Pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Pano</span></a>
+      <a href="#gorevler" data-route="gorevler" aria-label="Görevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg><span>Görevler</span></a>
+      <a href="#alisveris" data-route="alisveris" aria-label="Alışveriş"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span>Alışveriş</span></a>
+      <a href="#notlar" data-route="notlar" aria-label="Notlar"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Notlar</span></a>
+      <a href="#takvim" data-route="takvim" aria-label="Takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Takvim</span></a>
+      <a href="#odak" data-route="odak" aria-label="Odak"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span>Odak</span></a>
       <button class="fab" data-new aria-label="Yeni ekle"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     </nav>
     <!-- Pano -->
@@ -1047,11 +1052,11 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 
 <nav class="tabbar" aria-label="Alt menü">
   <span class="tab-ind" aria-hidden="true"></span>
-  <a href="#pano" data-route="pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
-  <a href="#gorevler" data-route="gorevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler</a>
+  <a href="#pano" data-route="pano" aria-label="Pano"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pano</a>
+  <a href="#gorevler" data-route="gorevler" aria-label="Görevler"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Görevler</a>
   <button class="fab" data-new aria-label="Yeni görev"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-  <a href="#alisveris" data-route="alisveris"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş</a>
-  <a href="#takvim" data-route="takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
+  <a href="#alisveris" data-route="alisveris" aria-label="Alışveriş"><svg class="i" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Alışveriş</a>
+  <a href="#takvim" data-route="takvim" aria-label="Takvim"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Takvim</a>
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
