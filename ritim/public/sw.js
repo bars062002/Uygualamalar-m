@@ -1,6 +1,6 @@
 // Keeps the app shell available offline. Data requests (/api) always go to the network.
-const CACHE = 'ritim-v3';
-const SHELL = ['/', '/manifest.webmanifest', '/vendor/Sortable.min.js', '/icons/apple-touch-icon.png', '/icons/icon-192.png'];
+const CACHE = 'ritim-v4';
+const SHELL = ['/', '/manifest.webmanifest', '/vendor/Sortable.min.js', '/fonts/ritim-fonts.css', '/icons/apple-touch-icon.png', '/icons/icon-192.png'];
 const NAV_TIMEOUT_MS = 4000;
 
 // Shown when the page can neither be fetched nor found in the cache, so the app never opens to a blank screen.

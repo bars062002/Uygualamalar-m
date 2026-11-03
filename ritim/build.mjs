@@ -11,6 +11,12 @@ const SORTABLE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sor
 if (!page.includes(SORTABLE_CDN)) throw new Error('Sortable script tag not found in ritim-gorevler.html');
 page = page.replace(SORTABLE_CDN, '/vendor/Sortable.min.js');
 
+// Yazı tipleri yerelden: Google Fonts erişilemeyen ağlarda (ör. iPad hücresel) açılışı engellemesin
+const GFONTS = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap';
+if (!page.includes(GFONTS)) throw new Error('Google Fonts link not found in ritim-gorevler.html');
+page = page.replace(GFONTS, '/fonts/ritim-fonts.css')
+  .replace(/<link rel="preconnect" href="https:\/\/fonts\.(googleapis|gstatic)\.com"[^>]*>\n?/g, '');
+
 const head = `<!doctype html>
 <html lang="tr">
 <head>
