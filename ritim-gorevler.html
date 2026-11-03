@@ -657,6 +657,63 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 /* UI/UX denetimi: telefonda simge + küçük etiket (Site Asistan alt menüsü gibi), 48 px dokunma alanı */
 @media (max-width: 520px){ html.embed .embed-nav a{flex:1 1 0; min-width:0; padding:0; flex-direction:column; gap:3px; height:52px}
   html.embed .embed-nav a span{display:block; font-size:10.5px; font-weight:600; line-height:1; letter-spacing:0; max-width:100%; overflow:hidden; text-overflow:ellipsis} }
+/* Pano üst bölümü (A + hafta şeridi): koca halka yerine kompakt özet */
+.hero.hx{display:flex; flex-direction:column; gap:16px; align-items:stretch; padding:18px}
+.hx-week{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px}
+.hx-d{border:0; font:inherit; color:var(--ink); border-radius:16px; padding:9px 0 8px; background:var(--surface); box-shadow:var(--raise-sm); display:flex; flex-direction:column; align-items:center; gap:1px; cursor:pointer; min-height:66px}
+.hx-d small{font-size:11px; font-weight:600; color:var(--ink-3); text-transform:capitalize}
+.hx-d b{font-size:19px; font-weight:800; line-height:1.2}
+.hx-d.past{opacity:.7}
+.hx-d.on{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 10px 20px -10px var(--accent-glow); opacity:1}
+.hx-d.on small{color:var(--on-accent); opacity:.85}
+.hx-dots{display:flex; gap:3px; height:6px; margin-top:3px}.hx-dots i{width:5px; height:5px; border-radius:50%; background:var(--accent)}
+.hx-d.on .hx-dots i{background:var(--on-accent)}
+.hx-sum{display:flex; align-items:center; gap:14px; padding:12px 14px; border-radius:22px; box-shadow:var(--inset)}
+.hx-ring{position:relative; width:64px; height:64px; flex:none; display:grid; place-items:center}
+.hx-ring .ring{position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg)}
+.hx-ring .ring circle{stroke-width:18}
+.hx-ring b{position:relative; font-size:14px; font-weight:800}
+.hx-nums{flex:1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; text-align:center}
+.hx-n .v{display:block; font-size:25px; font-weight:800; line-height:1.1; color:var(--ink)}
+.hx-n .k{font-size:12px; font-weight:600; color:var(--ink-3)}
+.hx-n.bad .v{color:var(--bad)}
+.hx-msg{margin:0; font-size:.9rem; color:var(--ink-2)}
+.hx-card{position:relative; border-radius:24px; padding:16px; color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 18px 34px -16px var(--accent-glow)}
+.hx-top{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.hx-k{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; opacity:.88}
+.hx-badge{font-size:13px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--on-accent); color:var(--accent)}
+.hx-card.late .hx-badge{color:var(--bad)}
+.hx-tt{display:block; width:100%; border:0; background:none; color:inherit; font:inherit; font-size:1.3rem; font-weight:800; line-height:1.25; text-align:left; padding:0; margin:8px 0 6px; cursor:pointer}
+.hx-meta{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:14px; font-weight:600}
+.hx-meta span{display:inline-flex; align-items:center; gap:5px}.hx-meta svg.i{width:16px; height:16px}
+.hx-site{font-size:12.5px; font-weight:700; padding:3px 9px; border-radius:8px; background:rgba(255,255,255,.2)}
+.hx-acts{display:flex; gap:10px; margin-top:14px}
+.hx-btn{flex:1; min-height:48px; border:0; border-radius:15px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-size:15px; font-weight:700; cursor:pointer}
+.hx-btn svg.i{width:19px; height:19px}
+.hx-btn.w{background:var(--on-accent); color:var(--accent)}
+.hx-btn.g{background:rgba(255,255,255,.16); color:inherit}
+.hx-menu{margin-top:12px; display:flex; flex-direction:column; gap:6px; padding:8px; border-radius:18px; background:var(--surface); box-shadow:var(--raise-sm); color:var(--ink)}
+.hx-menu[hidden]{display:none}
+.hx-menu button,.hx-pick{position:relative; display:flex; align-items:center; gap:12px; min-height:52px; padding:6px 12px; border:0; border-radius:14px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer}
+.hx-menu button:hover,.hx-pick:hover{box-shadow:var(--inset-sm)}
+.hx-menu svg.i{width:20px; height:20px; color:var(--accent); flex:none}
+.hx-menu b{display:block; font-size:15px}.hx-menu small{display:block; font-size:12.5px; color:var(--ink-3)}
+.hx-pick input{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:16px; border:0}
+.hx-h{display:flex; justify-content:space-between; align-items:baseline; margin:4px 2px 10px}.hx-h b{font-size:1.05rem}.hx-h a{font-size:14px; font-weight:600; color:var(--accent); text-decoration:none}
+.hx-row{display:flex; align-items:center; gap:4px; border-radius:18px; padding:0 8px 0 2px; background:var(--surface); box-shadow:var(--raise-sm); margin-bottom:10px}
+.hx-cb{flex:none; width:44px; height:44px; border:0; background:none; display:grid; place-items:center; cursor:pointer; padding:0}
+.hx-cb:before{content:""; width:24px; height:24px; border-radius:8px; border:2px solid var(--ink-3); box-sizing:border-box}
+.hx-row.late .hx-cb:before{border-color:var(--bad)}
+.hx-li{flex:1; min-width:0; border:0; background:none; color:var(--ink); font:inherit; text-align:left; padding:10px 4px; cursor:pointer}
+.hx-li b{display:block; font-size:15px; font-weight:650; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hx-li small{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); margin-top:2px}
+.hx-li small span{display:inline-flex; align-items:center; gap:4px}.hx-li svg.i{width:13px; height:13px}
+.hx-li em{font-style:normal; font-size:12px; font-weight:700; padding:2px 8px; border-radius:7px; background:color-mix(in srgb,var(--accent) 12%,transparent); color:var(--accent)}
+.hx-row.late small span{color:var(--bad); font-weight:600}
+.hx-more{display:block; text-align:center; min-height:44px; line-height:44px; font-size:14px; font-weight:600; color:var(--accent); text-decoration:none}
+.hx-d:focus-visible,.hx-btn:focus-visible,.hx-cb:focus-visible,.hx-li:focus-visible,.hx-tt:focus-visible,.hx-menu button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (min-width:900px){ .hero.hx{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"week week" "sum next" "msg next" "list next"; align-items:start; column-gap:22px}
+  .hx-week{grid-area:week}.hx-sum{grid-area:sum}.hx-msg{grid-area:msg}.hx-next{grid-area:next}.hx-list{grid-area:list} }
 /* Sekmeler ayrı ayrı kartlar: zemin şeffaf (yapışkan kalırken altı sayfa rengiyle örtülür), her sekme kabarık, seçili olan gömülü */
 html.embed .embed-nav{background:var(--bg); box-shadow:none; border-radius:0; gap:8px; padding:8px 4px 10px; margin:0 -4px 14px; overflow:visible}
 html.embed .embed-nav a{background:var(--surface); box-shadow:var(--raise-sm); border-radius:16px}
@@ -827,18 +884,18 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         <button class="btn sm" data-clear-samples>Örnekleri temizle</button>
       </div>
       <div class="dash">
-        <div class="card hero">
-          <div class="disc" role="img" id="dashDisc" aria-label="Bugünün ilerlemesi">
-            <svg class="ring" viewBox="0 0 200 200"><circle class="trk" cx="100" cy="100" r="86"/><circle class="bar" id="dashRing" cx="100" cy="100" r="86"/></svg>
-            <div class="disc-txt">
-              <div class="big num" id="dashPct">0<small>%</small></div>
-              <p class="sub num" id="dashSub">0 / 0 tamamlandı</p>
+        <div class="card hero hx" id="dashHero">
+          <div class="hx-week" id="dashWeek" role="group" aria-label="Bu hafta"></div>
+          <div class="hx-sum" id="dashSum">
+            <div class="hx-ring" role="img" id="dashDisc" aria-label="Bugünün ilerlemesi">
+              <svg class="ring" viewBox="0 0 200 200"><circle class="trk" cx="100" cy="100" r="86"/><circle class="bar" id="dashRing" cx="100" cy="100" r="86"/></svg>
+              <b class="num" id="dashSub">0/0</b>
             </div>
+            <div class="hx-nums" id="dashStats"></div>
           </div>
-          <div class="hero-copy">
-            <p id="dashMsg">Görevleriniz yükleniyor…</p>
-            <div class="stats" id="dashStats"></div>
-          </div>
+          <p class="hx-msg" id="dashMsg" hidden></p>
+          <div class="hx-next" id="dashNext"></div>
+          <div class="hx-list" id="dashToday"></div>
         </div>
         <div class="card span-7">
           <div class="card-head"><h2>Son 7 gün</h2><span>Tamamlanan görev sayısı</span></div>
@@ -1826,8 +1883,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     // Numbers and rings start once their card has faded in, and share one clock and curve.
     view.querySelectorAll('.ring .bar').forEach(el => fillRing(el, COUNT_MS, COUNT_DELAY));
     if (ui.route === 'pano') {
-      countUp($('#dashPct .cv'), COUNT_DELAY);
-      $$('#dashStats .v, #dashBars .val').forEach((el, i) => countUp(el, COUNT_DELAY + 120 + i * 30));
+      $$('#dashStats .v, #dashBars .val').forEach((el, i) => countUp(el, COUNT_DELAY + 80 + i * 30));
     }
   }
   const COUNT_MS = 1400, COUNT_DELAY = 260;
@@ -1978,6 +2034,68 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   }
   const byDate = (a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (b.star - a.star) || PRI_ORDER[a.pri] - PRI_ORDER[b.pri] || a.createdAt - b.createdAt;
 
+  /* Pano üst bölümü: hafta şeridi · sıradaki görev (Tamamla / Ertele) · bugünün listesi */
+  const HX = {
+    chk: '<svg class="i" viewBox="0 0 24 24"><path d="m6 12 4 4 8-8"/></svg>', arrow: '<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    clock: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>', cal: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>'
+  };
+  const hxDays = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+  function hxNextTask(t) {
+    const open = S.tasks.filter(x => !x.done);
+    const late = open.filter(isLate).sort((a, b) => a.due.localeCompare(b.due));
+    if (late.length) return late[0];
+    const now = new Date(), hm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const td = open.filter(x => x.due === t).sort((a, b) => String(a.remind || '99').localeCompare(String(b.remind || '99')));
+    return td.find(x => x.remind && x.remind >= hm) || td[0] || open.filter(x => x.due && x.due > t).sort(byDate)[0] || null;
+  }
+  function renderHero(t, tt) {
+    /* Hafta şeridi: pazartesiden pazara; nokta = o güne planlı açık görev */
+    const wd = (parse(t).getDay() + 6) % 7, mon = addDays(t, -wd);
+    $('#dashWeek').innerHTML = [...Array(7)].map((_, i) => {
+      const dd = addDays(mon, i), n = S.tasks.filter(x => !x.done && x.due === dd).length + (dd === t ? S.tasks.filter(x => !x.done && isLate(x)).length : 0);
+      const nm = fmtDay.format(parse(dd)).replace('.', '');
+      return `<button type="button" class="hx-d ${dd === t ? 'on' : ''} ${dd < t ? 'past' : ''}" data-hxday="${dd}" aria-label="${fmtLong.format(parse(dd))}, ${n} görev"><small>${esc(nm)}</small><b class="num">${parse(dd).getDate()}</b><span class="hx-dots">${'<i></i>'.repeat(Math.min(n, 3))}</span></button>`;
+    }).join('');
+    /* Sıradaki görev */
+    const nx = STORE.ready ? hxNextTask(t) : null;
+    if (!nx) { $('#dashNext').innerHTML = ''; }
+    else {
+      const lateBy = isLate(nx) ? hxDays(nx.due, t) : 0;
+      const badge = lateBy ? `${lateBy} gün` : nx.due === t ? (nx.remind || 'Bugün') : dueLabel(nx.due);
+      const kick = lateBy ? 'En eski geciken' : nx.due === t ? 'Sıradaki görev' : 'Yaklaşan görev';
+      $('#dashNext').innerHTML = `<div class="hx-card ${lateBy ? 'late' : ''}">
+        <div class="hx-top"><span class="hx-k">${kick}</span><span class="hx-badge">${esc(badge)}</span></div>
+        <button type="button" class="hx-tt" data-open="${nx.id}">${esc(nx.title)}</button>
+        <div class="hx-meta">${nx.site ? `<span class="hx-site">${esc(nx.site)}</span>` : ''}<span>${HX.clock}${lateBy ? esc(fmtLong.format(parse(nx.due))) + '’den beri' : esc(nx.remind ? nx.remind : dueLabel(nx.due))}</span></div>
+        <div class="hx-acts"><button type="button" class="hx-btn w" data-hxdone="${nx.id}">${HX.chk}Tamamla</button><button type="button" class="hx-btn g" data-hxsnz="${nx.id}" aria-haspopup="menu" aria-expanded="false">${HX.arrow}Ertele</button></div>
+        <div class="hx-menu" role="menu" hidden data-for="${nx.id}"></div></div>`;
+    }
+    /* Bugünün listesi: gecikenler + bugünküler (sıradaki hariç) */
+    const rest = S.tasks.filter(x => !x.done && x !== nx && (isLate(x) || x.due === t)).sort((a, b) => (a.due || '').localeCompare(b.due || '') || String(a.remind || '99').localeCompare(String(b.remind || '99')));
+    $('#dashToday').innerHTML = !STORE.ready ? '' : rest.length ? `<div class="hx-h"><b>Bugünün listesi</b><a href="#gorevler">${rest.length + (nx && (isLate(nx) || nx.due === t) ? 1 : 0)} görev</a></div>` + rest.slice(0, 4).map(x => {
+      const lb = isLate(x) ? hxDays(x.due, t) : 0;
+      return `<div class="hx-row ${lb ? 'late' : ''}"><button type="button" class="hx-cb" data-hxdone="${x.id}" aria-label="Tamamla: ${esc(x.title)}"></button><button type="button" class="hx-li" data-open="${x.id}"><b>${esc(x.title)}</b><small>${x.site ? `<em>${esc(x.site)}</em>` : ''}<span>${HX.clock}${lb ? (lb === 1 ? 'Dün' : lb + ' gün gecikti') : esc(x.remind || 'Bugün')}</span></small></button></div>`;
+    }).join('') + (rest.length > 4 ? `<a class="hx-more" href="#gorevler">${rest.length - 4} görev daha</a>` : '') : '';
+  }
+  function hxSnoozeMenu(id, btn) {
+    const m = $(`#dashNext .hx-menu[data-for="${id}"]`); if (!m) return;
+    if (!m.hidden) { m.hidden = true; btn.setAttribute('aria-expanded', 'false'); return; }
+    const t = today(), wd = (parse(t).getDay() + 6) % 7, toMon = wd === 0 ? 7 : 7 - wd;
+    const o = [['Yarın', 1], ['2 gün sonra', 2], [wd === 0 ? 'Gelecek pazartesi' : 'Pazartesi', toMon], ['1 hafta sonra', 7]];
+    m.innerHTML = o.map(([l, n]) => `<button type="button" role="menuitem" data-hxto="${addDays(t, n)}">${HX.cal}<span><b>${l}</b><small>${esc(fmtLong.format(parse(addDays(t, n))))}</small></span></button>`).join('')
+      + `<label class="hx-pick" role="menuitem">${HX.cal}<span><b>Tarih seç</b><small>Takvimden başka bir gün</small></span><input type="date" min="${addDays(t, 1)}" aria-label="Erteleme tarihi"></label>`;
+    m.hidden = false; btn.setAttribute('aria-expanded', 'true');
+    const done = due => { const x = byId(id); if (!x || !due) return; x.due = due; x.reminded = null; putTask(x); render(); toast(`Görev ${fmtLong.format(parse(due))} gününe ertelendi`); };
+    m.querySelectorAll('[data-hxto]').forEach(b => b.onclick = () => done(b.dataset.hxto));
+    m.querySelector('input').addEventListener('change', e => done(e.target.value));
+  }
+  document.addEventListener('click', e => {
+    const hero = e.target.closest && e.target.closest('#dashHero'); if (!hero) return;
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.hxdone) { e.stopPropagation(); return toggleDone(b.dataset.hxdone); }
+    if (b.dataset.hxsnz) { e.stopPropagation(); return hxSnoozeMenu(b.dataset.hxsnz, b); }
+    if (b.dataset.hxday) { ui.calSel = b.dataset.hxday; const dt = parse(b.dataset.hxday); ui.calMonth = new Date(dt.getFullYear(), dt.getMonth(), 1); go('takvim'); }
+  });
   function renderDash() {
     const t = today(), h = new Date().getHours();
     $('#h-pano').textContent = h < 6 ? 'İyi geceler' : h < 12 ? 'Günaydın' : h < 18 ? 'İyi günler' : 'İyi akşamlar';
@@ -1985,15 +2103,16 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 
     const tt = S.tasks.filter(isToday), d = tt.filter(x => x.done).length, pct = tt.length ? Math.round(d / tt.length * 100) : 0;
     setRing($('#dashRing'), tt.length ? d / tt.length : 0);
-    $('#dashPct').innerHTML = `<span class="cv">${pct}</span><small>%</small>`;
-    $('#dashSub').textContent = `${d} / ${tt.length} tamamlandı`;
+    $('#dashSub').textContent = `${d}/${tt.length}`;
     $('#dashDisc').setAttribute('aria-label', `Bugün ${tt.length} görevin ${d} tanesi tamamlandı, yüzde ${pct}`);
+    renderHero(t, tt, d);
 
     const open = S.tasks.filter(x => !x.done), late = open.filter(isLate);
     const inRange = (a, b) => S.tasks.filter(x => x.done && doneDay(x) && doneDay(x) > addDays(t, -b) && doneDay(x) <= addDays(t, -a)).length;
     const wk = inRange(0, 7), prev = inRange(7, 14), delta = wk - prev;
     const left = tt.length - d;
     const next = open.filter(x => x.due && x.due >= t).sort(byDate)[0];
+    $('#dashMsg').hidden = !STORE.ready || !!tt.filter(x => !x.done).length;
     $('#dashMsg').innerHTML = !STORE.ready ? 'Görevleriniz yükleniyor…'
       : !S.tasks.length ? '<b>Henüz görev yok.</b> “Yeni görev” ile ilk görevinizi ekleyin; burada günlük ilerlemeniz görünecek.'
       : !tt.length ? 'Bugün için planlanmış görev yok. Görevlere bir son tarih ekleyerek gününüzü planlayın.'
@@ -2008,7 +2127,9 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       { k: 'Açık görev', v: open.length, n: `${open.filter(x => x.star).length} tanesi önemli` },
       { k: 'Bu hafta biten', v: wk, n: delta === 0 ? 'Geçen haftayla aynı' : `Geçen haftaya göre ${delta > 0 ? '+' : ''}${delta}`, nc: delta > 0 ? 'up' : delta < 0 ? 'down' : '' },
     ];
-    $('#dashStats').innerHTML = stats.map(s => `<div class="stat ${s.cls || ''}"><span class="k">${s.k}</span><span class="v num">${s.v}</span><span class="n ${s.nc || ''}">${s.n}</span></div>`).join('');
+    void stats; // Ayrıntılı sayılar artık özet şeridinde (Geciken · Bugün · Bitti)
+    $('#dashStats').innerHTML = [['Geciken', late.length, late.length ? 'bad' : ''], ['Bugün', left, ''], ['Bitti', d, d ? 'ok' : '']]
+      .map(([k, v, c]) => `<div class="hx-n ${c}"><span class="v num">${v}</span><span class="k">${k}</span></div>`).join('');
 
     const days = [...Array(7)].map((_, i) => addDays(t, i - 6));
     const counts = days.map(dd => S.tasks.filter(x => x.done && doneDay(x) === dd).length);
