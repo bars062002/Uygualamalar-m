@@ -1710,6 +1710,10 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   if (EMBED) document.documentElement.classList.add('embed');
   const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light' };
   const HOST_SKINS = new Set(['cam', 'kagit', 'brut']); let skin = null;
+  let saOn = null, replayT = 0;
+  const replayView = () => { clearTimeout(replayT); replayT = setTimeout(() => { if (STORE.ready && motionOK() && !document.hidden) enterView(); }, 80); };
+  /* Uygulamaya arka plandan dönünce de (Site Asistan'da Ritim açıksa ya da Ritim tek başına) */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && (!EMBED || saOn)) replayView(); });
   addEventListener('message', e => {
     const d = e.data;
     if (!EMBED || !d || d.type !== 'sa-insets') return;
@@ -1717,6 +1721,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     // Yalnız Ritim görünürken eşitle (gizliyken her sekme değişiminde çalışıp diğer modüllerin geçişini yavaşlatıyordu)
     if (d.on !== false) { lastAct = Date.now(); pull(); }
+    /* Site Asistan'da Ritim sekmesi açılınca giriş animasyonu yeniden oynar: sayılar ve halkalar görünürken akar (önceden arka planda oynayıp bitiyordu) */
+    { const on = d.on !== false; if (on && saOn === false) replayView(); saOn = on; }
     const st = document.documentElement.style;
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
