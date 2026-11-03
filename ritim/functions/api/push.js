@@ -1,5 +1,5 @@
 import { json } from '../../lib/http.js';
-import { vapid, sendPush, pushStatus, note } from '../../lib/push.js';
+import { vapid, sendPush, pushStatus, note, deadSub } from '../../lib/push.js';
 
 // GET /api/push/key → { key } (VAPID genel anahtarı; açık)
 export async function onRequestGetKey({ env }) { return json({ key: (await vapid(env)).pub }); }
@@ -24,13 +24,21 @@ export async function onRequestPostUnsub({ request, env, data: ctx }) {
   return json({ ok: true });
 }
 // POST /api/push/test → bu kullanıcının tüm cihazlarına deneme bildirimi
-export async function onRequestPostTest({ env, data: ctx }) {
+export async function onRequestPostTest({ request, env, data: ctx }) {
+  let b = {}; try { b = await request.json(); } catch {}
+  const me = String(b && b.endpoint || '');
   const subs = (await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subs WHERE owner = ?').bind(ctx.user.username).all()).results || [];
   if (!subs.length) return json({ error: 'Bu hesapta bildirim açık cihaz yok.' }, 404);
-  let ok = 0; const st = [];
-  for (const s of subs) { try { const c = await sendPush(env, s, { title: 'Site Asistan', body: 'Bildirimler çalışıyor ✓', tag: 'deneme', url: './?m=home' }, 600); st.push(c); if (c >= 200 && c < 300) ok++; if (c === 404 || c === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run(); } catch (e) { st.push(0); } }
-  await note(env, ctx.user.username, 'test', { status: st });
-  return json({ ok, total: subs.length, status: st });
+  let ok = 0, self = null; const st = [], why = [];
+  for (const s of subs) {
+    let c = 0, r = '';
+    try { c = await sendPush(env, s, { title: 'Site Asistan', body: 'Deneme bildirimi: bildirimler çalışıyor', tag: 'deneme', url: './?m=home' }, 600); r = sendPush.lastReason || ''; } catch (e) { c = 0; r = String(e && e.message || e).slice(0, 120); }
+    st.push(c); why.push(r); if (c >= 200 && c < 300) ok++;
+    if (s.endpoint === me) self = { status: c, reason: r };
+    if (deadSub(c, r)) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run();
+  }
+  await note(env, ctx.user.username, 'test', { status: st, reason: why.filter(Boolean)[0] || '' });
+  return json({ ok, total: subs.length, status: st, self, registered: !!self });
 }
 
 // GET /api/push/status → { devices, digest:{at,ymd,time,status,empty}, remind:{...}, test:{...} }

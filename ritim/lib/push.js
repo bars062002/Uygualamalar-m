@@ -27,7 +27,7 @@ async function vapidAuth(env, endpoint) {
   const { key, pub } = await vapid(env);
   const aud = new URL(endpoint).origin;
   const h = b64u(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
-  const c = b64u(enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: SUBJECT })));
+  const c = b64u(enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 3600, sub: SUBJECT })));
   const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, enc.encode(h + '.' + c));
   return `vapid t=${h}.${c}.${b64u(sig)}, k=${pub}`;
 }
@@ -49,15 +49,19 @@ export async function encrypt(payload, p256dh, authSecret) {
   const rs = new Uint8Array([0, 0, 16, 0]); // 4096
   return cat(salt, rs, new Uint8Array([asPub.length]), asPub, ct);
 }
-// Bir aboneliğe gönder. Dönüş: HTTP durumu (404/410 → abonelik geçersiz)
+// Bir aboneliğe gönder. Dönüş: HTTP durumu (404/410 → abonelik geçersiz). Hata gövdesi sendPush.lastReason'da.
 export async function sendPush(env, sub, msg, ttl = 86400) {
   const body = await encrypt(JSON.stringify(msg), sub.p256dh, sub.auth);
   const r = await fetch(sub.endpoint, { method: 'POST', body, headers: {
     'content-encoding': 'aes128gcm', 'content-type': 'application/octet-stream', ttl: String(ttl), urgency: 'normal',
     ...(msg.tag ? { topic: String(msg.tag).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32) } : {}),
     authorization: await vapidAuth(env, sub.endpoint) } });
+  sendPush.lastReason = r.status >= 300 ? (await r.text().catch(() => '')).slice(0, 160) : '';
+  if (r.status >= 300) console.log('push reddedildi', r.status, new URL(sub.endpoint).host, sendPush.lastReason);
   return r.status;
 }
+/* Abonelik kalıcı olarak geçersiz mi? 404/410 her zaman; 403 + anahtar uyuşmazlığı (abonelik başka bir VAPID anahtarıyla açılmış) */
+export const deadSub = (st, why) => st === 404 || st === 410 || (st === 403 && /mismatch|VapidPkHash|ExpiredSubscription/i.test(why || ''));
 
 // ---------- Zamanlanmış bildirimler (her dakika) ----------
 // Türkiye saati (UTC+3, yaz saati yok)
@@ -75,7 +79,7 @@ async function deliver(env, subs, msg) {
     for (let i = 0; i < 2 && !(st >= 200 && st < 300) && st !== 404 && st !== 410; i++) {  // geçici ağ hatasında bir kez daha dene
       try { st = await sendPush(env, s, msg); } catch (e) { st = -1; console.log('push ağ hatası', String(e && e.message || e)); }
     }
-    if (st === 404 || st === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run();
+    if (deadSub(st, sendPush.lastReason)) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(s.endpoint).run();
     res.push(st);
   }
   return res;

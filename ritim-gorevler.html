@@ -2501,7 +2501,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       const kind = d.type.slice(8), rid = d.rid;
       const reply = (ok, data) => { try { e.source.postMessage({ type: 'rt-push', rid, ok, data }, e.origin); } catch (_) {} };
       const path = kind === 'key' ? 'push/key' : 'push/' + kind;
-      const body = kind === 'sub' ? JSON.stringify({ sub: d.sub, contracts: d.contracts || [] }) : kind === 'unsub' ? JSON.stringify({ endpoint: String(d.endpoint || '') }) : kind === 'test' ? '{}' : undefined;
+      const body = kind === 'sub' ? JSON.stringify({ sub: d.sub, contracts: d.contracts || [] }) : kind === 'unsub' ? JSON.stringify({ endpoint: String(d.endpoint || '') }) : kind === 'test' ? JSON.stringify({ endpoint: String(d.endpoint || '') }) : undefined;
       api(path, kind === 'key' || kind === 'status' ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body })
         .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
