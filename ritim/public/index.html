@@ -2374,12 +2374,12 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       reply(); return;
     }
     /* Bildirimler: Site Asistan aboneliği Ritim hesabına bağlanır (istekler Ritim'in kendi adresinden, oturum anahtarıyla) */
-    if (/^sa-push-(key|sub|unsub|test)$/.test(d.type)) {
+    if (/^sa-push-(key|sub|unsub|test|status)$/.test(d.type)) {
       const kind = d.type.slice(8), rid = d.rid;
       const reply = (ok, data) => { try { e.source.postMessage({ type: 'rt-push', rid, ok, data }, e.origin); } catch (_) {} };
       const path = kind === 'key' ? 'push/key' : 'push/' + kind;
       const body = kind === 'sub' ? JSON.stringify({ sub: d.sub, contracts: d.contracts || [] }) : kind === 'unsub' ? JSON.stringify({ endpoint: String(d.endpoint || '') }) : kind === 'test' ? '{}' : undefined;
-      api(path, kind === 'key' ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+      api(path, kind === 'key' || kind === 'status' ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body })
         .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
     }
