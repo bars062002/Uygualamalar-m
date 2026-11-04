@@ -740,7 +740,11 @@ html.embed #segFilter button,html.embed #listStrip button,html.embed .list-strip
 :where(a,button,input,select,textarea,[role=button],[tabindex]):focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 /* Site Asistan içinde Pano başlığı: üst menüde olan Notlar / Odak ve kabuğun yönettiği Tema düğmeleri gizli; Yeni görev vurgu renginde dolu */
 html.embed .vhead-actions :is(a[href="#notlar"],a[href="#odak"],[data-look]){display:none!important}
-html.embed .vhead-actions{flex:1 1 100%; gap:12px}
+/* Site Asistan içinde geniş "Yeni görev" çubuğu yok: bilgisayarda üst menüdeki +, telefonda sağ alttaki + kullanılır.
+   Selamlama satırında yalnız yedekleme simgesi sağda kalır (bir satır kazanılır) */
+html.embed #v-pano .vhead{flex-wrap:nowrap; align-items:center}
+html.embed .vhead-actions{flex:0 0 auto; gap:12px}
+html.embed #v-pano .vhead-actions .btn.primary[data-new]{display:none!important}
 html.embed .vhead-actions .btn.primary{flex:1; height:52px; border-radius:16px; letter-spacing:.06em;
   background:linear-gradient(115deg,var(--accent) 0%,var(--accent-2) 100%); color:var(--on-accent);
   box-shadow:0 14px 26px -12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.22)}
@@ -2130,7 +2134,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     const next = open.filter(x => x.due && x.due >= t).sort(byDate)[0];
     $('#dashMsg').hidden = !STORE.ready || !!tt.filter(x => !x.done).length;
     $('#dashMsg').innerHTML = !STORE.ready ? 'Görevleriniz yükleniyor…'
-      : !S.tasks.length ? '<b>Henüz görev yok.</b> “Yeni görev” ile ilk görevinizi ekleyin; burada günlük ilerlemeniz görünecek.'
+      : !S.tasks.length ? '<b>Henüz görev yok.</b> “+” düğmesiyle ilk görevinizi ekleyin; burada günlük ilerlemeniz görünecek.'
       : !tt.length ? 'Bugün için planlanmış görev yok. Görevlere bir son tarih ekleyerek gününüzü planlayın.'
       : left === 0 ? '<b>Bugünün tüm görevleri tamam.</b> Yarının listesine göz atabilir ya da mola verebilirsiniz.'
       : `Bugün <b>${left} görev</b> kaldı${late.length ? `, bunların <b>${late.length} tanesi gecikmiş</b>` : ''}.${next ? ` Sıradaki: <b>${esc(next.title)}</b>.` : ''}`;
