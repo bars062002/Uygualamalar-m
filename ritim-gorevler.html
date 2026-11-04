@@ -2506,6 +2506,14 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         .then(r => r.json().then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
     }
+    /* Kira Takip: sahada tamamlandı işaretleri (ortak liste, Ritim hesabıyla) */
+    if (d.type === 'sa-kira') {
+      const reply = (ok, data) => { try { e.source.postMessage({ type: 'rt-kira', rid: d.rid, ok, data }, e.origin); } catch (_) {} };
+      if (!lsGet(KEY_PW)) { reply(false, { auth: true, error: 'Ritim oturumu yok.' }); return; }
+      const opts = d.op === 'set' ? { method: 'POST', body: JSON.stringify({ k: String(d.k || ''), d: d.d == null ? null : String(d.d) }) } : {};
+      api('kira', opts).then(r => (isJson(r) ? r.json() : Promise.resolve({ error: 'Sunucu yanıt vermedi.' })).then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
+      return;
+    }
     if (d.type === 'sa-new-task' && typeof d.site === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); go('gorevler'); openAdd(); setTimeout(() => { $('#addSite').value = d.site.slice(0, 24); if (typeof d.title === 'string' && d.title) $('#addTitle').value = d.title.slice(0, 140); if (typeof d.due === 'string') $('#addDue').value = d.due; $('#addTitle').focus(); }, 120); }; f(); return; }
     /* Site Asistan › hızlı görev: Ritim'e geçmeden doğrudan ekle (saat verilirse hatırlatma) */
     if (d.type === 'sa-add-task' && typeof d.title === 'string' && d.title.trim()) {
