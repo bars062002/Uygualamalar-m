@@ -2491,6 +2491,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         sumSent = ''; postSum(); };
       f(); return;
     }
+    /* Site Asistan ana sayfası: tamamlanan görevi geri al */
+    if (d.type === 'sa-undone-task' && typeof d.id === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); const t = byId(d.id); if (t && t.done) toggleDone(d.id); sumSent = ''; postSum(); }; f(); return; }
     if (d.type === 'sa-open-task' && typeof d.id === 'string') { const go = () => { if (!STORE.ready) return setTimeout(go, 300); location.hash = '#gorevler'; if (S.tasks.some(t => t.id === d.id)) setTimeout(() => openDrawer(d.id), 120); }; go(); return; }
     /* Saha 360: bir saha koduna bağlı görev ve notlar; görev ekle; not aç */
     if (d.type === 'sa-site' && typeof d.code === 'string') {
