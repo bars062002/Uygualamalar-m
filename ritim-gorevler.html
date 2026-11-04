@@ -2510,7 +2510,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     if (d.type === 'sa-kira') {
       const reply = (ok, data) => { try { e.source.postMessage({ type: 'rt-kira', rid: d.rid, ok, data }, e.origin); } catch (_) {} };
       if (!lsGet(KEY_PW)) { reply(false, { auth: true, error: 'Ritim oturumu yok.' }); return; }
-      const opts = d.op === 'set' ? { method: 'POST', body: JSON.stringify({ k: String(d.k || ''), d: d.d == null ? null : String(d.d) }) } : {};
+      const opts = d.op === 'set' ? { method: 'POST', body: JSON.stringify({ k: String(d.k || ''), d: d.d == null ? null : String(d.d), s: d.s == null ? undefined : String(d.s), n: d.n == null ? undefined : String(d.n).slice(0, 500) }) } : {};
       api('kira', opts).then(r => (isJson(r) ? r.json() : Promise.resolve({ error: 'Sunucu yanıt vermedi.' })).then(j => reply(r.ok, j))).catch(err => reply(false, { error: String(err && err.message || err) }));
       return;
     }
