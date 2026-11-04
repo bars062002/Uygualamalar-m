@@ -35,8 +35,8 @@ export async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS push_subs (endpoint TEXT PRIMARY KEY, owner TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, prefs TEXT, contracts TEXT, created INTEGER, updated INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS push_subs_owner ON push_subs (owner)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS push_log (k TEXT PRIMARY KEY, at INTEGER)'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS kira_marks (k TEXT PRIMARY KEY, d TEXT NOT NULL, who TEXT NOT NULL, name TEXT, at INTEGER)'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS kira_log (id INTEGER PRIMARY KEY AUTOINCREMENT, k TEXT NOT NULL, d TEXT, who TEXT NOT NULL, at INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS kira_marks (k TEXT PRIMARY KEY, d TEXT NOT NULL, s TEXT, n TEXT, who TEXT NOT NULL, name TEXT, at INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS kira_log (id INTEGER PRIMARY KEY AUTOINCREMENT, k TEXT NOT NULL, d TEXT, s TEXT, n TEXT, who TEXT NOT NULL, at INTEGER)'),
   ]);
   schemaReady = true;
 }
