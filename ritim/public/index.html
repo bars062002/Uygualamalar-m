@@ -765,6 +765,8 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 84px)}
 }
 
+/* Apple Design §1: basma tepkisi anında (80 ms), bırakınca öğenin kendi yumuşak dönüşü — Site Asistan ile aynı his */
+@media (prefers-reduced-motion: no-preference){ :where(button,.btn,[role="button"]):where(:not(:disabled)):active{transition-duration:.08s; transition-timing-function:ease-out} }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
 }
