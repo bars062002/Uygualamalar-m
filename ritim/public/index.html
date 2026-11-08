@@ -864,6 +864,14 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 .vt-sf{flex:none; width:120px}
 .vt-sf input{width:100%; height:38px; border:0; border-radius:10px; padding:0 10px; font:inherit; font-size:16px; text-transform:uppercase; color:var(--ink); background:transparent; box-shadow:var(--inset-sm); outline:none}
 .vt-sf input:focus-visible{box-shadow:var(--inset-sm), 0 0 0 2px var(--accent)}
+.bk-auto{display:flex; flex-direction:column; gap:10px}
+.bk-h{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.bk-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.bk-list li{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-sm); box-shadow:var(--inset-sm)}
+.bk-list li span{flex:1; min-width:0; display:flex; flex-direction:column}
+.bk-list li b{font-size:.86rem; font-weight:600}
+.bk-list li small{font-size:.74rem; color:var(--ink-3)}
+.bk-list li.bk-none{font-size:.8rem; color:var(--ink-3)}
 .vt-none{margin:0; padding:18px 8px; text-align:center; color:var(--ink-3); font-size:.86rem}
 .vt-none[hidden]{display:none}
 .lightbox{position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:24px; background:rgba(10,12,16,.82); cursor:zoom-out}
@@ -1303,6 +1311,11 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     <div class="modal-foot">
       <button type="button" class="btn sm" id="bkExport">Dışa aktar ve kopyala</button>
       <button type="button" class="btn sm primary live" id="bkImport">İçe aktar</button>
+    </div>
+    <div class="qk-box bk-auto" id="bkAuto" hidden>
+      <div class="bk-h"><span class="lbl">Otomatik yedekler</span><button type="button" class="btn sm" id="bkNow">Şimdi yedekle</button></div>
+      <p class="hint-txt" style="font-size:.8rem; margin:0">Her pazar 03:00'te görev ve notların otomatik yedeklenir; son 4 yedek saklanır. İndirdiğin dosyanın içeriğini yukarıdaki kutuya yapıştırıp içe aktarabilirsin.</p>
+      <ul class="bk-list" id="bkList"></ul>
     </div>
     <div class="qk-box" id="qkBox" hidden>
       <span class="lbl">iPhone kestirmesi · Eylem Düğmesi</span>
@@ -2819,8 +2832,31 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     $('#bkLogout').textContent = `Çıkış yap · ${lsGet('ritim.name') || lsGet(KEY_USER) || ''}`;
     $('#qkBox').hidden = true;
     if (STORE.mode === 'api' && lsGet(KEY_PW)) api('me').then(r => r.ok ? r.json() : null).then(m => { if (m && m.quickUrl) { $('#qkUrl').value = m.quickUrl; $('#qkBox').hidden = false; } }).catch(() => {});
+    $('#bkAuto').hidden = !(STORE.mode === 'api' && lsGet(KEY_PW));
+    if (!$('#bkAuto').hidden) loadBackups();
     $('#backupModal').hidden = false;
   }
+  const fmtBk = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'short', hour: '2-digit', minute: '2-digit' });
+  async function loadBackups() {
+    const ul = $('#bkList'); ul.innerHTML = '<li class="bk-none">Yükleniyor…</li>';
+    try { const r = await api('backup'); const j = await r.json(); const L = j.list || [];
+      ul.innerHTML = L.length ? L.map(b => `<li><span><b>${fmtBk.format(new Date(b.at))}</b><small>${b.n} kayıt · ${fmtSize(b.size)}</small></span><button type="button" class="btn sm" data-bkat="${b.at}">İndir</button></li>`).join('')
+        : '<li class="bk-none">Henüz otomatik yedek yok. İlki pazar gecesi alınır; “Şimdi yedekle” ile hemen alabilirsin.</li>';
+    } catch (e) { ul.innerHTML = '<li class="bk-none">Yedekler alınamadı — bağlantını kontrol et.</li>'; }
+  }
+  $('#bkNow').addEventListener('click', async e => {
+    const b = e.currentTarget; b.disabled = true; b.textContent = 'Yedekleniyor…';
+    try { const r = await fetch('/api/backup', { method: 'POST', headers: { authorization: 'Bearer ' + (lsGet(KEY_PW) || '') } }); const j = await r.json().catch(() => ({}));
+      toast(r.ok ? `Yedek alındı · ${j.n} kayıt` : (j.error || 'Yedek alınamadı')); } catch (err) { toast('Yedek alınamadı — bağlantını kontrol et'); }
+    b.disabled = false; b.textContent = 'Şimdi yedekle'; loadBackups();
+  });
+  $('#bkList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-bkat]'); if (!b) return;
+    try { const r = await fetch('/api/backup?at=' + b.dataset.bkat, { headers: { authorization: 'Bearer ' + (lsGet(KEY_PW) || '') } }); if (!r.ok) throw new Error('x');
+      const blob = await r.blob(), u = URL.createObjectURL(blob), a = document.createElement('a'), d = new Date(+b.dataset.bkat);
+      a.href = u; a.download = `ritim-yedek-${ymd(d)}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000);
+    } catch (err) { toast('Yedek indirilemedi'); }
+  });
   const closeBackup = () => { $('#backupModal').hidden = true; };
   $('#bkClose').addEventListener('click', closeBackup);
   $('#backupModal').addEventListener('click', e => { if (e.target.id === 'backupModal') closeBackup(); });

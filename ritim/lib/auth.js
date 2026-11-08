@@ -31,6 +31,7 @@ export async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS docs (col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (col, id))'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS files (id TEXT PRIMARY KEY, owner TEXT NOT NULL, k TEXT NOT NULL, name TEXT, type TEXT, size INTEGER, parts INTEGER, created INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS files_owner ON files (owner)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS backups (owner TEXT NOT NULL, at INTEGER NOT NULL, size INTEGER, n INTEGER, data BLOB, PRIMARY KEY (owner, at))'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS vault (id TEXT PRIMARY KEY, owner TEXT NOT NULL, created INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS vault_owner ON vault (owner)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS file_parts (id TEXT NOT NULL, n INTEGER NOT NULL, data BLOB, PRIMARY KEY (id, n))'),
