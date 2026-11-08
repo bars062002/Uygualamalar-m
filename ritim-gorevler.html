@@ -2663,6 +2663,22 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       };
       reply(); return;
     }
+    /* Site Asistan genel arama: görev, not ve Dosyalarım'da eşleşenler */
+    if (d.type === 'sa-find' && typeof d.q === 'string' && d.rid) {
+      const reply = () => {
+        if (!STORE.ready) return setTimeout(reply, 300);
+        const q = lowerTr(d.q.trim()).slice(0, 60); if (!q) return;
+        const tasks = S.tasks.filter(t => !t.sample && lowerTr([t.title, t.site, t.notes, t.person, (t.subs || []).map(x => x.t).join(' ')].join(' ')).includes(q))
+          .sort((a, b) => (a.done - b.done) || String(a.due || '9').localeCompare(String(b.due || '9'))).slice(0, 6)
+          .map(t => ({ id: t.id, t: t.title || 'Görev', site: t.site || '', w: t.done ? 'Tamamlandı' : t.due ? dueLabel(t.due) : 'Tarihsiz' }));
+        const notes = S.notes.filter(n => lowerTr(n.title + ' ' + n.site + ' ' + n.body).includes(q)).slice(0, 4)
+          .map(n => ({ id: n.id, t: noteTitle(n), site: n.site || '', at: String(n.updated).slice(0, 10) }));
+        const send = () => { const files = (vui.files || []).filter(f => lowerTr(f.name + ' ' + (f.site || '')).includes(q)).slice(0, 4).map(f => ({ id: f.id, n: f.name, site: f.site || '' }));
+          try { e.source.postMessage({ type: 'rt-find', rid: d.rid, tasks, notes, files }, e.origin); } catch (_) {} };
+        if (!vui.files && STORE.mode === 'api') loadVaultQuiet().then(send); else send();
+      };
+      reply(); return;
+    }
     /* Saha 360 › Dosyalar: Notlar › Dosyalarım bu sahaya süzülmüş açılır */
     if (d.type === 'sa-open-vault') {
       const f = () => { if (!STORE.ready) return setTimeout(f, 300); vui.q = String(d.q || '').slice(0, 30); $('#vaultQ').value = vui.q; location.hash = '#notlar'; setTimeout(() => setVault(true), 60); };
