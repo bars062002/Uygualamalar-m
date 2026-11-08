@@ -480,7 +480,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li .fn small{font-size:.72rem; color:var(--ink-3)}
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
-/* Görev kartı kaydırma: sağa → tamamla, sola → sil */
+/* Görev kartı kaydırma: sağa → tamamla; sola kısa → Ertele + Sil düğmeleri açık kalır, sola sonuna kadar → ertele */
 .task{touch-action:pan-y}
 .task.sw{transition:none!important; position:relative; z-index:2}
 .task.sw-back{transition:transform .35s cubic-bezier(.22,1.2,.36,1)!important}
@@ -489,6 +489,20 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .sw-bg.r{background:linear-gradient(90deg,#2e7d5b,#3f9b72); justify-content:flex-start; gap:10px}
 .sw-bg.l{background:linear-gradient(270deg,#b42318,#8f1c14); justify-content:flex-end; gap:10px}
 .sw-bg.arm .i{animation:pop .3s}
+.sw-bg.l{background:none; box-shadow:none; padding:0; gap:0}
+.sw-act{display:flex; height:100%; margin-left:auto; border-radius:var(--r); overflow:hidden; box-shadow:var(--inset)}
+.sw-act button{pointer-events:auto; width:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:#fff; font:700 .72rem/1 inherit; letter-spacing:.06em; text-transform:uppercase; transition:width .22s cubic-bezier(.2,.9,.25,1)}
+.sw-act button .i{width:20px; height:20px; stroke-width:2.2}
+.sw-act .snz{background:linear-gradient(270deg,#8A5000,#9C6100)}
+.sw-act .del{background:linear-gradient(270deg,#b42318,#8f1c14)}
+.sw-bg.full .sw-act{flex:1}.sw-bg.full .sw-act .snz{flex:1}.sw-bg.full .sw-act .del{width:0; padding:0; overflow:hidden}
+.sw-bg.open{pointer-events:auto}
+.snz-list{display:flex; flex-direction:column; gap:10px}
+.snz-list button,.snz-list label{display:flex; align-items:center; gap:14px; min-height:56px; padding:0 16px; border-radius:var(--r-sm); box-shadow:var(--raise-sm); text-align:left; color:var(--ink); cursor:pointer}
+.snz-list b{display:block; font-size:.95rem; font-weight:600}.snz-list small{display:block; font-size:.78rem; color:var(--ink-3)}
+.snz-list .i{width:20px; height:20px; color:var(--accent); flex:none}
+.snz-list input[type=date]{margin-left:auto; font:inherit; font-size:16px; border:0; background:none; color:var(--ink)}
+@media (prefers-reduced-motion: reduce){ .sw-act button{transition:none} }
 #nePrev li{position:relative}
 #nePrev li>span{margin-right:6px}
 .to-task{display:inline-flex; align-items:center; gap:5px; vertical-align:middle; margin-left:4px; padding:5px 10px; border:0; border-radius:999px; font-family:inherit; font-size:.7rem; font-weight:600; line-height:1; letter-spacing:.02em; color:var(--accent); background:var(--surface); box-shadow:var(--raise-sm); cursor:pointer; white-space:nowrap}
@@ -1288,6 +1302,13 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   </div>
 </aside>
 
+<div class="modal" id="snzModal" hidden role="dialog" aria-modal="true" aria-labelledby="snzTitle">
+  <div class="card modal-card">
+    <div><h2 id="snzTitle" style="margin:0">Ne zamana erteleyelim?</h2><p class="hint-txt" id="snzSub" style="margin:6px 0 0"></p></div>
+    <div class="snz-list" id="snzList"></div>
+    <div class="modal-foot"><span style="flex:1"></span><button type="button" class="btn sm ghost" id="snzClose">Vazgeç</button></div>
+  </div>
+</div>
 <div class="modal" id="listModal" hidden role="dialog" aria-modal="true" aria-labelledby="lmTitle">
   <form class="card modal-card" id="listForm" autocomplete="off">
     <h2 id="lmTitle">Yeni liste</h2>
@@ -2567,18 +2588,43 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 
   // Tick a task in a list: show the check, sparks and strike line first, then let it slide to its new place.
   // ---------- Görev kartı kaydırma eylemleri (dokunmatik ve fare) ----------
+  // Apple Mail düzeni: sağa → Tamamla; sola kısa → Ertele + Sil açık kalır; sola sonuna kadar (ya da hızlı fiske) → Ertele.
+  // Yay ekrandaki değerden başlar, parmağın hızını devralır; karar konuma değil gidiş yönüne göre (momentum izdüşümü, d≈0,99); sınırda lastik direnç.
+  const SPR = (get, set, to, o = {}) => {
+    const z = o.damping == null ? 1 : o.damping, resp = o.response || .38, k = Math.pow(2 * Math.PI / resp, 2), c = 4 * Math.PI * z / resp;
+    let x = get(), v = o.v || 0, last = performance.now(), id = 0, stop = false;
+    if (!motionOK()) { set(to); o.done && o.done(); return { stop() {} }; }
+    const step = now => { if (stop) return; const dt = Math.min(.032, (now - last) / 1000); last = now;
+      const a = -k * (x - to) - c * v; v += a * dt; x += v * dt;
+      if (Math.abs(v) < 4 && Math.abs(x - to) < .4) { set(to); o.done && o.done(); return; } set(x); id = requestAnimationFrame(step); };
+    id = requestAnimationFrame(step); return { stop() { stop = true; cancelAnimationFrame(id); } };
+  };
+  const ACT_W = 176;
+  let swOpen = null;   // açık duran satır: { li, bg, x, anim }
+  function swClose(now) {
+    const o = swOpen; if (!o) return; swOpen = null; o.anim && o.anim.stop();
+    const fin = () => { o.bg.remove(); o.li.classList.remove('sw'); o.li.style.transform = ''; };
+    if (now) return fin();
+    o.anim = SPR(() => o.x, x => { o.x = x; o.li.style.transform = `translateX(${x}px)`; }, 0, { done: fin });
+  }
   (() => {
     let st = null, eatClick = false;
     const TH = () => Math.min(120, st.w * .32);
+    const rub = (d, lim) => { const a = Math.abs(d); if (a <= lim) return d; return Math.sign(d) * (lim + (a - lim) * .35); };
     document.addEventListener('pointerdown', e => {
       if (e.button > 0) return;
+      if (swOpen && !(e.target.closest && e.target.closest('.sw-bg.open, .task.sw'))) swClose();
       const li = e.target.closest && e.target.closest('.task');
       if (!li || e.target.closest('.grip, .check, [data-star], input, a') || li.dataset.busy) return;
-      st = { li, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, w: li.offsetWidth };
+      const base = swOpen && swOpen.li === li ? swOpen.x : 0;
+      if (swOpen && swOpen.li === li) { swOpen.anim && swOpen.anim.stop(); }
+      st = { li, x: e.clientX, y: e.clientY, dx: base, base, on: !!base, id: e.pointerId, w: li.offsetWidth, pts: [[e.clientX, performance.now()]] };
+      if (base) { st.bg = swOpen.bg; st.kind = 'l'; swOpen = null; }
     }, { passive: true });
     document.addEventListener('pointermove', e => {
       if (!st || e.pointerId !== st.id) return;
-      const dx = e.clientX - st.x, dy = e.clientY - st.y;
+      const dx = e.clientX - st.x + st.base, dy = e.clientY - st.y;
+      st.pts.push([e.clientX, performance.now()]); if (st.pts.length > 6) st.pts.shift();
       if (!st.on) {
         if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }
         if (Math.abs(dx) < 14 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
@@ -2591,26 +2637,79 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         try { li.setPointerCapture(e.pointerId); } catch (_) {}
       }
       st.dx = dx;
-      const t = byId(st.li.dataset.id), right = dx > 0, arm = Math.abs(dx) > TH();
-      st.li.style.transform = `translateX(${right ? Math.min(dx, st.w * .6) : Math.max(dx, -st.w * .6)}px)`;
+      const t = byId(st.li.dataset.id), right = dx > 0;
+      const x = right ? rub(dx, st.w * .6) : rub(dx, st.w * .78);
+      st.li.style.transform = `translateX(${x}px)`;
       const kind = right ? 'r' : 'l';
-      if (st.kind !== kind) { st.kind = kind; st.bg.className = 'sw-bg ' + kind;
-        st.bg.innerHTML = right ? `${ico('check')}<span>${t && t.done ? 'Geri al' : 'Tamamla'}</span>` : `<span>Sil</span>${ico('trash')}`; }
-      if (arm !== !!st.arm) { st.arm = arm; st.bg.classList.toggle('arm', arm); st.bg.style.opacity = arm ? '1' : '.75'; if (arm && navigator.vibrate) try { navigator.vibrate(8); } catch (_) {} }
+      if (st.kind !== kind || !st.bg.innerHTML) { st.kind = kind; st.bg.className = 'sw-bg ' + kind;
+        st.bg.innerHTML = right ? `${ico('check')}<span>${t && t.done ? 'Geri al' : 'Tamamla'}</span>`
+          : `<div class="sw-act"><button type="button" class="snz" data-swsnz>${ico('clock')}<span>Ertele</span></button><button type="button" class="del" data-swdel>${ico('trash')}<span>Sil</span></button></div>`; }
+      if (right) { const arm = dx > TH(); if (arm !== !!st.arm) { st.arm = arm; st.bg.classList.toggle('arm', arm); st.bg.style.opacity = arm ? '1' : '.75'; if (arm && navigator.vibrate) try { navigator.vibrate(8); } catch (_) {} } }
+      else { st.bg.style.opacity = '1'; const full = -dx > st.w * .6; if (full !== !!st.full) { st.full = full; st.bg.classList.toggle('full', full); if (full && navigator.vibrate) try { navigator.vibrate(10); } catch (_) {} } }
     }, { passive: true });
     const end = e => {
       if (!st || (e && e.pointerId !== st.id)) return;
       const s0 = st; st = null; if (!s0.on) return;
       eatClick = true; setTimeout(() => { eatClick = false; }, 350);
-      const li = s0.li, bg = s0.bg, id = li.dataset.id, fire = Math.abs(s0.dx) > Math.min(120, s0.w * .32);
-      li.classList.add('sw-back');
-      if (fire && s0.dx < 0) { li.style.transform = `translateX(${-s0.w - 40}px)`; setTimeout(() => { bg.remove(); li.classList.remove('sw', 'sw-back'); li.style.transform = ''; deleteTask(id); }, 260); return; }
-      li.style.transform = '';
-      setTimeout(() => { bg.remove(); li.classList.remove('sw', 'sw-back'); if (fire && s0.dx > 0) { const b = li.querySelector('[data-toggle]'); if (b) completeFromList(li, b); } }, 300);
+      const li = s0.li, bg = s0.bg, id = li.dataset.id;
+      if (s0.base && Math.abs(s0.dx - s0.base) < 6) { swOpen = { li, bg, x: s0.base }; swClose(); return; }   // açık satıra dokunmak kapatır
+      const p = s0.pts, a0 = p[0], a1 = p[p.length - 1], vx = a1 && a0 && a1[1] > a0[1] ? (a1[0] - a0[0]) / (a1[1] - a0[1]) * 1000 : 0;   // px/sn
+      const proj = s0.dx + vx / 1000 * .99 / (1 - .99);   // momentum izdüşümü
+      let cur = s0.dx > 0 ? rub(s0.dx, s0.w * .6) : rub(s0.dx, s0.w * .78);
+      const setX = x => { cur = x; li.style.transform = `translateX(${x}px)`; };
+      const fin = () => { bg.remove(); li.classList.remove('sw', 'sw-back'); li.style.transform = ''; };
+      if (s0.dx > 0) {
+        const fire = s0.dx > Math.min(120, s0.w * .32) || (proj > s0.w * .5 && vx > 500);
+        SPR(() => cur, setX, 0, { v: vx, done: () => { fin(); if (fire) { const b = li.querySelector('[data-toggle]'); if (b) completeFromList(li, b); } } });
+        return;
+      }
+      // sola: tam kaydırma (ya da hızlı fiske) → Ertele; yarıdan fazla → düğmeler açık kalır; değilse kapanır
+      if (s0.full || proj < -s0.w * .72) { SPR(() => cur, setX, 0, { v: vx, damping: .8, response: .3, done: () => { fin(); openSnooze(id); } }); return; }
+      if (proj < -ACT_W / 2) {
+        bg.classList.add('open'); bg.classList.remove('full');
+        const o = { li, bg, x: cur }; swOpen = o;
+        o.anim = SPR(() => o.x, x => { o.x = x; li.style.transform = `translateX(${x}px)`; }, -ACT_W, { v: vx, damping: vx < -800 ? .8 : 1, response: vx < -800 ? .3 : .38 });
+        return;
+      }
+      SPR(() => cur, setX, 0, { v: vx, done: fin });
     };
     document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
-    document.addEventListener('click', e => { if (eatClick && e.target.closest && e.target.closest('.task')) { e.stopPropagation(); e.preventDefault(); eatClick = false; } }, true);
+    document.addEventListener('click', e => {
+      const sb = e.target.closest && e.target.closest('[data-swsnz], [data-swdel]');
+      if (sb) { e.stopPropagation(); e.preventDefault(); const o = swOpen, li = o && o.li; if (!li) return; const id = li.dataset.id;
+        if (sb.matches('[data-swsnz]')) { swClose(); openSnooze(id); } else { swClose(true); deleteTask(id); } return; }
+      if (eatClick && e.target.closest && e.target.closest('.task')) { e.stopPropagation(); e.preventDefault(); eatClick = false; }
+    }, true);
+    addEventListener('scroll', () => { if (swOpen) swClose(); }, { passive: true, capture: true });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && swOpen) swClose(); });
   })();
+
+  // ---------- Ertele (kaydırma ve Site Asistan ana sayfasıyla aynı seçenekler) ----------
+  let snzId = null;
+  function openSnooze(id) {
+    const t = byId(id); if (!t) return; snzId = id;
+    const d0 = new Date(), add = n => { const d = new Date(d0); d.setDate(d.getDate() + n); return d; };
+    const mon = (() => { const d = new Date(d0); const k = (8 - d.getDay()) % 7 || 7; d.setDate(d.getDate() + k); return d; })();
+    const fD = new Intl.DateTimeFormat('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const seen = new Set(), opts = [['Yarın', add(1)], ['2 gün sonra', add(2)], ['Pazartesi', mon], ['1 hafta sonra', add(7)]].filter(([, d]) => { const k = ymd(d); if (seen.has(k)) return false; seen.add(k); return true; });
+    $('#snzSub').textContent = t.title;
+    $('#snzList').innerHTML = opts.map(([n, d]) => `<button type="button" data-snzd="${ymd(d)}">${ico('clock')}<span><b>${n}</b><small>${cap(fD.format(d))}</small></span></button>`).join('')
+      + `<label for="snzPick">${ico('added')}<span><b>Tarih seç</b><small>Takvimden başka bir gün</small></span><input type="date" id="snzPick" min="${ymd(add(1))}"></label>`;
+    $('#snzModal').hidden = false; setTimeout(() => { const b = $('#snzList button'); b && b.focus(); }, 60);
+  }
+  const closeSnooze = () => { $('#snzModal').hidden = true; snzId = null; };
+  function doSnooze(due) {
+    const t = byId(snzId); closeSnooze(); if (!t || !due) return;
+    const prev = { due: t.due, reminded: t.reminded, order: t.order };
+    t.due = due; t.reminded = null; delete t.order; putTask(t); render(); syncDrawer();
+    toast(`“${t.title}” → ${dueLabel(due)}`, () => { t.due = prev.due; t.reminded = prev.reminded; if (prev.order != null) t.order = prev.order; putTask(t); render(); syncDrawer(); });
+  }
+  $('#snzList').addEventListener('click', e => { const b = e.target.closest('[data-snzd]'); if (b) doSnooze(b.dataset.snzd); });
+  $('#snzList').addEventListener('change', e => { if (e.target.id === 'snzPick' && e.target.value) doSnooze(e.target.value); });
+  $('#snzClose').addEventListener('click', closeSnooze);
+  $('#snzModal').addEventListener('click', e => { if (e.target.id === 'snzModal') closeSnooze(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#snzModal').hidden) closeSnooze(); });
+
   function completeFromList(li, btn) {
     const t = byId(li.dataset.id); if (!t || li.dataset.busy) return;
     btn.classList.add('pop');
