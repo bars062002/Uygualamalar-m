@@ -512,6 +512,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .to-task:active{box-shadow:var(--inset)}
 @media (hover:hover){ .to-task{opacity:.55} #nePrev li:hover .to-task{opacity:1} }
 .group-head[data-group="inbox"]{color:var(--accent)}
+.group-head[data-group="star"]{color:var(--accent)}
+.group-head[data-group="star"] .n{background:var(--accent); color:#fff; box-shadow:var(--inset-sm)}
 .group-head[data-group="inbox"]::after{content:"Dokununca listeye yerleşir"; margin-left:auto; font-size:.68rem; font-weight:500; letter-spacing:.02em; text-transform:none; color:var(--ink-3)}
 .inbox-link{display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:11px 14px; border-radius:999px; color:var(--accent); text-decoration:none; font-size:.85rem; box-shadow:var(--raise-sm); background:var(--surface)}
 .inbox-link .i{width:15px; height:15px}
@@ -2331,20 +2333,22 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       <div class="track"><i style="width:${pc[k] / pm * 100}%;background:${pcol[k]}"></i></div></div>`).join('');
   }
 
-  // Manual order (from drag and drop) wins inside a group; otherwise date, star, priority.
+  // Sabit dizilim: önce en yakın gün, aynı gün içinde en son eklenen üstte. Elle sıra yok.
+  const addedAt = t => +new Date(t.createdAt || 0) || 0;
+  const newestFirst = (a, b) => addedAt(b) - addedAt(a);
   function sortTasks(a, b) {
     if (a.done !== b.done) return a.done ? 1 : -1;
     if (a.done) return (b.doneAt || '').localeCompare(a.doneAt || '');
-    const ao = typeof a.order === 'number', bo = typeof b.order === 'number';
-    if (ao && bo && a.order !== b.order) return a.order - b.order;
-    if (ao !== bo) return ao ? -1 : 1;
-    return byDate(a, b);
+    return (a.due || '9999').localeCompare(b.due || '9999') || newestFirst(a, b);
   }
-  const GROUPS = [['inbox', 'Yeni gelenler'], ['late', 'Gecikmiş'], ['today', 'Bugün'], ['tomorrow', 'Yarın'], ['week', 'Bu hafta'], ['later', 'Daha sonra'], ['none', 'Tarihsiz'], ['done', 'Tamamlanan']];
+  // Önemli ve Yeni gelenler: tarihe bakmadan en son eklenen en üstte
+  const NEWEST_GROUPS = ['star', 'inbox'];
+  const GROUPS = [['star', 'Önemli'], ['inbox', 'Yeni gelenler'], ['late', 'Gecikmiş'], ['today', 'Bugün'], ['tomorrow', 'Yarın'], ['week', 'Bu hafta'], ['later', 'Daha sonra'], ['none', 'Tarihsiz'], ['done', 'Tamamlanan']];
   // Eylem Düğmesi ile gelen ve henüz açılmamış görevler en üstte "Yeni gelenler"de durur
   const isInbox = t => t.src === 'quick' && !t.seen && !t.done;
   function groupOf(t) {
     if (t.done) return 'done';
+    if (t.star) return 'star';
     if (isInbox(t)) return 'inbox';
     if (!t.due) return 'none';
     const n = diffDays(t.due);
@@ -2403,7 +2407,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       return;
     }
     const by = {}; list.forEach(t => (by[groupOf(t)] ||= []).push(t));
-    if (by.inbox) by.inbox.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    NEWEST_GROUPS.forEach(k => by[k] && by[k].sort(newestFirst));
     const dragOn = !!window.Sortable && !q && ui.filter === 'all';
     // While dragging is possible, keep "Bugün" and "Yarın" visible as drop targets even when empty.
     const show = GROUPS.filter(([k]) => by[k] || (dragOn && ['today', 'tomorrow'].includes(k)));
@@ -2422,7 +2426,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       Sortable.create(ul, {
         group: { name: 'tasks', pull: true, put: DROPPABLE.includes(k) },
         handle: '.grip', animation: 180, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
-        sort: DROPPABLE.includes(k), forceFallback: true, fallbackTolerance: 4,
+        sort: false, forceFallback: true, fallbackTolerance: 4,
         onStart: () => document.body.classList.add('dragging'),
         onEnd: onDragEnd,
       });
@@ -2444,10 +2448,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const moved = byId(evt.item.dataset.id);
     const changedGroup = moved && to !== from;
     if (changedGroup) { moved.due = dueForGroup(to, moved.due); moved.reminded = null; if (from === 'inbox') moved.seen = true; }
-    [...evt.to.children].forEach((li, i) => {
-      const t = byId(li.dataset.id); if (!t) return;
-      if (t.order !== i || t === moved) { t.order = i; putTask(t); }
-    });
+    if (changedGroup) { delete moved.order; putTask(moved); }
     if (changedGroup) toast(to === 'none' ? `“${moved.title}” tarihsiz yapıldı` : `“${moved.title}” → ${dueLabel(moved.due)}`);
     render();
   }
@@ -2950,7 +2951,10 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if (g) { const k = g.dataset.group; ui.collapsed[k] = g.getAttribute('aria-expanded') === 'true'; return renderTasks(); }
     const li = el.closest('.task');
     if (li && el.closest('[data-toggle]')) return completeFromList(li, el.closest('[data-toggle]'));
-    if (li && el.closest('[data-star]')) { const t = byId(li.dataset.id); t.star = !t.star; putTask(t); return render(); }
+    if (li && el.closest('[data-star]')) {
+      const t = byId(li.dataset.id); t.star = !t.star; putTask(t); render();
+      return toast(t.star ? `“${t.title}” Önemli'ye taşındı` : `“${t.title}” Önemli'den çıkarıldı`, () => { t.star = !t.star; putTask(t); render(); });
+    }
     const op = el.closest('[data-open]');
     if (op) return openDrawer(op.dataset.open);
   });
