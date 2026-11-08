@@ -504,6 +504,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 html:root[data-oled="on"]{--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
 html[data-oled="on"] :is(.card,.task,.drawer,.toast,.selbar){box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)!important}
 .voice-btn{width:48px; padding:0; display:grid; place-items:center}
+.voice-top{width:44px; padding:0; display:grid; place-items:center}
 .voice-btn.rec{color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); animation:rec 1.2s ease-in-out infinite}
 @keyframes rec{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--accent) 22%,transparent)}}
 /* Odak modu: sayaç çalışırken ekran sadeleşir, arkada nefes alan ışık */
@@ -1126,6 +1127,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
           <button data-f="star">Önemli</button>
           <button data-f="done">Tamamlanan</button>
         </div>
+        <button class="btn sel-btn voice-top" type="button" id="voiceTop" aria-label="Sesle görev ekle"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
         <button class="btn sel-btn" type="button" id="selStart" title="Birden çok görevi seç (karta basılı tutarak da başlar)">Seç</button>
         <span id="catFilter"></span>
       </div>
@@ -2856,6 +2858,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const hi = document.createElement('input'); hi.type = 'checkbox'; hi.setAttribute('switch', ''); hi.tabIndex = -1; hl.appendChild(hi); document.body.appendChild(hl);
     navigator.vibrate = p => { const n = Array.isArray(p) ? Math.ceil(p.length / 2) : 1; for (let i = 0; i < n; i++) setTimeout(() => hl.click(), i * 90); return true; }; }
   const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let voiceFb = false;
   function parseVoice(txt) {
     let t = ' ' + txt.trim() + ' ', due = null, rem = null, site = '';
     const sm = t.match(/\b([A-Za-zÇĞİÖŞÜçğıöşü]{3,6}\s?\d{3,6})/); if (sm) { site = sm[1].replace(/\s/g, '').toLocaleUpperCase('tr-TR'); t = t.replace(sm[1], ' '); }
@@ -2870,16 +2873,18 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   window.RT_parseVoice = parseVoice;
   function voiceAdd() {
     const b = $('#addVoice');
-    if (!SRec) return toast('Bu tarayıcı sesle yazmayı desteklemiyor');
+    /* iPhone ana ekran uygulamasında tarayıcı ses tanıma yok: klavyenin dikte mikrofonuna yönlendir, Ekle'de cümle ayrıştırılır */
+    if (!SRec) { openAdd(); voiceFb = true; const i = $('#addTitle'); i.value = ''; i.focus(); return toast('Klavyedeki mikrofona basıp söyleyin, sonra Ekle’ye basın'); }
     const r = new SRec(); r.lang = 'tr-TR'; r.interimResults = false; r.maxAlternatives = 1;
     b.classList.add('rec');
     r.onresult = e => { const v = parseVoice(e.results[0][0].transcript); if (!v.title) return toast('Anlaşılamadı, tekrar deneyin');
       openAdd(); $('#addTitle').value = v.title; if (v.site) $('#addSite').value = v.site; if (v.due) $('#addDue').value = v.due; if (v.rem) $('#addRem').value = v.rem;
       toast(`“${v.title}”${v.site ? ' · ' + v.site : ''}${v.due ? ' · ' + dueLabel(v.due) : ''}${v.rem ? ' ' + v.rem : ''} — Ekle’ye basın`); };
-    r.onerror = () => toast('Mikrofon kullanılamadı'); r.onend = () => b.classList.remove('rec');
+    r.onerror = ev => { if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) { voiceFb = true; openAdd(); $('#addTitle').focus(); toast('Mikrofon izni yok · klavyedeki mikrofonla söyleyebilirsiniz'); } else toast('Anlaşılamadı, tekrar deneyin'); }; r.onend = () => b.classList.remove('rec');
     try { r.start(); } catch (e) { b.classList.remove('rec'); }
   }
   $('#addVoice').addEventListener('click', voiceAdd);
+  $('#voiceTop').addEventListener('click', voiceAdd);
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-sug]'); if (!b) return;
     const k = b.dataset.sug; if (k === 'voice') { openAdd(); voiceAdd(); } else if (k === 'all') { ui.filter = 'all'; render(); } else { openAdd(); $('#addTitle').focus(); } });
   if (IN_HOST) addEventListener('message', e => { const d = e.data; if (d && d.type === 'sa-sound' && HOST_OK(e.origin)) lsSet('ritim.sound', d.on ? 'on' : 'off', true); });
@@ -2987,6 +2992,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   $('#addDue').value = today();
   $('#addForm').addEventListener('submit', e => {
     e.preventDefault();
+    /* Klavye dikte ile söylenen cümle: saha, gün ve saat alanlara ayrılır */
+    if (voiceFb) { voiceFb = false; const v = parseVoice($('#addTitle').value); if (v.title) { $('#addTitle').value = v.title; if (v.site) $('#addSite').value = v.site; if (v.due) $('#addDue').value = v.due; if (v.rem) $('#addRem').value = v.rem; } }
     const title = $('#addTitle').value.trim();
     if (!title) { $('#addTitle').focus(); toast('Görev adı boş olamaz'); return; }
     const nm = title.match(/^not\b[\s:,.-]*(.+)$/is);
