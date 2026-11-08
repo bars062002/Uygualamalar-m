@@ -108,7 +108,8 @@ export async function runSchedule(env) {
     const rows = (await (digest
       ? env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'tasks' AND data IS NOT NULL").bind(owner)
       : env.DB.prepare("SELECT id, data FROM udocs WHERE owner = ? AND col = 'tasks' AND data IS NOT NULL AND json_extract(data, '$.due') = ? AND json_extract(data, '$.remind') IS NOT NULL").bind(owner, now.ymd)).all()).results || [];
-    const tasks = rows.map(r => { try { return Object.assign(JSON.parse(r.data), { id: r.id }); } catch { return null; } }).filter(t => t && !t.done && !t.sample);
+    const allT = rows.map(r => { try { return Object.assign(JSON.parse(r.data), { id: r.id }); } catch { return null; } }).filter(t => t && !t.sample);
+    const tasks = allT.filter(t => !t.done);
     // 1) Saatli hatırlatmalar: bugün, saati gelmiş (son 30 dk içinde) ve daha önce gönderilmemiş
     for (const t of tasks) {
       if (t.due !== now.ymd || !/^\d\d:\d\d$/.test(t.remind || '')) continue;
@@ -132,6 +133,18 @@ export async function runSchedule(env) {
       const st = await deliver(env, subs, { title: 'Günaydın · Günün özeti', body, tag: 'ozet', url: './?m=home' });
       console.log('günün özeti', owner, now.ymd, now.hm, st.join(','));
       await note(env, owner, 'digest', { ymd: now.ymd, time: now.hm, status: st, empty: !parts.length });
+    }
+    // 4) Haftalık özet: pazartesi 08:30 — geçen hafta tamamlanan, geciken, bu hafta planlı işler ve 30 gün içinde biten sözleşmeler
+    if (digest && new Date(now.ymd + 'T12:00:00Z').getUTCDay() === 1 && await once(env, `w:${owner}:${now.ymd}`)) {
+      const wk = new Date(Date.parse(now.ymd) - 7 * 864e5).toISOString().slice(0, 10), nx = new Date(Date.parse(now.ymd) + 6 * 864e5).toISOString().slice(0, 10);
+      const done = allT.filter(t => t.done && t.doneAt && String(t.doneAt).slice(0, 10) >= wk && String(t.doneAt).slice(0, 10) < now.ymd).length;
+      const late = tasks.filter(t => t.due && t.due < now.ymd).length, week = tasks.filter(t => t.due && t.due >= now.ymd && t.due <= nx).length;
+      let con = []; for (const s of subs) { try { const c = JSON.parse(s.contracts || '[]'); if (c.length > con.length) con = c; } catch {} }
+      const c30 = new Set(con.filter(c => { const d = dayDiff(c.b, now.ymd); return d >= 0 && d <= 30; }).map(c => c.k + c.b)).size;
+      const body = [`Geçen hafta ${done} iş tamamlandı.`, `Bu hafta ${week} iş planlı${late ? `, ${late} gecikmiş iş var` : ''}.`, c30 ? `${c30} sözleşme 30 gün içinde bitiyor.` : ''].filter(Boolean).join('\n');
+      const st = await deliver(env, subs, { title: 'Haftalık özet', body, tag: 'hafta', url: './?m=home' });
+      console.log('haftalık özet', owner, now.ymd, st.join(','));
+      await note(env, owner, 'weekly', { ymd: now.ymd, done, late, week, c30, status: st });
     }
     // 3) Sözleşme bitişine 90 / 60 / 30 gün kala ayrı bildirim (sabah özetiyle aynı saatte, günde bir kez)
     if (digest && await once(env, `c:${owner}:${now.ymd}`)) {
