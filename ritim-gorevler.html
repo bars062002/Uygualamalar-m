@@ -483,6 +483,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li .fn small{font-size:.72rem; color:var(--ink-3)}
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
+.drawer.morph{transition:none!important}
 /* Toplu seçim: karta basılı tut ya da Seç → kartlar seçilir, altta işlem çubuğu */
 .task{-webkit-touch-callout:none}
 .sel-btn{height:44px; padding:0 18px}
@@ -2791,6 +2792,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   function completeFromList(li, btn) {
     const t = byId(li.dataset.id); if (!t || li.dataset.busy) return;
     btn.classList.add('pop');
+    if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
+    if (!t.done && motionOK()) li.animate([{ transform: 'scale(1)' }, { transform: 'scale(.975)', offset: .35 }, { transform: 'scale(1.008)', offset: .75 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' });
     if (t.done || !motionOK()) return afterToggle(t.id);
     li.dataset.busy = '1';
     li.classList.add('done');
@@ -4038,6 +4041,14 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if (ui.open !== id) commitPendingSub();
     { const t0 = byId(id); if (t0 && isInbox(t0)) { t0.seen = true; putTask(t0); setTimeout(render, 450); } }
     ui.open = id; syncDrawer();
+    /* Telefonda kart büyüyerek detay ekranına dönüşür (kartın yerinden açılır) */
+    const src = motionOK() && !drawer.classList.contains('open') && $(`.view:not([hidden]) .task[data-id="${id}"]`);
+    if (src && drawer.offsetWidth >= innerWidth - 2) {
+      const c = src.getBoundingClientRect(); drawer.classList.add('morph', 'open'); const d = drawer.getBoundingClientRect();
+      const ins = `inset(${Math.max(0, c.top - d.top)}px ${Math.max(0, d.right - c.right)}px ${Math.max(0, d.bottom - c.bottom)}px ${Math.max(0, c.left - d.left)}px round 22px)`;
+      drawer.animate([{ clipPath: ins }, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { duration: 460, easing: 'cubic-bezier(.2,.9,.25,1)' }).finished.then(() => drawer.classList.remove('morph'), () => drawer.classList.remove('morph'));
+      src.animate([{ opacity: 1 }, { opacity: .25 }, { opacity: 1 }], { duration: 520 });
+    }
     drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); $('#scrim').hidden = false;
     if (motionOK()) $$('#drawer .d-body > *').forEach((el, i) => el.animate(ENTER, { duration: 480, delay: 90 + i * 45, easing: EASE, fill: 'backwards' }));
     setTimeout(() => $('#dTitle').focus(), 60);
