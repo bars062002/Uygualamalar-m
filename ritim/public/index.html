@@ -2034,7 +2034,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if ((nt && nt !== theme) || na !== accent || ns !== skin) { if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
     /* Site Asistan'da seçilen özel vurgu rengi (açık/koyu karşılıklarıyla, kontrastı ayarlı gelir) */
     const R = document.documentElement;
-    if (d.accent === 'ozel' && Array.isArray(d.accHex) && d.accHex.length === 4 && d.accHex.every(h => /^#[0-9a-f]{6}$/i.test(h))) {
+    if (Array.isArray(d.accHex) && d.accHex.length === 4 && d.accHex.every(h => /^#[0-9a-f]{6}$/i.test(h))) {
       const dk = isDarkTheme(), a = dk ? d.accHex[2] : d.accHex[0], a2 = dk ? d.accHex[3] : d.accHex[1], [r, g, b] = hexRgb(a);
       R.style.setProperty('--accent', a); R.style.setProperty('--accent-2', a2); R.style.setProperty('--accent-soft', `rgba(${r},${g},${b},.14)`); R.style.setProperty('--accent-glow', `rgba(${r},${g},${b},.35)`); R.style.setProperty('--on-accent', lum(a) > .45 ? '#111' : '#fff'); R.dataset.accOzel = '1';
     } else if (R.dataset.accOzel) { delete R.dataset.accOzel; ['--accent', '--accent-2', '--accent-soft', '--accent-glow', '--on-accent'].forEach(k => R.style.removeProperty(k)); applyTheme(); }
