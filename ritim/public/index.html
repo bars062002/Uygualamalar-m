@@ -764,6 +764,7 @@ html.embed .vhead-actions .btn.primary{flex:1; height:52px; border-radius:16px; 
 html.embed .vhead-actions .btn.primary svg.i{stroke:var(--on-accent); width:20px; height:20px}
 html.embed .vhead-actions .btn.primary:active{transform:scale(.98); box-shadow:0 6px 14px -8px var(--accent-glow), inset 0 2px 6px rgba(0,0,0,.18)}
 html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
+html.embed.rt-prime .view{opacity:0}
 /* Yedekler: simge tek başına fark edilmiyordu — yazılı */
 .vhead-actions .bk-open{height:44px; padding:0 16px; gap:8px; font-size:.8rem; flex:none}
 html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
@@ -1930,7 +1931,12 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     // Yalnız Ritim görünürken eşitle (gizliyken her sekme değişiminde çalışıp diğer modüllerin geçişini yavaşlatıyordu)
     if (d.on !== false) { lastAct = Date.now(); pull(); }
     /* Site Asistan'da Ritim sekmesi açılınca giriş animasyonu yeniden oynar: sayılar ve halkalar görünürken akar (önceden arka planda oynayıp bitiyordu) */
-    { const on = d.on !== false; if (on && saOn === false) replayView(); saOn = on; }
+    /* Gizlenince görünüm hazır bekler (içerik saydam); sekmeye dönülünce beklemeden, aynı karede yükselerek açılır.
+       Önceden eski içerik bir an görünüp sonra kaybolup yeniden geliyordu (beyaz flaş). */
+    { const on = d.on !== false, root = document.documentElement;
+      if (!on && saOn !== false && STORE.ready && motionOK()) root.classList.add('rt-prime');
+      if (on && saOn === false) { clearTimeout(replayT); if (STORE.ready && motionOK() && !document.hidden) { root.classList.remove('rt-prime'); enterView(); } else root.classList.remove('rt-prime'); }
+      saOn = on; }
     const st = document.documentElement.style;
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
