@@ -442,6 +442,13 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .hint-txt{font-size:.78rem; color:var(--ink-3); margin:0}
 .hint-txt:empty{display:none}
 .subs{display:flex; flex-direction:column; gap:10px; list-style:none; margin:0 0 12px; padding:0}
+.tpl{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px}
+.tpl > small{font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-right:2px}
+.tpl button{display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 12px; border-radius:10px; font-size:.78rem; font-weight:600; color:var(--ink-2); box-shadow:var(--inset-sm)}
+.tpl button svg.i{width:13px; height:13px}
+.tpl button:hover{color:var(--accent)}
+.tpl button.save{color:var(--ink-3); box-shadow:none; text-decoration:underline; text-underline-offset:3px}
+@media (pointer:coarse){ .tpl button{min-height:44px} }
 .subs li{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; font-size:.9rem}
 .subs li.done span{text-decoration:line-through; color:var(--ink-3)}
 .subs .sub-at{display:block; font-size:.72rem; color:var(--ink-3); margin-top:2px; font-variant-numeric:tabular-nums}
@@ -1263,6 +1270,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       <span class="lbl" id="dSubsLbl">Alt görevler</span>
       <ul class="subs" id="dSubs"></ul>
       <form id="dSubForm" autocomplete="off"><label class="field" for="dSubIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="dSubIn" placeholder="Alt görev ekle ve Enter'a basın" maxlength="120"></label></form>
+      <div class="tpl" id="dTpl" role="group" aria-label="Alt görev şablonları"></div>
     </div>
     <div>
       <span class="lbl">Notlar</span>
@@ -2683,6 +2691,29 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       };
       reply(); return;
     }
+    /* Saha 360 › Saha ziyareti: fotoğraflar Dosyalarım'a (saha kodlu, yalnız sen görürsün), ziyaret notu Notlar'a */
+    if (d.type === 'sa-visit' && d.rid && typeof d.site === 'string') {
+      const reply = (ok, extra) => { try { e.source.postMessage(Object.assign({ type: 'rt-visit', rid: d.rid, ok }, extra || {}), e.origin); } catch (_) {} };
+      const run = async () => {
+        if (!STORE.ready) return setTimeout(run, 300);
+        if (STORE.mode !== 'api') return reply(false, { error: 'Ritim hesabınla giriş yapmalısın.' });
+        const site = d.site.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20), at = new Date(), p2 = x => String(x).padStart(2, '0');
+        const stamp = `${p2(at.getDate())}.${p2(at.getMonth() + 1)}.${at.getFullYear()} ${p2(at.getHours())}.${p2(at.getMinutes())}`;
+        const files = (Array.isArray(d.photos) ? d.photos : []).filter(f => f instanceof Blob).slice(0, 6), saved = [];
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i], ext = ((f.type || 'image/jpeg').split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+          try { const r = await fetch('/api/vault', { method: 'POST', body: f, headers: { ...authH(), 'content-type': f.type || 'image/jpeg', 'x-file-name': encodeURIComponent(`${site} ziyaret ${stamp}${files.length > 1 ? ' (' + (i + 1) + ')' : ''}.${ext}`), 'x-site': site } });
+            const j = await r.json().catch(() => ({})); if (r.ok) { saved.push(j); if (vui.files) vui.files.unshift(j); } } catch (_) {}
+        }
+        const geo = typeof d.lat === 'number' && typeof d.lng === 'number' ? `https://maps.google.com/?q=${d.lat.toFixed(6)},${d.lng.toFixed(6)}` : '';
+        const body = [`- Tarih: ${stamp}`, geo ? `- Konum: ${geo}${d.acc ? ` (±${Math.round(d.acc)} m)` : ''}` : '- Konum: alınamadı',
+          saved.length ? `- Fotoğraf: ${saved.length} adet · Notlar › Dosyalarım › ${site}` : (files.length ? '- Fotoğraf yüklenemedi' : ''), '', String(d.text || '').slice(0, 4000)].filter((x, i) => x !== '' || i === 3).join('\n');
+        const now = at.toISOString(), n = normNote({ id: uid(), title: `Saha ziyareti · ${site} · ${stamp.slice(0, 10)}`, body, site, created: now, updated: now, src: 'visit' });
+        S.notes.push(n); putNote(n); if (ui.route === 'notlar') renderNotes();
+        reply(true, { photos: saved.length, failed: files.length - saved.length, note: n.id });
+      };
+      run(); return;
+    }
     if (d.type === 'sa-open-backup') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); location.hash = '#pano'; setTimeout(() => { openBackup(); setTimeout(() => { const b = $('#bkAuto'); if (b && !b.hidden) b.scrollIntoView({ block: 'center', behavior: motionOK() ? 'smooth' : 'auto' }); }, 260); }, 120); }; f(); return; }
     /* Site Asistan genel arama: görev, not ve Dosyalarım'da eşleşenler */
     if (d.type === 'sa-find' && typeof d.q === 'string' && d.rid) {
@@ -3685,6 +3716,35 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     toast(`${item.name} silindi`, () => { S.shop.splice(k, 0, item); putShop(item); render(); });
   });
 
+  // ---------- Alt görev şablonları ----------
+  // Sık işler için hazır adımlar; kendi şablonun bu cihazda saklanır. Kira Takip'ten açılan görevlere sunucu "Kira yenileme"yi ekler.
+  const TEMPLATES = [
+    { id: 'kira', name: 'Kira yenileme', subs: ['Lehtarı ara', 'Kira teklifini al', 'Onaya gönder', 'Sözleşmeyi imzalat', 'ERP girişini yap'] },
+    { id: 'tekrar', name: 'Tekrarlama', subs: ['Artış oranını hesapla', 'Lehtara bildir', 'ERP girişini yap', 'Ödeme talimatını kontrol et'] },
+    { id: 'ziyaret', name: 'Saha ziyareti', subs: ['Randevu al', 'Sahayı fotoğrafla', 'Lehtarla görüş', 'Ziyaret notunu yaz'] },
+    { id: 'fesih', name: 'İptal / fesih', subs: ['Fesih yazısını hazırla', 'Lehtara tebliğ et', 'Söküm planla', 'Teminat iadesini başlat'] },
+  ];
+  const myTpl = () => { try { const t = JSON.parse(lsGet('ritim.tpl') || 'null'); return t && Array.isArray(t.subs) && t.subs.length ? t : null; } catch (e) { return null; } };
+  const allTpl = () => { const m = myTpl(); return m ? TEMPLATES.concat([{ id: 'mine', name: m.name || 'Benim şablonum', subs: m.subs }]) : TEMPLATES; };
+  function renderTpl(t) {
+    $('#dTpl').innerHTML = `<small>Şablon</small>${allTpl().map(x => `<button type="button" data-tpl="${x.id}" title="${esc(x.subs.join(' · '))}">${ico('subs')}${esc(x.name)}</button>`).join('')}`
+      + (t && t.subs.length >= 2 ? `<button type="button" class="save" data-tplsave>Bunu şablon yap</button>` : '');
+  }
+  $('#dTpl').addEventListener('click', e => {
+    const t = byId(ui.open); if (!t) return;
+    if (e.target.closest('[data-tplsave]')) {
+      const name = (prompt('Şablon adı', (myTpl() || {}).name || 'Benim şablonum') || '').trim().slice(0, 30); if (!name) return;
+      lsSet('ritim.tpl', JSON.stringify({ name, subs: t.subs.map(x => x.t).slice(0, 15) })); renderTpl(t); toast(`“${name}” şablonu kaydedildi`); return;
+    }
+    const b = e.target.closest('[data-tpl]'); if (!b) return;
+    const tp = allTpl().find(x => x.id === b.dataset.tpl); if (!tp) return;
+    const have = new Set(t.subs.map(x => lowerTr(x.t.trim()))), add = tp.subs.filter(x => !have.has(lowerTr(x)));
+    if (!add.length) return toast('Bu adımlar zaten ekli');
+    const now = Date.now(), ids = add.map(() => uid());
+    edit(x => { add.forEach((v, i) => x.subs.push({ id: ids[i], t: v, d: false, at: now })); });
+    toast(`${add.length} adım eklendi · ${tp.name}`, () => edit(x => { x.subs = x.subs.filter(s => !ids.includes(s.id)); }));
+  });
+
   // ---------- Drawer ----------
   const drawer = $('#drawer');
   // Alt görev kutusunda Enter'a basılmadan kalan yazı: panel kapanırken ya da başka göreve geçerken
@@ -3732,6 +3792,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       : t.remind ? 'Hatırlatıcı, sayfa açıkken seçtiğiniz saatte ekranda çıkar.' : '';
     const sd = t.subs.filter(s => s.d).length;
     $('#dSubsLbl').textContent = t.subs.length ? `Alt görevler · ${sd}/${t.subs.length}` : 'Alt görevler';
+    renderTpl(t);
     $('#dSubs').innerHTML = t.subs.map(s => `<li class="${s.d ? 'done' : ''}" data-sub="${s.id}">
       <button class="check" data-subtoggle aria-label="Alt görevi işaretle">${ico('check')}</button><span>${esc(s.t)}${s.at && validAt(s.at) ? `<time class="sub-at" datetime="${new Date(s.at).toISOString()}">${fmtNote.format(new Date(s.at))}</time>` : ''}</span>
       <button class="rm" data-subrm aria-label="Alt görevi sil">${ico('x')}</button></li>`).join('');
