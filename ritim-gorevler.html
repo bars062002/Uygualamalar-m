@@ -484,6 +484,20 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
 .drawer.morph{transition:none!important}
+/* OLED Siyah (Site Asistan teması): tam siyah zemin, ince kenar parıltısı */
+html:root[data-oled="on"]{--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
+html[data-oled="on"] :is(.card,.task,.drawer,.toast,.selbar){box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)!important}
+.voice-btn{width:48px; padding:0; display:grid; place-items:center}
+.voice-btn.rec{color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); animation:rec 1.2s ease-in-out infinite}
+@keyframes rec{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--accent) 22%,transparent)}}
+/* Odak modu: sayaç çalışırken ekran sadeleşir, arkada nefes alan ışık */
+body.focusing .tabbar, body.focusing .side, body.focusing #v-odak .focus > :not(.focus-main), body.focusing #fmode{opacity:0; pointer-events:none; transition:opacity .6s}
+body.focusing #v-odak .vhead{opacity:.35; transition:opacity .6s}
+body.focusing::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:0; background:radial-gradient(45% 35% at 50% 42%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 70%); animation:fbreath 5.5s ease-in-out infinite}
+@keyframes fbreath{50%{opacity:.35; transform:scale(1.08)}}
+.empty .sug{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:14px}
+.empty .sug button{min-height:44px; padding:0 16px; border-radius:99px; box-shadow:var(--raise-sm); font-weight:600; color:var(--accent)}
+@media (prefers-reduced-motion: reduce){ body.focusing::before, .voice-btn.rec{animation:none} }
 /* Toplu seçim: karta basılı tut ya da Seç → kartlar seçilir, altta işlem çubuğu */
 .task{-webkit-touch-callout:none}
 .sel-btn{height:44px; padding:0 18px}
@@ -1084,6 +1098,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         <label class="field small" for="addPri"><select id="addPri" aria-label="Öncelik"><option value="high">Yüksek</option><option value="med" selected>Orta</option><option value="low">Düşük</option></select></label>
         <label class="field small" for="addDue"><input type="date" id="addDue" aria-label="Son tarih"></label>
         <label class="field small rem-f" for="addRem" title="Hatırlatma saati: o saatte telefonuna bildirim gelir"><svg class="i" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><input type="time" id="addRem" aria-label="Hatırlatma saati" step="300"></label>
+        <button class="btn voice-btn" type="button" id="addVoice" aria-label="Sesle görev ekle" title="Söyle: “Yarın 10'da KSEMR32087'yi ara”"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
         <button class="btn primary" type="submit">Ekle</button>
         <button class="btn m-only add-x" type="button" id="addClose">Vazgeç</button>
       </form>
@@ -1973,7 +1988,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   if (EMBED) { let fy = scrollY, fr = 0; addEventListener('scroll', () => { if (fr) return; fr = requestAnimationFrame(() => { fr = 0; const y = scrollY, f = document.querySelector('.embed-nav .fab'); if (!f) return;
     if (y > fy + 6 && y > 120) f.classList.add('away'); else if (y < fy - 6 || y < 60) f.classList.remove('away'); fy = y; }); }, { passive: true }); }
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light' };
+  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light' };
   const HOST_SKINS = new Set(['cam', 'kagit', 'brut']); let skin = null;
   let saOn = null, replayT = 0;
   const replayView = () => { clearTimeout(replayT); replayT = setTimeout(() => { if (STORE.ready && motionOK() && !document.hidden) enterView(); }, 80); };
@@ -1997,6 +2012,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
     const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
+    if (d.theme) { if (d.theme === 'oled') document.documentElement.dataset.oled = 'on'; else delete document.documentElement.dataset.oled; }
     if ((nt && nt !== theme) || na !== accent || ns !== skin) { if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
   });
   const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
@@ -2451,7 +2467,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         : ui.filter === 'done' ? ['Henüz tamamlanan yok', 'Bitirdiğiniz görevler burada listelenir.']
         : ui.filter === 'star' ? ['Önemli görev yok', 'Bir görevin yanındaki yıldıza dokunarak öne çıkarın.']
         : ['Liste boş', 'Yukarıdaki alana yazıp Enter’a basarak ilk görevinizi ekleyin.'];
-      $('#groups').innerHTML = `<div class="empty"><b>${msg[0]}</b>${msg[1]}</div>`;
+      const sug = !q && STORE.ready && ui.filter !== 'done' ? `<div class="sug"><button type="button" data-sug="voice">Sesle ekle</button><button type="button" data-sug="add">Yeni görev</button>${ui.filter !== 'all' ? '<button type="button" data-sug="all">Tüm görevler</button>' : ''}</div>` : '';
+      $('#groups').innerHTML = `<div class="empty"><b>${msg[0]}</b>${msg[1]}${sug}</div>`;
       return;
     }
     const by = {}; list.forEach(t => (by[groupOf(t)] ||= []).push(t));
@@ -2810,6 +2827,36 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       setTimeout(() => { burst(innerWidth / 2, innerHeight * 0.35, { n: 44, spread: Math.min(innerWidth, 520) * 0.42, confetti: true }); toast('Bugünün tüm görevleri tamam! 🎉'); }, 150);
     }
   }
+
+  // ---------- Sesle görev: “Yarın 10'da KSEMR32087'yi ara” → başlık, saha, tarih, saat ----------
+  const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  function parseVoice(txt) {
+    let t = ' ' + txt.trim() + ' ', due = null, rem = null, site = '';
+    const sm = t.match(/\b([A-Za-zÇĞİÖŞÜçğıöşü]{3,6}\s?\d{3,6})/); if (sm) { site = sm[1].replace(/\s/g, '').toLocaleUpperCase('tr-TR'); t = t.replace(sm[1], ' '); }
+    const low = () => t.toLocaleLowerCase('tr-TR');
+    for (const [k, n] of [['yarından sonra', 2], ['öbür gün', 2], ['bugün', 0], ['yarın', 1]]) { const i = low().indexOf(k); if (i >= 0) { due = addDays(today(), n); t = t.slice(0, i) + ' ' + t.slice(i + k.length).replace(/^\S*/, ''); break; } }
+    const tm = t.match(/(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*'?(?:da|de|ta|te)(?=\s)/i);
+    if (tm) { const h = +tm[1], m = +(tm[2] || 0); if (h < 24 && m < 60) { rem = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); t = t.replace(tm[0], ' '); if (!due) due = today(); } }
+    const title = t.replace(/(^|\s)'?(yi|yı|yu|yü|i|ı)(?=\s)/gi, ' ').replace(/\s+/g, ' ').trim();
+    const tt = site && title.split(' ').length <= 2 ? site + ' · ' + title.toLocaleLowerCase('tr-TR') : title.charAt(0).toLocaleUpperCase('tr-TR') + title.slice(1);
+    return { title: tt, site, due, rem };
+  }
+  window.RT_parseVoice = parseVoice;
+  function voiceAdd() {
+    const b = $('#addVoice');
+    if (!SRec) return toast('Bu tarayıcı sesle yazmayı desteklemiyor');
+    const r = new SRec(); r.lang = 'tr-TR'; r.interimResults = false; r.maxAlternatives = 1;
+    b.classList.add('rec');
+    r.onresult = e => { const v = parseVoice(e.results[0][0].transcript); if (!v.title) return toast('Anlaşılamadı, tekrar deneyin');
+      openAdd(); $('#addTitle').value = v.title; if (v.site) $('#addSite').value = v.site; if (v.due) $('#addDue').value = v.due; if (v.rem) $('#addRem').value = v.rem;
+      toast(`“${v.title}”${v.site ? ' · ' + v.site : ''}${v.due ? ' · ' + dueLabel(v.due) : ''}${v.rem ? ' ' + v.rem : ''} — Ekle’ye basın`); };
+    r.onerror = () => toast('Mikrofon kullanılamadı'); r.onend = () => b.classList.remove('rec');
+    try { r.start(); } catch (e) { b.classList.remove('rec'); }
+  }
+  $('#addVoice').addEventListener('click', voiceAdd);
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-sug]'); if (!b) return;
+    const k = b.dataset.sug; if (k === 'voice') { openAdd(); voiceAdd(); } else if (k === 'all') { ui.filter = 'all'; render(); } else { openAdd(); $('#addTitle').focus(); } });
+  if (IN_HOST) addEventListener('message', e => { const d = e.data; if (d && d.type === 'sa-sound' && HOST_OK(e.origin)) lsSet('ritim.sound', d.on ? 'on' : 'off', true); });
 
   // ---------- Toplu seçim ----------
   const selIds = () => sel ? [...sel].filter(byId) : [];
@@ -4256,6 +4303,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     paintTimer();
   }
   function paintTimer() {
+    document.body.classList.toggle('focusing', !!F.running && ui.route === 'odak');
     $('#fTime').textContent = mmss(Math.ceil(F.left));
     $('#fLabel').textContent = F.running ? MODES[F.mode].label : F.left < F.total ? 'Duraklatıldı' : MODES[F.mode].label;
     setRing($('#fRing'), 1 - F.left / F.total);
