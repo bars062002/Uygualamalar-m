@@ -4170,6 +4170,24 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     paintTimer();
   }
 
+  // ---------- Site Asistan geri hareketi: açık iç ekranı bildir, 'sa-back' gelince en üsttekini kapat ----------
+  if (IN_HOST) {
+    const canBack = () => !!document.querySelector('.modal:not([hidden]), .lightbox') || (typeof ui !== 'undefined' && !!ui.open)
+      || (ui.route === 'notlar' && (nui.mobileOpen && $('#notesWrap').classList.contains('editing') || (typeof vui !== 'undefined' && vui.open)));
+    let lastCan = null;
+    setInterval(() => { const c = canBack(); if (c !== lastCan) { lastCan = c; try { parent.postMessage({ type: 'rt-canback', can: c }, hostOrigin); } catch (e) {} } }, 400);
+    addEventListener('message', e => {
+      const d = e.data; if (!d || d.type !== 'sa-back' || !HOST_OK(e.origin)) return;
+      const dl = document.querySelector('.modal.dlg'); if (dl) { dl.querySelector('[data-x]')?.click(); return; }
+      if (!$('#snzModal').hidden) return closeSnooze();
+      const lb = document.querySelector('.lightbox'); if (lb) { lb.click(); return; }
+      const m = [...document.querySelectorAll('.modal:not([hidden])')].pop(); if (m) { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); if (!m.hidden && m.id === 'backupModal') closeBackup(); return; }
+      if (ui.open) return closeDrawer();
+      if (ui.route === 'notlar' && vui.open) return setVault(false);
+      if (ui.route === 'notlar' && nui.mobileOpen) { nui.mobileOpen = false; renderNotes(); }
+    });
+  }
+
   // ---------- Tek giriş: Site Asistan oturumu verir / kapatır ----------
   if (IN_HOST) addEventListener('message', e => {
     const d = e.data; if (!d || !HOST_OK(e.origin)) return;
