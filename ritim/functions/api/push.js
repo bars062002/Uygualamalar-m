@@ -10,7 +10,7 @@ export async function onRequestPostSub({ request, env, data: ctx }) {
   let b; try { b = await request.json(); } catch { return json({ error: 'Geçersiz JSON.' }, 400); }
   const s = b && b.sub, k = s && s.keys;
   if (!s || !okEndpoint(s.endpoint) || !k || !/^[A-Za-z0-9_-]{80,100}$/.test(k.p256dh || '') || !/^[A-Za-z0-9_-]{16,32}$/.test(k.auth || '')) return json({ error: 'Geçersiz abonelik.' }, 400);
-  const con = (Array.isArray(b.contracts) ? b.contracts : []).slice(0, 300)
+  const con = (Array.isArray(b.contracts) ? b.contracts : []).slice(0, 1200)
     .filter(c => c && /^\d{4}-\d\d-\d\d$/.test(c.b || '')).map(c => ({ k: String(c.k || '').slice(0, 24), a: String(c.a || '').slice(0, 60), b: c.b }));
   const now = Date.now();
   await env.DB.prepare('INSERT INTO push_subs (endpoint, owner, p256dh, auth, prefs, contracts, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (endpoint) DO UPDATE SET owner = excluded.owner, p256dh = excluded.p256dh, auth = excluded.auth, contracts = excluded.contracts, updated = excluded.updated')

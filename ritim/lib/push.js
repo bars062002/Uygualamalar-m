@@ -133,6 +133,19 @@ export async function runSchedule(env) {
       console.log('günün özeti', owner, now.ymd, now.hm, st.join(','));
       await note(env, owner, 'digest', { ymd: now.ymd, time: now.hm, status: st, empty: !parts.length });
     }
+    // 3) Sözleşme bitişine 90 / 60 / 30 gün kala ayrı bildirim (sabah özetiyle aynı saatte, günde bir kez)
+    if (digest && await once(env, `c:${owner}:${now.ymd}`)) {
+      let con = []; for (const s of subs) { try { const c = JSON.parse(s.contracts || '[]'); if (c.length > con.length) con = c; } catch {} }
+      const seen = new Set(), hit = { 30: [], 60: [], 90: [] };
+      con.forEach(c => { const d = dayDiff(c.b, now.ymd); if (hit[d] && !seen.has(c.k + c.b)) { seen.add(c.k + c.b); hit[d].push(c); } });
+      for (const d of [30, 60, 90]) {
+        const L = hit[d]; if (!L.length) continue;
+        const body = L.slice(0, 5).map(c => `${c.k}${c.a ? ' · ' + c.a : ''}`).join('\n') + (L.length > 5 ? `\n+${L.length - 5} sözleşme daha` : '');
+        const st = await deliver(env, subs, { title: `${L.length} sözleşme ${d} gün sonra bitiyor`, body, tag: 'bitis' + d, url: './?m=kt' });
+        console.log('bitiş hatırlatması', owner, d, L.length, st.join(','));
+        await note(env, owner, 'contract', { days: d, n: L.length, status: st });
+      }
+    }
   }
   // eski kayıtları temizle (14 gün) — saatte bir
   if (now.min % 60 === 0) await env.DB.prepare('DELETE FROM push_log WHERE at < ?').bind(Date.now() - 14 * 864e5).run();
