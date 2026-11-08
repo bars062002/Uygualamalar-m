@@ -127,6 +127,10 @@ export async function runSchedule(env) {
       const soon = con.map(c => ({ ...c, d: dayDiff(c.b, now.ymd) })).filter(c => c.d >= 0 && c.d <= 7).sort((a, b) => a.d - b.d);
       const parts = [];
       if (today || late) parts.push(`${today} görev bugün${late ? `, ${late} gecikmiş` : ''}`);
+      /* 2 gündür ele alınmayan önemli ya da gecikmiş işler ayrıca öne çıkar */
+      const stale = tasks.filter(t => (t.star || (t.due && t.due < now.ymd)) && Date.now() - (+t.touched || +new Date(t.createdAt || 0) || Date.now()) >= 2 * 864e5)
+        .sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0));
+      if (stale.length) parts.unshift(`Bekleyen: ${stale.length} önemli iş 2+ gündür ele alınmadı — ` + stale.slice(0, 3).map(t => String(t.title || 'Görev').slice(0, 40)).join(', ') + (stale.length > 3 ? '…' : ''));
       if (soon.length) parts.push(`${soon.length} sözleşme 7 gün içinde bitiyor: ` + soon.slice(0, 4).map(c => `${c.k} (${c.d ? c.d + ' gün' : 'bugün'})`).join(', ') + (soon.length > 4 ? '…' : ''));
       /* Söylenecek bir şey olmasa da özet gelir: sistemin çalıştığı her sabah görünür */
       const body = parts.length ? parts.join('\n') : 'Bugün için planlı ya da geciken görev yok. 7 gün içinde biten sözleşme yok.';

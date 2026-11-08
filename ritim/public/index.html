@@ -499,6 +499,37 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li .fn small{font-size:.72rem; color:var(--ink-3)}
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
+/* Toplu seçim: karta basılı tut ya da Seç → kartlar seçilir, altta işlem çubuğu */
+.task{-webkit-touch-callout:none}
+.sel-btn{height:44px; padding:0 18px}
+body.selmode .sel-btn{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); box-shadow:0 4px 12px var(--accent-glow)}
+body.selmode #groups .task{cursor:pointer; user-select:none; -webkit-user-select:none}
+body.selmode #groups .task .grip, body.selmode #groups .task .tactions{visibility:hidden}
+body.selmode #groups .task .check svg.i{opacity:0; transition:opacity .15s}
+body.selmode #groups .task.picked{box-shadow:var(--inset),inset 0 0 0 2px var(--accent)}
+body.selmode #groups .task.picked .check{background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 3px 8px var(--accent-glow); color:var(--on-accent)}
+body.selmode #groups .task.picked .check svg.i{opacity:1}
+.selbar{position:fixed; z-index:55; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); width:min(560px, calc(100% - 24px)); padding:10px; border-radius:24px; background:var(--surface); box-shadow:var(--raise); display:grid; gap:8px}
+.selbar:not([hidden]){animation:sb-in .42s var(--spring) both}
+@keyframes sb-in{from{opacity:0; transform:translate(-50%, 24px) scale(.96)}}
+.selbar .sb-top{display:flex; align-items:center; gap:8px}
+.selbar .sb-n{flex:1; font-weight:700; font-size:.95rem}
+.selbar .sb-top button{min-height:44px; padding:0 14px; border-radius:99px; font-weight:600; font-size:.85rem; color:var(--accent); box-shadow:var(--raise-sm)}
+.selbar .sb-top .sb-x{width:44px; padding:0; display:grid; place-items:center; color:var(--ink-2)}
+.selbar .sb-acts{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px}
+.selbar .sb-acts button{min-height:56px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; font-size:.75rem; font-weight:600; color:var(--ink); box-shadow:var(--raise-sm); transition:box-shadow .15s, transform .15s, opacity .2s}
+.selbar .sb-acts button:active{box-shadow:var(--inset-sm); transform:scale(.97)}
+.selbar .sb-acts button:disabled{opacity:.4; box-shadow:var(--inset-sm)}
+.selbar .sb-acts button svg.i{width:20px; height:20px}
+.selbar .sb-acts [data-sb="del"]{color:var(--bad)}
+.selbar .sb-acts [data-sb="done"]{color:var(--accent)}
+.selbar .sb-menu{display:flex; flex-wrap:wrap; gap:6px; padding:4px 2px 2px}
+.selbar .sb-menu button{min-height:44px; padding:0 14px; border-radius:99px; box-shadow:var(--raise-sm); display:inline-flex; align-items:center; gap:8px; font-size:.85rem; font-weight:600; color:var(--ink)}
+body.selmode .toast{bottom:calc(24px + env(safe-area-inset-bottom, 0px) + 150px)!important}
+body.selmode .tabbar{transform:translateY(calc(100% + 64px)); transition:transform .3s}
+@media (prefers-reduced-motion: reduce){ .selbar:not([hidden]){animation:none} }
+/* 2 gündür ele alınmayan önemli/gecikmiş iş */
+.pill.stale{color:var(--on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:var(--inset-sm)}
 /* Görev kartı kaydırma: sağa → tamamla; sola kısa → Ertele + Sil düğmeleri açık kalır, sola sonuna kadar → ertele */
 .task{touch-action:pan-y}
 .task.sw{transition:none!important; position:relative; z-index:2}
@@ -701,6 +732,7 @@ html.embed .embed-nav .fab{flex:none; width:38px; height:38px; border-radius:12p
   background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 14px -6px var(--accent-glow)}
 html.embed .mini-timer:not([hidden]){bottom:calc(var(--sa-bottom, 0px) + 14px)}
 html.embed .toast{bottom:calc(var(--sa-bottom, 0px) + 16px)!important}
+html.embed .selbar{bottom:calc(var(--sa-bottom, 0px) + 12px)}
 html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 /* UI/UX denetimi: telefonda simge + küçük etiket (Site Asistan alt menüsü gibi), 48 px dokunma alanı */
 @media (max-width: 520px){ html.embed .embed-nav a{flex:1 1 0; min-width:0; padding:0; flex-direction:column; gap:3px; height:52px}
@@ -1059,6 +1091,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         </div>
       </header>
       <div class="list-strip m-only" id="listStrip" aria-label="Listeler"></div>
+      <div class="selbar" id="selBar" role="toolbar" aria-label="Seçili görevler" hidden></div>
       <form class="add" id="addForm" autocomplete="off">
         <label class="field grow" for="addTitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="addTitle" placeholder="Yeni görev ekleyin… (N)" maxlength="140"></label>
         <label class="field small site-f" for="addSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="addSite" placeholder="Saha kodu" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Saha kodu"></label>
@@ -1077,6 +1110,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
           <button data-f="star">Önemli</button>
           <button data-f="done">Tamamlanan</button>
         </div>
+        <button class="btn sel-btn" type="button" id="selStart" title="Birden çok görevi seç (karta basılı tutarak da başlar)">Seç</button>
         <span id="catFilter"></span>
       </div>
       <div class="banner" data-import-banner hidden>
@@ -1558,7 +1592,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       toast('Değişiklik kaydedilemedi. Bağlantınızı kontrol edin.');
     }
   }
-  const putTask = t => write('tasks', t.id, t);
+  const putTask = t => { t.touched = Date.now(); return write('tasks', t.id, t); };
   const dropTask = id => write('tasks', id, null);
   const putList = l => write('lists', l.id, l);
   const dropList = id => write('lists', id, null);
@@ -1879,6 +1913,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   // ---------- UI state ----------
   const ui = { filter: 'all', cat: null, q: '', collapsed: { done: true }, open: null, route: 'pano', calMonth: null, calSel: today(), calMode: lsGet('ritim.calMode') === 'month' ? 'month' : 'flow', flowFrom: null };
   const byId = id => S.tasks.find(t => t.id === id);
+  let sel = null;   // toplu seçim: seçili görev kimlikleri (Set) ya da null
   const isToday = t => (!t.done && t.due && t.due <= today()) || (t.done && doneDay(t) === today());
   const isLate = t => !t.done && t.due && t.due < today();
   // Site Asistan ana sayfası "Günün özeti" için bugünün/gecikenlerin kısa özeti (yalnız Site Asistan içinde)
@@ -1889,7 +1924,10 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       .sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : 0) || String(a.remind || '99').localeCompare(String(b.remind || '99')));
     const sum = { today: open.filter(t => t.due === today()).length, late: open.filter(isLate).length,
       done: S.tasks.filter(t => t.done && !t.sample && doneDay(t) === today()).length,
-      items: open.slice(0, 6).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), rem: t.remind || '', site: t.site || '' })), day: today(), v: 2 };
+      items: open.slice(0, 6).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), rem: t.remind || '', site: t.site || '' })), day: today(), v: 3,
+      /* son 7 günde günlük tamamlanan (eskiden bugüne) ve 2+ gündür bekleyen önemli/gecikmiş işler */
+      wk: Array.from({ length: 7 }, (_, i) => { const d = addDays(today(), i - 6); return S.tasks.filter(t => t.done && !t.sample && doneDay(t) === d).length; }),
+      stale: S.tasks.filter(t => staleDays(t) >= 2).length };
     const k = JSON.stringify(sum); if (k === sumSent) return; sumSent = k;
     try { parent.postMessage({ type: 'rt-sum', sum }, hostOrigin); } catch (e) {}
   }
@@ -2171,6 +2209,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 
   // ---------- Render ----------
   function render() {
+    if (sel && ui.route !== 'gorevler') selExit(true);
     const anim = motionOK(), wasReady = ui.dataShown;
     const before = anim && !ui.entering ? snapshotItems() : null;
     renderNow();
@@ -2372,9 +2411,15 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     return n < 0 ? 'late' : n === 0 ? 'today' : n === 1 ? 'tomorrow' : n < 7 ? 'week' : 'later';
   }
 
+  /* Önemli ya da gecikmiş iş kaç gündür ele alınmadı (son değişiklikten bu yana) */
+  function staleDays(t) {
+    if (!t || t.done || t.sample || !(t.star || isLate(t))) return 0;
+    const at = +t.touched || +new Date(t.createdAt || 0) || 0; if (!at) return 0;
+    return Math.floor((Date.now() - at) / 864e5);
+  }
   function taskHTML(t, drag = true) {
-    const sd = t.subs.filter(s => s.d).length;
-    return `<li class="task ${t.done ? 'done' : ''} ${drag ? '' : 'nodrag'}" data-id="${t.id}">
+    const sd = t.subs.filter(s => s.d).length, sdays = staleDays(t);
+    return `<li class="task ${t.done ? 'done' : ''} ${drag ? '' : 'nodrag'} ${sel && sel.has(t.id) ? 'picked' : ''}" data-id="${t.id}"${sel ? ` aria-selected="${sel.has(t.id)}"` : ''}>
       <span class="grip" aria-hidden="true" title="Sürükleyerek taşıyın">${ico('grip')}</span>
       <button class="check" data-toggle aria-label="${t.done ? 'Tamamlanmadı olarak işaretle' : 'Tamamlandı olarak işaretle'}">${ico('check')}</button>
       <button class="tbody" data-open="${t.id}">
@@ -2383,6 +2428,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
           ${t.site ? `<span class="chip site num">${esc(t.site)}</span>` : ''}
           <span class="chip">${catDot(t.cat)}${esc(catName(t.cat))}</span>
           ${t.due ? `<span class="pill ${!t.done && isLate(t) ? 'late' : !t.done && t.due === today() ? 'today' : ''}">${ico('clock')}${t.done ? fmtShort.format(parse(t.due)) : dueLabel(t.due)}</span>` : ''}
+          ${sdays >= 2 ? `<span class="pill stale num" title="Son değişiklikten bu yana ${sdays} gün geçti">${ico('bell')}${sdays} gündür bekliyor</span>` : ''}
           ${t.remind && t.due && !t.done ? `<span class="chip num">${ico('bell')}${t.remind}</span>` : ''}
           ${t.repeat ? `<span class="chip">${ico('repeat')}${REPEAT[t.repeat]}</span>` : ''}
           ${t.subs.length ? `<span class="chip num">${ico('subs')}${sd}/${t.subs.length}</span>` : ''}
@@ -2425,7 +2471,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     }
     const by = {}; list.forEach(t => (by[groupOf(t)] ||= []).push(t));
     NEWEST_GROUPS.forEach(k => by[k] && by[k].sort(newestFirst));
-    const dragOn = !!window.Sortable && !q && ui.filter === 'all';
+    const dragOn = !!window.Sortable && !q && ui.filter === 'all' && !sel;
     // While dragging is possible, keep "Bugün" and "Yarın" visible as drop targets even when empty.
     const show = GROUPS.filter(([k]) => by[k] || (dragOn && ['today', 'tomorrow'].includes(k)));
     $('#groups').innerHTML = show.map(([k, label]) => {
@@ -2590,7 +2636,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     return n;
   }
 
-  function toggleDone(id) {
+  function toggleDone(id, quiet) {
     const t = byId(id); if (!t) return;
     t.done = !t.done; t.doneAt = t.done ? new Date().toISOString() : null;
     let made = null;
@@ -2602,7 +2648,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     }
     if (!t.done && t.nextId) { const n = byId(t.nextId); if (n && !n.done) { S.tasks = S.tasks.filter(x => x !== n); dropTask(n.id); } t.nextId = null; }
     putTask(t); render(); syncDrawer();
-    if (t.done) toast(made ? `Tamamlandı. Sonraki: ${dueLabel(made.due)}` : 'Görev tamamlandı', () => toggleDone(id));
+    if (t.done && !quiet) toast(made ? `Tamamlandı. Sonraki: ${dueLabel(made.due)}` : 'Görev tamamlandı', () => toggleDone(id));
   }
 
   function addTask(title, cat, pri, due, site, remind) {
@@ -2642,7 +2688,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       if (e.button > 0) return;
       if (swOpen && !(e.target.closest && e.target.closest('.sw-bg.open, .task.sw'))) swClose();
       const li = e.target.closest && e.target.closest('.task');
-      if (!li || e.target.closest('.grip, .check, [data-star], input, a') || li.dataset.busy) return;
+      if (!li || sel || e.target.closest('.grip, .check, [data-star], input, a') || li.dataset.busy) return;
       const base = swOpen && swOpen.li === li ? swOpen.x : 0;
       if (swOpen && swOpen.li === li) { swOpen.anim && swOpen.anim.stop(); }
       st = { li, x: e.clientX, y: e.clientY, dx: base, base, on: !!base, id: e.pointerId, w: li.offsetWidth, pts: [[e.clientX, performance.now()]] };
@@ -2650,6 +2696,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     }, { passive: true });
     document.addEventListener('pointermove', e => {
       if (!st || e.pointerId !== st.id) return;
+      if (sel) { if (st.on) { st.li.classList.remove('sw'); st.li.style.transform = ''; st.bg && st.bg.remove(); } st = null; return; }
       const dx = e.clientX - st.x + st.base, dy = e.clientY - st.y;
       st.pts.push([e.clientX, performance.now()]); if (st.pts.length > 6) st.pts.shift();
       if (!st.on) {
@@ -2732,22 +2779,24 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   // ---------- Ertele (kaydırma ve Site Asistan ana sayfasıyla aynı seçenekler) ----------
   let snzId = null;
   function openSnooze(id) {
-    const t = byId(id); if (!t) return; snzId = id;
+    const ids = (Array.isArray(id) ? id : [id]).filter(byId), t = byId(ids[0]); if (!t) return; snzId = ids;
     const d0 = new Date(), add = n => { const d = new Date(d0); d.setDate(d.getDate() + n); return d; };
     const mon = (() => { const d = new Date(d0); const k = (8 - d.getDay()) % 7 || 7; d.setDate(d.getDate() + k); return d; })();
     const fD = new Intl.DateTimeFormat('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
     const seen = new Set(), opts = [['Yarın', add(1)], ['2 gün sonra', add(2)], ['Pazartesi', mon], ['1 hafta sonra', add(7)]].filter(([, d]) => { const k = ymd(d); if (seen.has(k)) return false; seen.add(k); return true; });
-    $('#snzSub').textContent = t.title;
+    $('#snzSub').textContent = ids.length > 1 ? `${ids.length} görev` : t.title;
     $('#snzList').innerHTML = opts.map(([n, d]) => `<button type="button" data-snzd="${ymd(d)}">${ico('clock')}<span><b>${n}</b><small>${cap(fD.format(d))}</small></span></button>`).join('')
       + `<label for="snzPick">${ico('added')}<span><b>Tarih seç</b><small>Takvimden başka bir gün</small></span><input type="date" id="snzPick" min="${ymd(add(1))}"></label>`;
     $('#snzModal').hidden = false; setTimeout(() => { const b = $('#snzList button'); b && b.focus(); }, 60);
   }
   const closeSnooze = () => { $('#snzModal').hidden = true; snzId = null; };
   function doSnooze(due) {
-    const t = byId(snzId); closeSnooze(); if (!t || !due) return;
-    const prev = { due: t.due, reminded: t.reminded, order: t.order };
-    t.due = due; t.reminded = null; delete t.order; putTask(t); render(); syncDrawer();
-    toast(`“${t.title}” → ${dueLabel(due)}`, () => { t.due = prev.due; t.reminded = prev.reminded; if (prev.order != null) t.order = prev.order; putTask(t); render(); syncDrawer(); });
+    const ts = (snzId || []).map(byId).filter(Boolean); closeSnooze(); if (!ts.length || !due) return;
+    const prev = ts.map(t => ({ t, due: t.due, reminded: t.reminded }));
+    ts.forEach(t => { t.due = due; t.reminded = null; delete t.order; putTask(t); });
+    if (sel) selExit(true);
+    render(); syncDrawer();
+    toast(ts.length > 1 ? `${ts.length} görev → ${dueLabel(due)}` : `“${ts[0].title}” → ${dueLabel(due)}`, () => { prev.forEach(p => { p.t.due = p.due; p.t.reminded = p.reminded; putTask(p.t); }); render(); syncDrawer(); });
   }
   $('#snzList').addEventListener('click', e => { const b = e.target.closest('[data-snzd]'); if (b) doSnooze(b.dataset.snzd); });
   $('#snzList').addEventListener('change', e => { if (e.target.id === 'snzPick' && e.target.value) doSnooze(e.target.value); });
@@ -2774,6 +2823,98 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       setTimeout(() => { burst(innerWidth / 2, innerHeight * 0.35, { n: 44, spread: Math.min(innerWidth, 520) * 0.42, confetti: true }); toast('Bugünün tüm görevleri tamam! 🎉'); }, 150);
     }
   }
+
+  // ---------- Toplu seçim ----------
+  const selIds = () => sel ? [...sel].filter(byId) : [];
+  function selEnter(id) {
+    if (ui.route !== 'gorevler') return;
+    swClose(true); sel = new Set(id ? [id] : []); document.body.classList.add('selmode');
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+    render(); selPaint();
+  }
+  function selExit(silent) {
+    if (!sel) return; sel = null; document.body.classList.remove('selmode');
+    if (!silent) render();
+    selPaint();
+  }
+  function selPaint() {
+    const bar = $('#selBar'); if (!bar) return;
+    if (!sel) { bar.hidden = true; return; }
+    const ids = selIds(), n = ids.length, allStar = n && ids.every(id => byId(id).star);
+    const vis = $$('#groups .task').map(li => li.dataset.id), allOn = vis.length && vis.every(id => sel.has(id));
+    if (bar.hidden || !bar.firstChild) bar.innerHTML = `<div class="sb-top"><button type="button" class="sb-x" data-sb="x" aria-label="Seçimi bitir">${ico('x')}</button><span class="sb-n" id="selN" aria-live="polite"></span><button type="button" data-sb="all"></button></div>
+      <div class="sb-acts"><button type="button" data-sb="done">${ico('check')}Tamamla</button><button type="button" data-sb="snz">${ico('clock')}Ertele</button><button type="button" data-sb="star">${ico('star')}<span></span></button><button type="button" data-sb="list">${ico('subs')}Liste</button><button type="button" data-sb="del">${ico('trash')}Sil</button></div>
+      <div class="sb-menu" id="selMenu" hidden></div>`;
+    bar.hidden = false;
+    $('#selN').textContent = n ? `${n} görev seçili` : 'Görevlere dokunun';
+    bar.querySelector('[data-sb="all"]').textContent = allOn ? 'Hiçbiri' : 'Tümünü seç';
+    bar.querySelector('[data-sb="star"] span').textContent = allStar ? 'Önemsiz' : 'Önemli';
+    bar.querySelectorAll('.sb-acts button').forEach(b => { b.disabled = !n; });
+    if (!n) $('#selMenu').hidden = true;
+  }
+  function selToggle(li) {
+    const id = li.dataset.id; if (!id || !sel) return;
+    sel.has(id) ? sel.delete(id) : sel.add(id);
+    li.classList.toggle('picked', sel.has(id)); li.setAttribute('aria-selected', String(sel.has(id)));
+    if (navigator.vibrate) try { navigator.vibrate(3); } catch (e) {}
+    selPaint();
+  }
+  async function selAct(k, b) {
+    const ids = selIds(), ts = ids.map(byId).filter(Boolean);
+    if (k === 'x') return selExit();
+    if (k === 'all') { const vis = $$('#groups .task').map(li => li.dataset.id), allOn = vis.every(id => sel.has(id)); vis.forEach(id => allOn ? sel.delete(id) : sel.add(id)); $$('#groups .task').forEach(li => { li.classList.toggle('picked', sel.has(li.dataset.id)); li.setAttribute('aria-selected', String(sel.has(li.dataset.id))); }); return selPaint(); }
+    if (!ts.length) return;
+    if (k === 'done') {
+      const open = ts.filter(t => !t.done); if (!open.length) return toast('Seçili görevler zaten tamamlanmış');
+      open.forEach(t => toggleDone(t.id, true)); selExit();
+      return toast(`${open.length} görev tamamlandı`, () => { open.forEach(t => { if (t.done) toggleDone(t.id, true); }); });
+    }
+    if (k === 'snz') return openSnooze(ids);
+    if (k === 'star') {
+      const on = !ts.every(t => t.star), prev = ts.map(t => [t, t.star]);
+      ts.forEach(t => { t.star = on; putTask(t); }); selExit();
+      return toast(on ? `${ts.length} görev Önemli'ye taşındı` : `${ts.length} görev Önemli'den çıkarıldı`, () => { prev.forEach(([t, v]) => { t.star = v; putTask(t); }); render(); });
+    }
+    if (k === 'list') {
+      const m = $('#selMenu'); if (!m.hidden) { m.hidden = true; return; }
+      m.innerHTML = lists().map(l => `<button type="button" data-sbl="${esc(l.id)}">${catDot(l.id)}${esc(l.name)}</button>`).join(''); m.hidden = false; return;
+    }
+    if (k === 'del') {
+      if (!(await askYes(`${ts.length} görev silinsin mi?`, 'Hemen sonra çıkan bildirimden geri alabilirsiniz.'))) return;
+      const keep = ts.map(t => [t, S.tasks.indexOf(t)]).sort((a, b) => a[1] - b[1]);
+      S.tasks = S.tasks.filter(t => !ts.includes(t)); ts.forEach(t => dropTask(t.id)); selExit();
+      return toast(`${ts.length} görev silindi`, () => { keep.forEach(([t, i]) => { S.tasks.splice(Math.min(i, S.tasks.length), 0, t); putTask(t); }); render(); });
+    }
+  }
+  $('#selStart').addEventListener('click', () => sel ? selExit() : selEnter());
+  $('#selBar').addEventListener('click', e => {
+    const l = e.target.closest('[data-sbl]');
+    if (l) { const ts = selIds().map(byId), prev = ts.map(t => [t, t.cat]); ts.forEach(t => { t.cat = l.dataset.sbl; putTask(t); }); selExit(); return toast(`${ts.length} görev → ${catName(l.dataset.sbl)}`, () => { prev.forEach(([t, c]) => { t.cat = c; putTask(t); }); render(); }); }
+    const b = e.target.closest('[data-sb]'); if (b && !b.disabled) selAct(b.dataset.sb, b);
+  });
+  /* Seçim modunda karta dokunmak seçer; basılı tutmak (480 ms, kıpırdamadan) seçimi başlatır */
+  let lpT = 0, lpLi = null, lpUp = 0;
+  document.addEventListener('click', e => {
+    /* basılı tutup bırakınca gelen tıklama, seçimi başlatan kartı geri kapatmasın */
+    if (lpLi) { const same = lpLi.contains(e.target) && performance.now() - lpUp < 450; lpLi = null; if (same) { e.preventDefault(); e.stopPropagation(); return; } }
+    if (!sel) return;
+    const li = e.target.closest && e.target.closest('#groups .task'); if (!li) return;
+    e.preventDefault(); e.stopPropagation(); selToggle(li);
+  }, true);
+  (() => {
+    let p0 = null;
+    document.addEventListener('pointerdown', e => {
+      clearTimeout(lpT); p0 = null; if (sel || e.button > 0) return;
+      const li = e.target.closest && e.target.closest('#groups .task');
+      if (!li || e.target.closest('.grip, .check, [data-star]')) return;
+      p0 = [e.clientX, e.clientY];
+      lpT = setTimeout(() => { p0 = null; selEnter(li.dataset.id); lpLi = $(`#groups .task[data-id="${li.dataset.id}"]`) || li; lpUp = 1e12; }, 480);
+    }, { passive: true });
+    document.addEventListener('pointermove', e => { if (p0 && Math.hypot(e.clientX - p0[0], e.clientY - p0[1]) > 8) { clearTimeout(lpT); p0 = null; } }, { passive: true });
+    ['pointerup', 'pointercancel', 'scroll'].forEach(ev => document.addEventListener(ev, () => { clearTimeout(lpT); p0 = null; if (lpLi && lpUp > 1e11) lpUp = performance.now(); }, { passive: true, capture: true }));
+    document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('#groups .task') && e.pointerType !== 'mouse') e.preventDefault(); });
+  })();
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel && $('#snzModal').hidden && !document.querySelector('.modal.dlg')) selExit(); });
 
   function deleteTask(id) {
     const i = S.tasks.findIndex(t => t.id === id); if (i < 0) return;
@@ -4074,7 +4215,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       if (x.done || !x.remind || x.due !== t) return;
       const key = t + ' ' + x.remind;
       if (x.reminded === key || x.remind > hm) return;
-      x.reminded = key; putTask(x); showReminder(x);
+      x.reminded = key; write('tasks', x.id, x); showReminder(x);
     });
   }
   function showReminder(x) {
@@ -4177,7 +4318,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 
   // ---------- Site Asistan geri hareketi: açık iç ekranı bildir, 'sa-back' gelince en üsttekini kapat ----------
   if (IN_HOST) {
-    const canBack = () => !!document.querySelector('.modal:not([hidden]), .lightbox') || (typeof ui !== 'undefined' && !!ui.open)
+    const canBack = () => !!sel || !!document.querySelector('.modal:not([hidden]), .lightbox') || (typeof ui !== 'undefined' && !!ui.open)
       || (ui.route === 'notlar' && (nui.mobileOpen && $('#notesWrap').classList.contains('editing') || (typeof vui !== 'undefined' && vui.open)));
     let lastCan = null;
     setInterval(() => { const c = canBack(); if (c !== lastCan) { lastCan = c; try { parent.postMessage({ type: 'rt-canback', can: c }, hostOrigin); } catch (e) {} } }, 400);
@@ -4185,6 +4326,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const d = e.data; if (!d || d.type !== 'sa-back' || !HOST_OK(e.origin)) return;
       const dl = document.querySelector('.modal.dlg'); if (dl) { dl.querySelector('[data-x]')?.click(); return; }
       if (!$('#snzModal').hidden) return closeSnooze();
+      if (sel) return selExit();
       const lb = document.querySelector('.lightbox'); if (lb) { lb.click(); return; }
       const m = [...document.querySelectorAll('.modal:not([hidden])')].pop(); if (m) { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); if (!m.hidden && m.id === 'backupModal') closeBackup(); return; }
       if (ui.open) return closeDrawer();
