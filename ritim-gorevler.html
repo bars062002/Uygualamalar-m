@@ -1912,7 +1912,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       items: open.slice(0, 6).map(t => ({ id: t.id, t: t.title || 'Görev', late: isLate(t), w: isLate(t) ? dueLabel(t.due) : (t.remind || 'Bugün'), rem: t.remind || '', site: t.site || '' })), day: today(), v: 3,
       /* son 7 günde günlük tamamlanan (eskiden bugüne) ve 2+ gündür bekleyen önemli/gecikmiş işler */
       wk: Array.from({ length: 7 }, (_, i) => { const d = addDays(today(), i - 6); return S.tasks.filter(t => t.done && !t.sample && doneDay(t) === d).length; }),
-      stale: S.tasks.filter(t => staleDays(t) >= 2).length };
+      stale: S.tasks.filter(t => staleDays(t) >= 2).length, tmr: S.tasks.filter(t => !t.done && !t.sample && t.due === addDays(today(), 1)).length };
     const k = JSON.stringify(sum); if (k === sumSent) return; sumSent = k;
     try { parent.postMessage({ type: 'rt-sum', sum }, hostOrigin); } catch (e) {}
   }
@@ -2778,7 +2778,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   function doSnooze(due) {
     const ts = (snzId || []).map(byId).filter(Boolean); closeSnooze(); if (!ts.length || !due) return;
     const prev = ts.map(t => ({ t, due: t.due, reminded: t.reminded }));
-    ts.forEach(t => { t.due = due; t.reminded = null; delete t.order; putTask(t); });
+    ts.forEach(t => { t.due = due; t.reminded = null; delete t.order; putTask(t); }); sfx('snz');
     if (sel) selExit(true);
     render(); syncDrawer();
     toast(ts.length > 1 ? `${ts.length} görev → ${dueLabel(due)}` : `“${ts[0].title}” → ${dueLabel(due)}`, () => { prev.forEach(p => { p.t.due = p.due; p.t.reminded = p.reminded; putTask(p.t); }); render(); syncDrawer(); });
@@ -2791,7 +2791,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 
   function completeFromList(li, btn) {
     const t = byId(li.dataset.id); if (!t || li.dataset.busy) return;
-    btn.classList.add('pop');
+    btn.classList.add('pop'); if (!t.done) sfx('done');
     if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
     if (!t.done && motionOK()) li.animate([{ transform: 'scale(1)' }, { transform: 'scale(.975)', offset: .35 }, { transform: 'scale(1.008)', offset: .75 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' });
     if (t.done || !motionOK()) return afterToggle(t.id);
@@ -2853,7 +2853,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if (!ts.length) return;
     if (k === 'done') {
       const open = ts.filter(t => !t.done); if (!open.length) return toast('Seçili görevler zaten tamamlanmış');
-      open.forEach(t => toggleDone(t.id, true)); selExit();
+      open.forEach(t => toggleDone(t.id, true)); selExit(); sfx('done');
       return toast(`${open.length} görev tamamlandı`, () => { open.forEach(t => { if (t.done) toggleDone(t.id, true); }); });
     }
     if (k === 'snz') return openSnooze(ids);
@@ -2869,7 +2869,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if (k === 'del') {
       if (!(await askYes(`${ts.length} görev silinsin mi?`, 'Hemen sonra çıkan bildirimden geri alabilirsiniz.'))) return;
       const keep = ts.map(t => [t, S.tasks.indexOf(t)]).sort((a, b) => a[1] - b[1]);
-      S.tasks = S.tasks.filter(t => !ts.includes(t)); ts.forEach(t => dropTask(t.id)); selExit();
+      S.tasks = S.tasks.filter(t => !ts.includes(t)); ts.forEach(t => dropTask(t.id)); selExit(); sfx('del');
       return toast(`${ts.length} görev silindi`, () => { keep.forEach(([t, i]) => { S.tasks.splice(Math.min(i, S.tasks.length), 0, t); putTask(t); }); render(); });
     }
   }
@@ -2906,7 +2906,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   function deleteTask(id) {
     const i = S.tasks.findIndex(t => t.id === id); if (i < 0) return;
     const li = $(`.view:not([hidden]) .task[data-id="${id}"]`);
-    const [t] = S.tasks.splice(i, 1); dropTask(id); closeDrawer();
+    const [t] = S.tasks.splice(i, 1); dropTask(id); closeDrawer(); sfx('del');
     leave(li).then(render);
     toast('Görev silindi', () => { S.tasks.splice(i, 0, t); putTask(t); render(); });
   }
@@ -4195,6 +4195,17 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   // ---------- Reminders (shown while the page is open) ----------
   let audioCtx = null;
   addEventListener('pointerdown', () => { try { audioCtx ||= new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }, { once: true });
+  /* Ses kimliği: tamamla (yükselen iki nota), ertele (inen), sil (alçak, yumuşak). Çok kısa ve kısık. */
+  function sfx(kind) {
+    if (lsGet('ritim.sound') === 'off') return;
+    try {
+      const ac = audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)()), t0 = ac.currentTime;
+      const N = { done: [[880, 0], [1320, .07]], snz: [[740, 0], [554, .08]], del: [[220, 0], [150, .06]] }[kind] || [];
+      N.forEach(([f, d]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = kind === 'del' ? 'triangle' : 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(.0001, t0 + d); g.gain.exponentialRampToValueAtTime(.07, t0 + d + .012); g.gain.exponentialRampToValueAtTime(.0001, t0 + d + .16);
+        o.connect(g).connect(ac.destination); o.start(t0 + d); o.stop(t0 + d + .18); });
+    } catch (e) {}
+  }
   function beep(notes = [660, 660, 880]) {
     try {
       const ac = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
