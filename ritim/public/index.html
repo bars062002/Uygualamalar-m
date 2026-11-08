@@ -460,6 +460,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .subs{display:flex; flex-direction:column; gap:10px; list-style:none; margin:0 0 12px; padding:0}
 .subs li{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; font-size:.9rem}
 .subs li.done span{text-decoration:line-through; color:var(--ink-3)}
+.subs .sub-at{display:block; font-size:.72rem; color:var(--ink-3); margin-top:2px; font-variant-numeric:tabular-nums}
+.subs li.done .sub-at{text-decoration:none}
 .subs .check{width:24px; height:24px}
 .subs .check svg.i{width:12px; height:12px}
 .subs li.done .check{background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 3px 8px var(--accent-glow); color:var(--on-accent)}
@@ -802,6 +804,31 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 .ne-body{flex:1; min-height:340px; resize:vertical; font-size:.95rem; line-height:1.65}
 .ne-prev{flex:1; min-height:340px; padding:20px 22px; border-radius:var(--r-sm); box-shadow:var(--inset); overflow:auto; line-height:1.7; font-size:.95rem; color:var(--ink)}
 .ne-help{margin:0; font-size:.74rem; color:var(--ink-3)}
+.ne-files{margin:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
+.files li{background:var(--field, transparent)}
+.files li .fd{color:var(--ink-3)}
+.ne-body.drop{box-shadow:var(--inset), 0 0 0 2px var(--accent)}
+#vaultBtn[aria-pressed="true"]{box-shadow:var(--inset-sm); color:var(--accent)}
+.vault{margin-top:24px; padding:22px; display:flex; flex-direction:column; gap:16px}
+.vault.drop{outline:2px dashed var(--accent); outline-offset:-8px}
+.vt-head{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.vt-ic{width:46px; height:46px; flex:none; border-radius:14px; display:grid; place-items:center; color:var(--accent); background:var(--field, transparent); box-shadow:var(--inset-sm)}
+.vt-ttl{flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px}
+.vt-ttl b{font-size:1.05rem}
+.vt-ttl small{font-size:.8rem; color:var(--ink-3)}
+.vt-use{display:flex; align-items:center; gap:12px}
+.vt-bar{flex:1; height:10px; border-radius:6px; box-shadow:var(--inset-sm); overflow:hidden; background:var(--field, transparent)}
+.vt-bar i{display:block; height:100%; width:0; border-radius:6px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); box-shadow:inset 0 1px 2px rgba(0,0,0,.18); transition:width .5s cubic-bezier(.16,1,.3,1)}
+.vt-use small{font-size:.76rem; color:var(--ink-3); white-space:nowrap}
+.vt-q{max-width:420px}
+.vt-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin:0}
+.vt-list li{box-shadow:var(--inset-sm)}
+.vt-list li a,.ne-files li a{cursor:pointer}
+.vt-none{margin:0; padding:18px 8px; text-align:center; color:var(--ink-3); font-size:.86rem}
+.vt-none[hidden]{display:none}
+.lightbox{position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:24px; background:rgba(10,12,16,.82); cursor:zoom-out}
+.lightbox img{max-width:100%; max-height:100%; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lightbox button{position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; display:grid; place-items:center}
 .md h1,.md h2,.md h3{margin:.9em 0 .35em; line-height:1.25; letter-spacing:-.01em}
 .md h1{font-size:1.35rem} .md h2{font-size:1.12rem} .md h3{font-size:1rem; color:var(--ink-2)}
 .md>:first-child{margin-top:0}
@@ -1008,8 +1035,23 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
           <p class="eyebrow">Defter</p>
           <h1 class="emboss" id="h-notlar">Notlar</h1>
         </div>
-        <button class="btn primary" id="noteNew"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni not</button>
+        <div class="vhead-actions">
+          <button class="btn" id="vaultBtn" aria-pressed="false" title="Yalnız senin görebildiğin dosyalar"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Dosyalarım</span></button>
+          <button class="btn primary" id="noteNew"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Yeni not</button>
+        </div>
       </header>
+      <div class="vault card" id="vault" hidden>
+        <div class="vt-head">
+          <span class="vt-ic"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+          <div class="vt-ttl"><b>Dosyalarım</b><small>Yalnız sen görürsün. Bağlantıyla paylaşılamaz, açmak için oturumun gerekir.</small></div>
+          <label class="btn primary sm" id="vaultAdd" for="vaultIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>Dosya yükle</span></label>
+          <input type="file" id="vaultIn" multiple hidden>
+        </div>
+        <div class="vt-use"><span class="vt-bar"><i id="vaultBar"></i></span><small class="num" id="vaultUse">—</small></div>
+        <label class="field vt-q" for="vaultQ"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="vaultQ" type="search" placeholder="Dosyalarda ara…" autocomplete="off"></label>
+        <ul class="files vt-list" id="vaultList"></ul>
+        <p class="vt-none" id="vaultNone">Henüz dosya yok. “Dosya yükle” ile ekle ya da ekran görüntüsünü buraya yapıştır (⌘V / Ctrl+V).</p>
+      </div>
       <div class="notes" id="notesWrap">
         <div class="card notes-side">
           <label class="field" for="noteQ"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="noteQ" type="search" placeholder="Notlarda ara…" autocomplete="off" enterkeyhint="search"></label>
@@ -1031,12 +1073,14 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
               <label class="field ne-site" for="neSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="neSite" placeholder="Saha kodu" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Saha kodu"></label>
               <span class="ne-meta num" id="neMeta"></span>
               <button class="btn icon sm" id="nePin" aria-label="Sabitle" title="Sabitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2H6z"/></svg></button>
+              <label class="btn icon sm" id="neAttach" for="neFileIn" aria-label="Dosya ekle" title="Dosya ya da görsel ekle"><svg class="i" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></label><input type="file" id="neFileIn" multiple hidden>
               <button class="btn icon sm" id="neCopy" aria-label="Kopyala" title="Kopyala"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
               <button class="btn icon sm danger" id="neDel" aria-label="Sil" title="Sil"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
             </div>
             <textarea class="area ne-body" id="neBody" placeholder="# Başlık&#10;- Toplantı linki: https://…&#10;- Arayacak kişi: 0533 123 45 67&#10;- [ ] Yapılacak&#10;**Önemli:** …"></textarea>
             <div class="ne-prev md" id="nePrev" hidden></div>
-            <p class="ne-help">**kalın**, *eğik*, # başlık, - liste, - [ ] yapılacak. Telefon ve bağlantılar Önizle'de tıklanır.</p>
+            <ul class="files ne-files" id="neFiles"></ul>
+            <p class="ne-help">**kalın**, *eğik*, # başlık, - liste, - [ ] yapılacak. Ekran görüntüsünü yapıştır (⌘V / Ctrl+V) ya da ataçla dosya ekle.</p>
           </div>
         </div>
       </div>
@@ -2775,9 +2819,12 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   function normNote(n) {
     const now = new Date().toISOString();
     return { id: String(n.id), title: String(n.title || '').slice(0, 120), body: String(n.body || ''), site: String(n.site || '').toLocaleUpperCase('tr-TR'), pinned: !!n.pinned,
-      created: n.created || now, updated: n.updated || n.created || now, src: n.src || '' };
+      created: n.created || now, updated: n.updated || n.created || now, src: n.src || '', files: Array.isArray(n.files) ? n.files.filter(f => f && f.id) : [] };
   }
   const putNote = n => write('notes', n.id, n);
+  const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1).replace('.', ',') + ' MB';
+  const fileUrl = f => `/api/file?id=${encodeURIComponent(f.id)}&k=${encodeURIComponent(f.k)}`;
+  const fileTag = f => { const m = /\.([a-z0-9]{1,5})$/i.exec(f.name || ''); return (m ? m[1] : (f.type || '').split('/')[1] || 'DOSYA').slice(0, 4).toUpperCase(); };
   const nui = { sel: null, mode: 'edit', q: '' };
   const noteOf = id => S.notes.find(n => n.id === id);
   const noteTitle = n => n.title.trim() || (n.body.trim().split('\n')[0] || '').replace(/^#+\s*|[*_`>]/g, '').trim().slice(0, 60) || 'Adsız not';
@@ -2851,6 +2898,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     $$('#neMode button').forEach(b => b.classList.toggle('on', b.dataset.m === nui.mode));
     bo.hidden = nui.mode !== 'edit'; $('#nePrev').hidden = nui.mode === 'edit';
     if (nui.mode !== 'edit') $('#nePrev').innerHTML = mdRender(n.body);
+    renderNoteFiles(n);
   }
   function openNote(id, focusBody) {
     nui.sel = id; nui.mobileOpen = true;
@@ -2881,7 +2929,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     render(); toast('Not “Karalamalar”a eklendi');
   }
 
-  $('#noteNew').addEventListener('click', () => newNote());
+  $('#noteNew').addEventListener('click', () => { if (vui.open) setVault(false); newNote(); });
   $('#noteQ').addEventListener('input', e => { nui.q = e.target.value; renderNotes(); });
   $('#noteList').addEventListener('click', e => { const b = e.target.closest('[data-note]'); if (b) openNote(b.dataset.note); });
   $('#neBack').addEventListener('click', () => { nui.mobileOpen = false; renderNotes(); });
@@ -2936,6 +2984,162 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     S.notes.splice(k, 1); write('notes', n.id, null); nui.sel = null; nui.mobileOpen = false; renderNotes();
     toast('Not silindi', () => { S.notes.splice(k, 0, n); putNote(n); nui.sel = n.id; renderNotes(); });
   });
+  // ---------- Not ekleri ve Dosyalarım ----------
+  // Ekran görüntüsü yapıştırma (⌘V / Ctrl+V), sürükle-bırak ya da ataç ile. Not ekleri anahtarlı bağlantıyla açılır;
+  // Dosyalarım'daki dosyalar bağlantıyla açılmaz, her istek oturum ister (sunucu: /api/vault).
+  const authH = () => ({ authorization: 'Bearer ' + (lsGet(KEY_PW) || '') });
+  const isImg = t => /^image\/(jpeg|png|gif|webp)$/.test(t || '');
+  function pastedFiles(dt) {
+    const out = []; if (!dt) return out;
+    [...(dt.items || [])].forEach(it => { if (it.kind === 'file') { const f = it.getAsFile(); if (f) out.push(f); } });
+    if (!out.length && dt.files) out.push(...dt.files);
+    const d = new Date(), p2 = x => String(x).padStart(2, '0'), stamp = `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${d.getFullYear()} ${p2(d.getHours())}.${p2(d.getMinutes())}`;
+    // Panodan gelen görüntünün adı genelde "image.png": tarihli ad ver
+    return out.map((f, i) => /^image\.(png|jpe?g|gif|webp)$/i.test(f.name || '') || !f.name ? new File([f], `Ekran görüntüsü ${stamp}${out.length > 1 ? ' (' + (i + 1) + ')' : ''}.${(f.type.split('/')[1] || 'png').replace('jpeg', 'jpg')}`, { type: f.type }) : f);
+  }
+  async function sendFile(file, url) {
+    if (STORE.mode !== 'api') { toast('Dosya eklemek için hesabınla giriş yapmalısın'); return null; }
+    if (file.size > 10 * 1024 * 1024) { toast(`${file.name}: 10 MB’tan büyük`); return null; }
+    try {
+      const r = await fetch(url, { method: 'POST', body: file, headers: { ...authH(), 'content-type': file.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name) } });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { toast(j.error || 'Dosya yüklenemedi'); if (r.status === 401) askLogin(); return null; }
+      return j;
+    } catch (err) { toast('Dosya yüklenemedi — bağlantını kontrol et'); return null; }
+  }
+  const fileLi = (f, extra, href) => `<li data-fid="${esc(f.id)}"><a ${href ? `href="${href}" target="_blank" rel="noopener"` : 'role="button" tabindex="0"'} data-fopen="${esc(f.id)}">
+      <span class="fi">${f.thumb ? `<img src="${f.thumb}" alt="" loading="lazy">` : esc(fileTag(f))}</span>
+      <span class="fn"><b>${esc(f.name)}</b><small>${fmtSize(f.size || 0)}${extra ? ' · ' + extra : ''}</small></span></a>
+      <button class="btn icon sm" data-fdel="${esc(f.id)}" aria-label="Sil: ${esc(f.name)}">${ico('x')}</button></li>`;
+  const noteUp = new Map();   // not id → yüklenen dosya adları
+  function renderNoteFiles(n) {
+    const up = noteUp.get(n.id) || [];
+    $('#neAttach').hidden = STORE.mode !== 'api';
+    $('#neFiles').innerHTML = (n.files || []).map(f => fileLi({ ...f, thumb: isImg(f.type) ? fileUrl(f) : '' }, f.at ? fmtNote.format(new Date(f.at)) : '', fileUrl(f))).join('')
+      + up.map(x => `<li class="up"><span class="fi">…</span><span class="fn"><b>${esc(x)}</b><small>Yükleniyor…</small></span></li>`).join('');
+  }
+  async function addNoteFiles(files) {
+    const n = noteOf(nui.sel); if (!n || !files.length) return;
+    for (const file of files) {
+      noteUp.set(n.id, [...(noteUp.get(n.id) || []), file.name]); renderNoteFiles(n);
+      const j = await sendFile(file, '/api/file');
+      const left = noteUp.get(n.id) || []; left.splice(left.indexOf(file.name), 1);
+      if (j) { (n.files = n.files || []).push({ id: j.id, k: j.k, name: j.name, type: j.type, size: j.size, at: Date.now() }); n.updated = new Date().toISOString(); putNote(n); }
+      if (nui.sel === n.id) renderNoteFiles(n);
+    }
+    renderNotes();
+  }
+  $('#neFileIn').addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; addNoteFiles(f); });
+  ['#neBody', '#neTitle'].forEach(sel => $(sel).addEventListener('paste', e => {
+    const f = pastedFiles(e.clipboardData); if (!f.length) return;
+    e.preventDefault(); addNoteFiles(f);
+  }));
+  $('#neBody').addEventListener('dragover', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); e.currentTarget.classList.add('drop'); } });
+  $('#neBody').addEventListener('dragleave', e => e.currentTarget.classList.remove('drop'));
+  $('#neBody').addEventListener('drop', e => { e.currentTarget.classList.remove('drop'); const f = pastedFiles(e.dataTransfer); if (f.length) { e.preventDefault(); addNoteFiles(f); } });
+  $('#neFiles').addEventListener('click', async e => {
+    const b = e.target.closest('[data-fdel]'); if (!b) return;
+    e.preventDefault(); const n = noteOf(nui.sel); if (!n) return;
+    const f = (n.files || []).find(x => x.id === b.dataset.fdel); if (!f) return;
+    if (!confirm(`“${f.name}” nottan silinsin mi?`)) return;
+    n.files = n.files.filter(x => x.id !== f.id); n.updated = new Date().toISOString(); putNote(n); renderNoteFiles(n);
+    try { await fetch('/api/file?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() }); } catch (err) {}
+  });
+
+  const vui = { open: false, files: null, used: 0, max: 150 * 1048576, q: '', up: [], thumbs: new Map() };
+  function setVault(open) {
+    vui.open = open;
+    $('#vault').hidden = !open; $('#notesWrap').hidden = open;
+    $('#vaultBtn').setAttribute('aria-pressed', String(open));
+    if (open) loadVault();
+  }
+  async function loadVault() {
+    if (STORE.mode !== 'api') { vui.files = []; renderVault('Dosyalarım için hesabınla giriş yapmalısın.'); return; }
+    if (!vui.files) renderVault('Yükleniyor…');
+    try {
+      const r = await fetch('/api/vault', { headers: authH() });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { if (r.status === 401) askLogin(); renderVault(j.error || 'Dosyalar alınamadı.'); return; }
+      vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; renderVault();
+    } catch (err) { renderVault('Bağlantı yok — dosyalar alınamadı.'); }
+  }
+  async function vaultBlob(f) {
+    const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { headers: authH() });
+    if (!r.ok) throw new Error('x');
+    return new Blob([await r.arrayBuffer()], { type: f.type || 'application/octet-stream' });
+  }
+  function vaultThumbs() {
+    (vui.files || []).filter(f => isImg(f.type) && f.size < 4 * 1048576 && !vui.thumbs.has(f.id)).slice(0, 24).forEach(f => {
+      vui.thumbs.set(f.id, '');
+      vaultBlob(f).then(b => { vui.thumbs.set(f.id, URL.createObjectURL(b)); const im = $(`#vaultList [data-fid="${CSS.escape(f.id)}"] .fi`); if (im) im.innerHTML = `<img src="${vui.thumbs.get(f.id)}" alt="">`; }).catch(() => {});
+    });
+  }
+  function renderVault(msg) {
+    const all = vui.files || [], q = lowerTr(vui.q.trim());
+    const list = all.filter(f => !q || lowerTr(f.name).includes(q));
+    $('#vaultList').innerHTML = list.map(f => fileLi({ ...f, thumb: vui.thumbs.get(f.id) || '' }, fmtNote.format(new Date(f.created)))).join('')
+      + vui.up.map(x => `<li class="up"><span class="fi">…</span><span class="fn"><b>${esc(x)}</b><small>Yükleniyor…</small></span></li>`).join('');
+    const none = $('#vaultNone');
+    none.hidden = !!(list.length || vui.up.length) && !msg;
+    none.textContent = msg || (all.length ? 'Aramaya uyan dosya yok.' : 'Henüz dosya yok. “Dosya yükle” ile ekle ya da ekran görüntüsünü buraya yapıştır (⌘V / Ctrl+V).');
+    $('#vaultAdd').hidden = STORE.mode !== 'api';
+    const pct = Math.min(100, vui.used / vui.max * 100);
+    $('#vaultBar').style.width = pct.toFixed(1) + '%';
+    $('#vaultUse').textContent = `${fmtSize(vui.used)} / ${Math.round(vui.max / 1048576)} MB`;
+    vaultThumbs();
+  }
+  async function addVaultFiles(files) {
+    for (const file of files) {
+      vui.up.push(file.name); renderVault();
+      const j = await sendFile(file, '/api/vault');
+      vui.up.splice(vui.up.indexOf(file.name), 1);
+      if (j) { (vui.files = vui.files || []).unshift(j); vui.used += j.size || 0; toast(`${j.name} Dosyalarım’a kaydedildi`); }
+      renderVault();
+    }
+  }
+  $('#vaultBtn').addEventListener('click', () => setVault(!vui.open));
+  $('#vaultIn').addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; addVaultFiles(f); });
+  $('#vaultQ').addEventListener('input', e => { vui.q = e.target.value; renderVault(); });
+  document.addEventListener('paste', e => {
+    if (!vui.open || ui.route !== 'notlar' || e.target.closest?.('input:not([type=search]),textarea')) return;
+    const f = pastedFiles(e.clipboardData); if (f.length) { e.preventDefault(); addVaultFiles(f); }
+  });
+  $('#vault').addEventListener('dragover', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); $('#vault').classList.add('drop'); } });
+  $('#vault').addEventListener('dragleave', e => { if (!e.currentTarget.contains(e.relatedTarget)) $('#vault').classList.remove('drop'); });
+  $('#vault').addEventListener('drop', e => { $('#vault').classList.remove('drop'); const f = pastedFiles(e.dataTransfer); if (f.length) { e.preventDefault(); addVaultFiles(f); } });
+  function lightbox(src, name) {
+    const d = document.createElement('div'); d.className = 'lightbox'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', name);
+    d.innerHTML = `<img src="${src}" alt="${esc(name)}"><button type="button" aria-label="Kapat">${ico('x')}</button>`;
+    const close = () => { d.remove(); document.removeEventListener('keydown', key); };
+    const key = e => { if (e.key === 'Escape') close(); };
+    d.addEventListener('click', close); document.addEventListener('keydown', key);
+    document.body.appendChild(d); d.querySelector('button').focus();
+  }
+  async function openVault(f) {
+    const pdf = f.type === 'application/pdf';
+    const w = pdf ? window.open('', '_blank') : null;   // iOS: pencere tıklama anında açılmalı
+    try {
+      const b = await vaultBlob(f), u = URL.createObjectURL(b);
+      if (isImg(f.type)) lightbox(u, f.name);
+      else if (w) w.location = u;
+      else { const a = document.createElement('a'); a.href = u; a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); }
+      setTimeout(() => URL.revokeObjectURL(u), 60000);
+    } catch (err) { if (w) w.close(); toast('Dosya açılamadı'); }
+  }
+  $('#vaultList').addEventListener('click', async e => {
+    const del = e.target.closest('[data-fdel]'), op = e.target.closest('[data-fopen]');
+    const f = (vui.files || []).find(x => x.id === (del || op || {}).dataset?.[del ? 'fdel' : 'fopen']); if (!f) return;
+    e.preventDefault();
+    if (op) return openVault(f);
+    if (!confirm(`“${f.name}” kalıcı olarak silinsin mi?`)) return;
+    try {
+      const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() });
+      if (!r.ok) throw new Error('x');
+      vui.files = vui.files.filter(x => x.id !== f.id); vui.used = Math.max(0, vui.used - (f.size || 0)); renderVault(); toast(`${f.name} silindi`);
+    } catch (err) { toast('Silinemedi — bağlantını kontrol et'); }
+  });
+  $('#vaultList').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-fopen]')) { e.preventDefault(); e.target.click(); } });
+
   // Görev çekmecesinden: görevi yeni bir nota aktar
   $('#dToNote').addEventListener('click', () => {
     const t = byId(ui.open); if (!t) return;
@@ -3312,7 +3516,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     const inp = $('#dSubIn'); const v = inp.value.trim(); inp.value = '';
     if (!v || !ui.open) return;
     const t = byId(ui.open); if (!t) return;
-    (t.subs = t.subs || []).push({ id: uid(), t: v, d: false }); putTask(t); render();
+    (t.subs = t.subs || []).push({ id: uid(), t: v, d: false, at: Date.now() }); putTask(t); render();
   }
   function openDrawer(id) {
     if (ui.open !== id) commitPendingSub();
@@ -3352,7 +3556,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     const sd = t.subs.filter(s => s.d).length;
     $('#dSubsLbl').textContent = t.subs.length ? `Alt görevler · ${sd}/${t.subs.length}` : 'Alt görevler';
     $('#dSubs').innerHTML = t.subs.map(s => `<li class="${s.d ? 'done' : ''}" data-sub="${s.id}">
-      <button class="check" data-subtoggle aria-label="Alt görevi işaretle">${ico('check')}</button><span>${esc(s.t)}</span>
+      <button class="check" data-subtoggle aria-label="Alt görevi işaretle">${ico('check')}</button><span>${esc(s.t)}${s.at && validAt(s.at) ? `<time class="sub-at" datetime="${new Date(s.at).toISOString()}">${fmtNote.format(new Date(s.at))}</time>` : ''}</span>
       <button class="rm" data-subrm aria-label="Alt görevi sil">${ico('x')}</button></li>`).join('');
     const created = new Date(t.createdAt);
     const okAge = validAt(t.createdAt), n = okAge ? ageDays(t.createdAt) : 0, done = t.done && t.doneAt ? new Date(t.doneAt) : null;
@@ -3398,9 +3602,6 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   $('#dMail').addEventListener('input', e => edit(t => { t.email = e.target.value.trim(); }));
   $('#dAddr').addEventListener('input', e => edit(t => { t.addr = e.target.value.trim(); }));
 
-  const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1).replace('.', ',') + ' MB';
-  const fileUrl = f => `/api/file?id=${encodeURIComponent(f.id)}&k=${encodeURIComponent(f.k)}`;
-  const fileTag = f => { const m = /\.([a-z0-9]{1,5})$/i.exec(f.name || ''); return (m ? m[1] : (f.type || '').split('/')[1] || 'DOSYA').slice(0, 4).toUpperCase(); };
   const uploading = new Map();   // görev id → yüklenen dosya adları
   function renderFiles(t) {
     const api = STORE.mode === 'api';
@@ -3447,7 +3648,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   $('#dStar').addEventListener('click', e => { e.preventDefault(); edit(t => { t.star = !t.star; }); });
   $('#dSubForm').addEventListener('submit', e => {
     e.preventDefault(); const v = $('#dSubIn').value.trim(); if (!v) return;
-    edit(t => t.subs.push({ id: uid(), t: v, d: false })); $('#dSubIn').value = '';
+    edit(t => t.subs.push({ id: uid(), t: v, d: false, at: Date.now() })); $('#dSubIn').value = '';
   });
   $('#dSubs').addEventListener('click', e => {
     const li = e.target.closest('[data-sub]'); if (!li) return;
