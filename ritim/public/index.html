@@ -327,9 +327,10 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .dragging .group-head .hint{opacity:1}
 .tlist{display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; min-height:12px}
 .dragging .tlist{min-height:56px; border-radius:var(--r); box-shadow:var(--inset-sm); padding:6px}
-.task{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px 18px 16px 8px; border-radius:var(--r); box-shadow:var(--raise-sm); background:var(--surface); transition:box-shadow .25s, opacity .3s, transform .3s var(--ease-out)}
-@media (hover:hover){ .task:hover{transform:translateY(-2px)} }
-.task:hover{box-shadow:var(--raise)}
+/* Görev kartları gömülü: zemine oyulmuş kart; üzerine gelince oyuk hafifçe derinleşir */
+.task{display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px 18px 16px 8px; border-radius:var(--r); box-shadow:var(--inset); background:var(--surface); transition:box-shadow .25s, opacity .3s, transform .3s var(--ease-out)}
+@media (hover:hover){ .task:hover{box-shadow:var(--inset),inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)} }
+.task:focus-within{box-shadow:var(--inset),inset 0 0 0 2px color-mix(in srgb,var(--accent) 45%,transparent)}
 .task.done{opacity:.62}
 .task.done .ttl{color:var(--ink-3)}
 .grip{width:22px; height:36px; display:grid; place-items:center; color:var(--ink-3); cursor:grab; touch-action:none; opacity:.5; border-radius:8px}
