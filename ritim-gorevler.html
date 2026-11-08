@@ -839,9 +839,15 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 .vt-bar i{display:block; height:100%; width:0; border-radius:6px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); box-shadow:inset 0 1px 2px rgba(0,0,0,.18); transition:width .5s cubic-bezier(.16,1,.3,1)}
 .vt-use small{font-size:.76rem; color:var(--ink-3); white-space:nowrap}
 .vt-q{max-width:420px}
-.vt-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin:0}
+.vt-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; margin:0}
 .vt-list li{box-shadow:var(--inset-sm)}
 .vt-list li a,.ne-files li a{cursor:pointer}
+.vt-site{flex:none; display:inline-flex; align-items:center; gap:4px; min-height:36px; padding:0 10px; border-radius:10px; font-size:.74rem; font-weight:700; letter-spacing:.04em; color:var(--ink-3); box-shadow:var(--inset-sm)}
+.vt-site svg.i{width:13px; height:13px}
+.vt-site.on{color:var(--accent)}
+.vt-sf{flex:none; width:120px}
+.vt-sf input{width:100%; height:38px; border:0; border-radius:10px; padding:0 10px; font:inherit; font-size:16px; text-transform:uppercase; color:var(--ink); background:transparent; box-shadow:var(--inset-sm); outline:none}
+.vt-sf input:focus-visible{box-shadow:var(--inset-sm), 0 0 0 2px var(--accent)}
 .vt-none{margin:0; padding:18px 8px; text-align:center; color:var(--ink-3); font-size:.86rem}
 .vt-none[hidden]{display:none}
 .lightbox{position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:24px; background:rgba(10,12,16,.82); cursor:zoom-out}
@@ -2647,12 +2653,20 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
         const c = d.code.toLocaleUpperCase('tr-TR').replace(/\s+/g, ''), no = String(d.no || '');
         const hit = x => { const v = String(x || '').toLocaleUpperCase('tr-TR').replace(/\s+/g, ''); return !!v && (v === c || (c.length >= 4 && v.startsWith(c)) || (no && v === no)); };
         const tasks = S.tasks.filter(t => !t.sample && hit(t.site)).sort((a, b) => (a.done - b.done) || String(a.due || '9').localeCompare(String(b.due || '9'))).slice(0, 12)
-          .map(t => ({ id: t.id, t: t.title || 'Görev', done: !!t.done, late: isLate(t), w: t.done ? 'Tamamlandı' : t.due ? dueLabel(t.due) : 'Tarihsiz' }));
+          .map(t => ({ id: t.id, t: t.title || 'Görev', done: !!t.done, late: isLate(t), w: t.done ? 'Tamamlandı' : t.due ? dueLabel(t.due) : 'Tarihsiz', d: t.due || '', da: t.doneAt || '', ca: t.createdAt || 0 }));
         const notes = S.notes.filter(n => hit(n.site)).sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 8)
           .map(n => ({ id: n.id, t: n.title || (n.body.split('\n')[0] || 'Not').slice(0, 80), s: n.body.replace(/\s+/g, ' ').slice(0, 120), at: String(n.updated).slice(0, 10) }));
-        try { e.source.postMessage({ type: 'rt-site', rid: d.rid, tasks, notes }, e.origin); } catch (_) {}
+        const send = () => { const files = (vui.files || []).filter(f => hit(f.site)).slice(0, 12).map(f => ({ id: f.id, n: f.name, at: f.created, sz: f.size }));
+          try { e.source.postMessage({ type: 'rt-site', rid: d.rid, tasks, notes, files }, e.origin); } catch (_) {} };
+        send();
+        if (!vui.files && STORE.mode === 'api') loadVaultQuiet().then(send);
       };
       reply(); return;
+    }
+    /* Saha 360 › Dosyalar: Notlar › Dosyalarım bu sahaya süzülmüş açılır */
+    if (d.type === 'sa-open-vault') {
+      const f = () => { if (!STORE.ready) return setTimeout(f, 300); vui.q = String(d.q || '').slice(0, 30); $('#vaultQ').value = vui.q; location.hash = '#notlar'; setTimeout(() => setVault(true), 60); };
+      f(); return;
     }
     /* Bildirimler: Site Asistan aboneliği Ritim hesabına bağlanır (istekler Ritim'in kendi adresinden, oturum anahtarıyla) */
     if (/^sa-push-(key|sub|unsub|test|status)$/.test(d.type)) {
@@ -3147,6 +3161,9 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; renderVault();
     } catch (err) { renderVault('Bağlantı yok — dosyalar alınamadı.'); }
   }
+  async function loadVaultQuiet() {
+    try { const r = await fetch('/api/vault', { headers: authH() }); if (!r.ok) return; const j = await r.json(); vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; } catch (err) {}
+  }
   async function vaultBlob(f) {
     const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { headers: authH() });
     if (!r.ok) throw new Error('x');
@@ -3160,8 +3177,11 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   }
   function renderVault(msg) {
     const all = vui.files || [], q = lowerTr(vui.q.trim());
-    const list = all.filter(f => !q || lowerTr(f.name).includes(q));
-    $('#vaultList').innerHTML = list.map(f => fileLi({ ...f, thumb: vui.thumbs.get(f.id) || '' }, fmtNote.format(new Date(f.created)))).join('')
+    const list = all.filter(f => !q || lowerTr(f.name + ' ' + (f.site || '')).includes(q));
+    $('#vaultList').innerHTML = list.map(f => fileLi({ ...f, thumb: vui.thumbs.get(f.id) || '' }, fmtNote.format(new Date(f.created)))
+      .replace('<button class="btn icon sm" data-fdel', vui.siteEd === f.id
+        ? `<form class="vt-sf" data-vsf="${esc(f.id)}"><input value="${esc(f.site || '')}" placeholder="Saha kodu" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Saha kodu"></form><button class="btn icon sm" data-fdel`
+        : `<button class="vt-site${f.site ? ' on' : ''}" data-vsite="${esc(f.id)}" aria-label="${f.site ? 'Saha: ' + esc(f.site) + ' · değiştir' : 'Sahaya bağla'}">${ico('pin')}<span>${f.site ? esc(f.site) : 'Saha'}</span></button><button class="btn icon sm" data-fdel`)).join('')
       + vui.up.map(x => `<li class="up"><span class="fi">…</span><span class="fn"><b>${esc(x)}</b><small>Yükleniyor…</small></span></li>`).join('');
     const none = $('#vaultNone');
     none.hidden = !!(list.length || vui.up.length) && !msg;
@@ -3210,7 +3230,20 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
       setTimeout(() => URL.revokeObjectURL(u), 60000);
     } catch (err) { if (w) w.close(); toast('Dosya açılamadı'); }
   }
+  async function setVaultSite(id, site) {
+    const f = (vui.files || []).find(x => x.id === id); vui.siteEd = null; if (!f) return renderVault();
+    site = site.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+    if (site === (f.site || '')) return renderVault();
+    const old = f.site; f.site = site; renderVault();
+    try { const r = await fetch('/api/vault?id=' + encodeURIComponent(id), { method: 'PUT', headers: { ...authH(), 'content-type': 'application/json' }, body: JSON.stringify({ site }) }); if (!r.ok) throw new Error('x');
+      toast(site ? `${f.name} → ${site} sahasına bağlandı` : 'Saha bağı kaldırıldı'); }
+    catch (err) { f.site = old; renderVault(); toast('Kaydedilemedi — bağlantını kontrol et'); }
+  }
+  $('#vaultList').addEventListener('submit', e => { const fm = e.target.closest('[data-vsf]'); if (!fm) return; e.preventDefault(); setVaultSite(fm.dataset.vsf, fm.querySelector('input').value); });
+  $('#vaultList').addEventListener('focusout', e => { const fm = e.target.closest('[data-vsf]'); if (fm && vui.siteEd) setTimeout(() => { if (vui.siteEd === fm.dataset.vsf) setVaultSite(fm.dataset.vsf, fm.querySelector('input').value); }, 120); });
   $('#vaultList').addEventListener('click', async e => {
+    const vs = e.target.closest('[data-vsite]');
+    if (vs) { e.preventDefault(); vui.siteEd = vs.dataset.vsite; renderVault(); const i = $('#vaultList [data-vsf] input'); if (i) { i.focus(); i.select(); } return; }
     const del = e.target.closest('[data-fdel]'), op = e.target.closest('[data-fopen]');
     const f = (vui.files || []).find(x => x.id === (del || op || {}).dataset?.[del ? 'fdel' : 'fopen']); if (!f) return;
     e.preventDefault();
