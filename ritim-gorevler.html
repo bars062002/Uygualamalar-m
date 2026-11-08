@@ -2014,6 +2014,12 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
     if (d.theme) { if (d.theme === 'oled') document.documentElement.dataset.oled = 'on'; else delete document.documentElement.dataset.oled; }
     if ((nt && nt !== theme) || na !== accent || ns !== skin) { if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
+    /* Site Asistan'da seçilen özel vurgu rengi (açık/koyu karşılıklarıyla, kontrastı ayarlı gelir) */
+    const R = document.documentElement;
+    if (d.accent === 'ozel' && Array.isArray(d.accHex) && d.accHex.length === 4 && d.accHex.every(h => /^#[0-9a-f]{6}$/i.test(h))) {
+      const dk = isDarkTheme(), a = dk ? d.accHex[2] : d.accHex[0], a2 = dk ? d.accHex[3] : d.accHex[1], [r, g, b] = hexRgb(a);
+      R.style.setProperty('--accent', a); R.style.setProperty('--accent-2', a2); R.style.setProperty('--accent-soft', `rgba(${r},${g},${b},.14)`); R.style.setProperty('--accent-glow', `rgba(${r},${g},${b},.35)`); R.style.setProperty('--on-accent', lum(a) > .45 ? '#111' : '#fff'); R.dataset.accOzel = '1';
+    } else if (R.dataset.accOzel) { delete R.dataset.accOzel; ['--accent', '--accent-2', '--accent-soft', '--accent-glow', '--on-accent'].forEach(k => R.style.removeProperty(k)); applyTheme(); }
   });
   const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const lum = h => { const [r, g, b] = hexRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
@@ -2829,6 +2835,10 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   }
 
   // ---------- Sesle görev: “Yarın 10'da KSEMR32087'yi ara” → başlık, saha, tarih, saat ----------
+  /* iPhone'da titreşim: iOS 18+ "switch" kutusu sistem dokunsal geri bildirimini verir */
+  if (!navigator.vibrate && /iP(hone|ad|od)/.test(navigator.userAgent)) { const hl = document.createElement('label'); hl.setAttribute('aria-hidden', 'true'); hl.style.cssText = 'position:fixed;left:-200px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+    const hi = document.createElement('input'); hi.type = 'checkbox'; hi.setAttribute('switch', ''); hi.tabIndex = -1; hl.appendChild(hi); document.body.appendChild(hl);
+    navigator.vibrate = p => { const n = Array.isArray(p) ? Math.ceil(p.length / 2) : 1; for (let i = 0; i < n; i++) setTimeout(() => hl.click(), i * 90); return true; }; }
   const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   function parseVoice(txt) {
     let t = ' ' + txt.trim() + ' ', due = null, rem = null, site = '';
