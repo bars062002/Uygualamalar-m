@@ -756,6 +756,40 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important; transition:none!important}
 }
+
+/* ---------- Takvim · Akış (zaman çizelgesi) ---------- */
+.cal-mode{align-self:flex-end}
+.flow{display:flex; flex-direction:column; gap:20px; margin-top:20px}
+.flow-bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.flow-range{font-size:1rem; margin-left:6px}
+.flow-sum{flex:1; text-align:right; font-size:.8rem; color:var(--ink-3)}
+.flow-days{display:flex; flex-direction:column; gap:18px; max-width:860px}
+.fday{padding:18px 20px 10px; border-radius:var(--r); box-shadow:var(--raise-sm)}
+.fday h3{margin:0 0 10px; font-size:1.05rem; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.fday h3 .fd-tag{font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:99px; box-shadow:var(--inset-sm); color:var(--accent)}
+.fday.late h3 .fd-tag{color:var(--bad)}
+.fday h3 .fd-n{margin-left:auto; font-size:.75rem; font-weight:500; color:var(--ink-3)}
+.fday ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.tl-row{display:grid; grid-template-columns:64px 3px minmax(0,1fr); gap:0 14px; padding:10px 0; align-items:stretch}
+.tl-row + .tl-row{border-top:1px solid color-mix(in srgb, var(--ink-3) 14%, transparent)}
+.tl-row .ft{display:flex; flex-direction:column; gap:2px; padding-top:2px; font-size:.95rem; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.tl-row .ft small{white-space:nowrap; font-size:.76rem; font-weight:500; color:var(--ink-3)}
+.tl-row .fbar{border-radius:3px; background:var(--c, var(--ink-3))}
+.tl-row .fb{display:flex; gap:10px; align-items:flex-start; min-width:0}
+.tl-row .fchk{flex:none; width:44px; height:44px; margin:-10px -8px -10px -12px; display:grid; place-items:center; border-radius:50%}
+.tl-row .fchk i{width:20px; height:20px; border-radius:50%; border:2px solid var(--c, var(--ink-3)); display:grid; place-items:center; color:var(--on-accent)}
+.tl-row .fchk i svg{width:12px; height:12px; opacity:0}
+.tl-row.done .fchk i{background:var(--c, var(--accent)); border-color:transparent}
+.tl-row.done .fchk i svg{opacity:1}
+.tl-row .fx{flex:1; min-width:0; text-align:left; display:flex; flex-direction:column; gap:3px; color:var(--ink); padding:0}
+.tl-row .fx b{font-size:.95rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere}
+.tl-row.done .fx b{text-decoration:line-through; color:var(--ink-3)}
+.tl-row .fx small{font-size:.8rem; color:var(--ink-3); display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.tl-row .fx small .chip.site{color:var(--ink); font-weight:600; padding:1px 7px; border-radius:6px; box-shadow:inset 0 0 0 1.5px currentColor}
+.tl-row .fx small svg.i{width:13px; height:13px}
+.fday-empty{padding:6px 0 10px; font-size:.86rem; color:var(--ink-3)}
+.flow-none{padding:36px 20px; text-align:center; color:var(--ink-3); border-radius:var(--r); box-shadow:var(--inset)}
+@media (max-width: 600px){ .tl-row{grid-template-columns:52px 3px minmax(0,1fr); gap:0 12px} .fday{padding:16px 16px 8px} .flow-sum{flex-basis:100%; text-align:left} }
 /* ---------- Notlar ---------- */
 .notes{display:grid; grid-template-columns:minmax(260px,340px) 1fr; gap:24px; margin-top:24px; align-items:start}
 .notes-side{padding:18px; display:flex; flex-direction:column; gap:16px; position:sticky; top:calc(var(--sa-top,0px) + 70px); max-height:calc(100vh - 140px)}
@@ -1077,7 +1111,18 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
           <p class="eyebrow">Planlama</p>
           <h1 class="emboss" id="h-takvim">Takvim</h1>
         </div>
+        <div class="seg cal-mode" id="calMode" role="tablist" aria-label="Takvim görünümü"><button type="button" role="tab" data-cm="flow">Akış</button><button type="button" role="tab" data-cm="month">Ay</button></div>
       </header>
+      <div class="flow" id="flow" hidden>
+        <div class="flow-bar">
+          <button class="btn icon sm" id="flowPrev" aria-label="Önceki 2 hafta"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="btn sm" id="flowToday">Bugün</button>
+          <button class="btn icon sm" id="flowNext" aria-label="Sonraki 2 hafta"><svg class="i" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          <b class="flow-range num" id="flowRange"></b>
+          <span class="flow-sum" id="flowSum"></span>
+        </div>
+        <div class="flow-days" id="flowDays"></div>
+      </div>
       <div class="calwrap">
         <div class="card">
           <div class="card-head">
@@ -1748,7 +1793,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
   }
 
   // ---------- UI state ----------
-  const ui = { filter: 'all', cat: null, q: '', collapsed: { done: true }, open: null, route: 'pano', calMonth: null, calSel: today() };
+  const ui = { filter: 'all', cat: null, q: '', collapsed: { done: true }, open: null, route: 'pano', calMonth: null, calSel: today(), calMode: lsGet('ritim.calMode') === 'month' ? 'month' : 'flow', flowFrom: null };
   const byId = id => S.tasks.find(t => t.id === id);
   const isToday = t => (!t.done && t.due && t.due <= today()) || (t.done && doneDay(t) === today());
   const isLate = t => !t.done && t.due && t.due < today();
@@ -2058,7 +2103,7 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     ['#addCat', '#dCat'].forEach(s => { const el = $(s), v = el.value; if (el.dataset.opts !== opts) { el.innerHTML = opts; el.dataset.opts = opts; } if (v && lists().some(l => l.id === v)) el.value = v; });
     if (ui.route === 'pano') renderDash();
     if (ui.route === 'gorevler') renderTasks();
-    if (ui.route === 'takvim') renderCal();
+    if (ui.route === 'takvim') setCalMode(ui.calMode);
     if (ui.route === 'odak') renderFocus();
     if (ui.route === 'alisveris') renderShop();
     if (ui.route === 'notlar') renderNotes();
@@ -2375,6 +2420,61 @@ html.embed .vhead-actions .btn.icon{width:52px; height:52px; flex:none}
     e.preventDefault();
     const v = $('#dayAddIn').value.trim(); if (!v) return;
     addTask(v, ui.cat || lists()[0].id, 'med', ui.calSel); $('#dayAddIn').value = '';
+  });
+
+
+  // ---------- Takvim · Akış: görevler gün gün zaman çizelgesi (saatliler saat sırasıyla, saatsizler "Gün boyu") ----------
+  const FLOW_DAYS = 14;
+  function renderFlow() {
+    const t = today(); if (!ui.flowFrom) ui.flowFrom = t;
+    const from = ui.flowFrom, to = addDays(from, FLOW_DAYS - 1);
+    const fR = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' });
+    $('#flowRange').textContent = `${fR.format(parse(from))} – ${fR.format(parse(to))} ${parse(to).getFullYear()}`;
+    const byDay = {};
+    S.tasks.forEach(x => { if (x.due && x.due >= from && x.due <= to) (byDay[x.due] ||= []).push(x); });
+    const late = from === t ? S.tasks.filter(x => isLate(x)).sort((a, b) => a.due.localeCompare(b.due)) : [];
+    const ord = (a, b) => (a.done - b.done) || ((a.remind || '') ? (b.remind ? a.remind.localeCompare(b.remind) : 1) : (b.remind ? -1 : 0)) || sortTasks(a, b);
+    const row = (x, showDate) => {
+      const c = x.done ? 'var(--ink-3)' : isLate(x) ? 'var(--bad)' : catColor(x.cat);
+      const sd = x.subs.filter(s => s.d).length;
+      const sub = [x.site ? `<span class="chip site num">${esc(x.site)}</span>` : '', `<span>${esc(catName(x.cat))}</span>`, x.person ? `<span>${ico('user')}${esc(x.person)}</span>` : '',
+        x.subs.length ? `<span class="num">${ico('subs')}${sd}/${x.subs.length}</span>` : '', x.repeat ? `<span>${ico('repeat')}${REPEAT[x.repeat]}</span>` : '',
+        showDate ? `<span class="num">${fmtShort.format(parse(x.due))}</span>` : ''].filter(Boolean).join('');
+      return `<li class="tl-row${x.done ? ' done' : ''}" data-fid="${x.id}" style="--c:${c}">
+        <span class="ft">${x.remind ? `${x.remind}${x.pomo ? '' : ''}` : '<small>Tüm gün</small>'}</span>
+        <span class="fbar" aria-hidden="true"></span>
+        <span class="fb"><button class="fchk" data-ftoggle="${x.id}" aria-label="${x.done ? 'Tamamlanmadı yap' : 'Tamamla'}: ${esc(x.title)}"><i>${ico('check')}</i></button>
+          <button class="fx" data-open="${x.id}"><b>${esc(x.title)}</b>${sub ? `<small>${sub}</small>` : ''}</button></span></li>`;
+    };
+    let html = '', open = 0, done = 0;
+    if (late.length) html += `<section class="fday late"><h3>Gecikmiş <span class="fd-tag">${late.length} iş</span></h3><ul>${late.map(x => row(x, true)).join('')}</ul></section>`;
+    for (let i = 0; i < FLOW_DAYS; i++) {
+      const d = addDays(from, i), items = (byDay[d] || []).sort(ord), n = diffDays(d);
+      items.forEach(x => x.done ? done++ : open++);
+      if (!items.length && d !== t) continue;
+      const tag = n === 0 ? 'Bugün' : n === 1 ? 'Yarın' : '';
+      html += `<section class="fday${n === 0 ? ' today' : ''}" data-fday="${d}"><h3>${cap(fmtLong.format(parse(d)))}${tag ? `<span class="fd-tag">${tag}</span>` : ''}${items.length ? `<span class="fd-n num">${items.filter(x => x.done).length}/${items.length}</span>` : ''}</h3>
+        ${items.length ? `<ul>${items.map(x => row(x)).join('')}</ul>` : '<p class="fday-empty">Bugün için planlanmış iş yok.</p>'}</section>`;
+    }
+    if (!html) html = `<p class="flow-none">${STORE.ready ? 'Bu iki haftada tarihli görev yok.' : 'Yükleniyor…'}</p>`;
+    $('#flowDays').innerHTML = html;
+    $('#flowSum').textContent = `${open} açık · ${done} tamamlandı${late.length ? ` · ${late.length} gecikmiş` : ''}`;
+  }
+  function setCalMode(m) {
+    ui.calMode = m; lsSet('ritim.calMode', m);
+    $$('#calMode button').forEach(b => { const on = b.dataset.cm === m; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+    $('#flow').hidden = m !== 'flow'; $('#v-takvim .calwrap').hidden = m === 'flow';
+    m === 'flow' ? renderFlow() : renderCal();
+  }
+  $('#calMode').addEventListener('click', e => { const b = e.target.closest('[data-cm]'); if (b && b.dataset.cm !== ui.calMode) { setCalMode(b.dataset.cm); if (motionOK()) $('#v-takvim').querySelectorAll(ui.calMode === 'flow' ? '.fday' : '.cal-day').forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: Math.min(i, 10) * 45, easing: EASE, fill: 'backwards' })); } });
+  const shiftFlow = n => { ui.flowFrom = addDays(ui.flowFrom || today(), n * FLOW_DAYS); renderFlow(); if (motionOK()) $$('#flowDays .fday').forEach((el, i) => el.animate([{ opacity: 0, transform: `translateX(${n * 26}px)` }, { opacity: 1, transform: 'none' }], { duration: 420, delay: Math.min(i, 8) * 40, easing: EASE, fill: 'backwards' })); };
+  $('#flowPrev').addEventListener('click', () => shiftFlow(-1));
+  $('#flowNext').addEventListener('click', () => shiftFlow(1));
+  $('#flowToday').addEventListener('click', () => { ui.flowFrom = today(); renderFlow(); });
+  $('#flowDays').addEventListener('click', e => {
+    const b = e.target.closest('[data-ftoggle]'); if (!b) return;
+    e.stopPropagation(); const r = b.closest('.tl-row'); r.classList.toggle('done');   // basışta anında geri bildirim
+    setTimeout(() => toggleDone(b.dataset.ftoggle), 160);
   });
 
   // ---------- Actions ----------
