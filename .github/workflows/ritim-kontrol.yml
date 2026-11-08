@@ -1,0 +1,25 @@
+name: Ritim kontrol
+on:
+  pull_request:
+    paths: ['ritim/**', 'ritim-gorevler.html', '.github/workflows/ritim-kontrol.yml']
+  push:
+    branches: [main]
+    paths: ['ritim/**', 'ritim-gorevler.html']
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sunucu modülleri yükleniyor
+        run: node -e "import('./ritim/worker.js').then(() => console.log('worker tamam'))"
+      - name: Uygulama sayfası güncel (ritim-gorevler.html → ritim/public/index.html)
+        run: |
+          node ritim/build.mjs
+          git diff --exit-code ritim/public/index.html || (echo "ritim/public/index.html güncel değil: node ritim/build.mjs çalıştırıp birlikte commit et" && exit 1)
+      - name: Sayfa betiği sözdizimi
+        run: |
+          node -e "const s=require('fs').readFileSync('ritim/public/index.html','utf8');const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach(x=>new Function(x[1]));console.log(m.length+' betik tamam')"

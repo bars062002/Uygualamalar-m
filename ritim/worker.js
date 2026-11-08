@@ -14,10 +14,12 @@ import { onRequestPost as taskPost } from './functions/api/task.js';
 import { onRequestGet as vaultGet, onRequestPost as vaultPost, onRequestPut as vaultPut, onRequestDelete as vaultDel } from './functions/api/vault.js';
 import { onRequestGet as kiraGet, onRequestPost as kiraPost } from './functions/api/kira.js';
 import { runSchedule } from './lib/push.js';
+import { runBackup } from './lib/backup.js';
+import { onRequestGet as backupGet, onRequestPost as backupPost } from './functions/api/backup.js';
 import { ensureSchema } from './lib/auth.js';
 import { json } from './lib/http.js';
 
-const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'GET /api/quick': quickGet, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost, 'POST /api/claim': claim, 'POST /api/file': filePost, 'GET /api/file': fileGet, 'DELETE /api/file': fileDel, 'GET /api/push/key': pushKey, 'POST /api/push/sub': pushSub, 'POST /api/push/unsub': pushUnsub, 'POST /api/push/test': pushTest, 'GET /api/push/status': pushStatusGet, 'POST /api/task': taskPost, 'GET /api/vault': vaultGet, 'POST /api/vault': vaultPost, 'PUT /api/vault': vaultPut, 'DELETE /api/vault': vaultDel, 'GET /api/kira': kiraGet, 'POST /api/kira': kiraPost };
+const routes = { 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'GET /api/quick': quickGet, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost, 'POST /api/claim': claim, 'POST /api/file': filePost, 'GET /api/file': fileGet, 'DELETE /api/file': fileDel, 'GET /api/push/key': pushKey, 'POST /api/push/sub': pushSub, 'POST /api/push/unsub': pushUnsub, 'POST /api/push/test': pushTest, 'GET /api/push/status': pushStatusGet, 'POST /api/task': taskPost, 'GET /api/backup': backupGet, 'POST /api/backup': backupPost, 'GET /api/vault': vaultGet, 'POST /api/vault': vaultPost, 'PUT /api/vault': vaultPut, 'DELETE /api/vault': vaultDel, 'GET /api/kira': kiraGet, 'POST /api/kira': kiraPost };
 
 export default {
   async fetch(request, env) {
@@ -31,6 +33,6 @@ export default {
   // Bildirimler: saatli görev hatırlatmaları ve 08:30 günün özeti (wrangler.toml → triggers)
   async scheduled(event, env, ctx) {
     if (!env.DB) return;
-    ctx.waitUntil(ensureSchema(env).then(() => runSchedule(env)));
+    ctx.waitUntil(ensureSchema(env).then(() => Promise.all([runSchedule(env), runBackup(env).catch(e => console.log('yedek', String(e)))])));
   },
 };
