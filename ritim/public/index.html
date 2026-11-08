@@ -194,6 +194,8 @@ svg.i{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; s
 .btn.ghost{box-shadow:none; letter-spacing:.02em; text-transform:none; font-weight:500}
 .btn.ghost:hover{box-shadow:var(--raise-sm)}
 .btn.danger{color:var(--bad)}
+.btn.danger-fill{background:var(--bad); color:#fff; box-shadow:0 10px 20px -8px var(--bad)}
+.modal.dlg{z-index:80}
 .btn.danger.armed{background:var(--bad); color:#fff; box-shadow:0 10px 20px -8px var(--bad)}
 
 .field{display:flex; align-items:center; gap:12px; height:52px; padding:0 18px; border-radius:var(--r-sm); box-shadow:var(--inset); color:var(--ink-3); min-width:0}
@@ -1734,9 +1736,16 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   }
   // ---------- Hesap: giriş / hesap oluşturma ----------
   const lg = { mode: 'login' };
+  /* Tek giriş: Site Asistan içinde giriş kabuğun kendi ekranında yapılır. Kabuk yanıt vermezse (eski sürüm) Ritim'in penceresi açılır. */
+  let saLoginAck = false;
   function askLogin() {
     const m = $('#loginModal');
     if (!m.hidden) return;
+    if (IN_HOST && !askLogin._fallback) {
+      saLoginAck = false; try { parent.postMessage({ type: 'rt-need-login' }, hostOrigin); } catch (e) {}
+      setTimeout(() => { if (!saLoginAck) { askLogin._fallback = true; askLogin(); askLogin._fallback = false; } }, 900);
+      return;
+    }
     $('#loginForm').hidden = false; $('#lgLegacy').hidden = true;
     m.hidden = false; $('#lgErr').textContent = '';
     setTimeout(() => $('#lgUser').focus(), 50);
@@ -2700,6 +2709,24 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && swOpen) swClose(); });
   })();
 
+  // ---------- Uygulama içi onay ve kısa yanıt pencereleri (tarayıcının confirm/prompt kutuları yerine) ----------
+  function dlg(o) {
+    return new Promise(res => {
+      const w = document.createElement('div'); w.className = 'modal dlg'; w.setAttribute('role', 'alertdialog'); w.setAttribute('aria-modal', 'true');
+      w.innerHTML = `<form class="card modal-card" autocomplete="off"><div><h2 style="margin:0;font-size:1.15rem">${esc(o.title)}</h2>${o.text ? `<p class="hint-txt" style="margin:8px 0 0;font-size:.88rem">${esc(o.text)}</p>` : ''}</div>
+        ${o.input != null ? `<label class="field"><input maxlength="${o.max || 60}" value="${esc(o.input)}" aria-label="${esc(o.title)}"></label>` : ''}
+        <div class="modal-foot"><span style="flex:1"></span><button type="button" class="btn sm ghost" data-x>${esc(o.cancel || 'Vazgeç')}</button><button type="submit" class="btn sm ${o.danger ? 'danger-fill' : 'primary live'}">${esc(o.ok || 'Tamam')}</button></div></form>`;
+      const inp = w.querySelector('input');
+      const done = v => { w.remove(); document.removeEventListener('keydown', key, true); res(v); };
+      const key = e => { if (e.key === 'Escape') { e.stopPropagation(); done(o.input != null ? null : false); } };
+      w.addEventListener('click', e => { if (e.target === w || e.target.closest('[data-x]')) done(o.input != null ? null : false); });
+      w.querySelector('form').addEventListener('submit', e => { e.preventDefault(); done(o.input != null ? inp.value.trim() : true); });
+      document.addEventListener('keydown', key, true); document.body.appendChild(w);
+      setTimeout(() => { if (inp) { inp.focus(); inp.select(); } else w.querySelector('[type=submit]').focus(); }, 40);
+    });
+  }
+  const askYes = (title, text, ok = 'Sil') => dlg({ title, text, ok, danger: true });
+
   // ---------- Ertele (kaydırma ve Site Asistan ana sayfasıyla aynı seçenekler) ----------
   let snzId = null;
   function openSnooze(id) {
@@ -3351,7 +3378,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const b = e.target.closest('[data-fdel]'); if (!b) return;
     e.preventDefault(); const n = noteOf(nui.sel); if (!n) return;
     const f = (n.files || []).find(x => x.id === b.dataset.fdel); if (!f) return;
-    if (!confirm(`“${f.name}” nottan silinsin mi?`)) return;
+    if (!(await askYes(`“${f.name}” nottan silinsin mi?`, 'Dosya da silinir; geri alınamaz.'))) return;
     n.files = n.files.filter(x => x.id !== f.id); n.updated = new Date().toISOString(); putNote(n); renderNoteFiles(n);
     try { await fetch('/api/file?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() }); } catch (err) {}
   });
@@ -3460,7 +3487,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const f = (vui.files || []).find(x => x.id === (del || op || {}).dataset?.[del ? 'fdel' : 'fopen']); if (!f) return;
     e.preventDefault();
     if (op) return openVault(f);
-    if (!confirm(`“${f.name}” kalıcı olarak silinsin mi?`)) return;
+    if (!(await askYes(`“${f.name}” silinsin mi?`, 'Dosyalarım’dan kalıcı olarak silinir; geri alınamaz.'))) return;
     try {
       const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() });
       if (!r.ok) throw new Error('x');
@@ -3854,8 +3881,9 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   $('#dTpl').addEventListener('click', e => {
     const t = byId(ui.open); if (!t) return;
     if (e.target.closest('[data-tplsave]')) {
-      const name = (prompt('Şablon adı', (myTpl() || {}).name || 'Benim şablonum') || '').trim().slice(0, 30); if (!name) return;
-      lsSet('ritim.tpl', JSON.stringify({ name, subs: t.subs.map(x => x.t).slice(0, 15) })); renderTpl(t); toast(`“${name}” şablonu kaydedildi`); return;
+      dlg({ title: 'Şablon adı', text: `${t.subs.length} adım şablon olarak kaydedilir; bu cihazda saklanır.`, input: (myTpl() || {}).name || 'Benim şablonum', max: 30, ok: 'Kaydet' }).then(name => {
+        name = (name || '').slice(0, 30); if (!name) return;
+        lsSet('ritim.tpl', JSON.stringify({ name, subs: t.subs.map(x => x.t).slice(0, 15) })); renderTpl(t); toast(`“${name}” şablonu kaydedildi`); }); return;
     }
     const b = e.target.closest('[data-tpl]'); if (!b) return;
     const tp = allTpl().find(x => x.id === b.dataset.tpl); if (!tp) return;
@@ -3993,7 +4021,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const b = e.target.closest('[data-fdel]'); if (!b) return;
     e.preventDefault();
     const t = cur(); if (!t) return; const f = (t.files || []).find(x => x.id === b.dataset.fdel); if (!f) return;
-    if (!confirm(`“${f.name}” silinsin mi?`)) return;
+    if (!(await askYes(`“${f.name}” silinsin mi?`, 'Ek görevden ve sunucudan silinir; geri alınamaz.'))) return;
     edit(x => { x.files = x.files.filter(y => y.id !== f.id); });
     try { await fetch('/api/file?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: { authorization: 'Bearer ' + (lsGet(KEY_PW) || '') } }); } catch (err) {}
   });
@@ -4141,6 +4169,19 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       : '<li><span>Bugün henüz seans yok. Başlat’a basarak ilk seansınızı başlatın.</span></li>';
     paintTimer();
   }
+
+  // ---------- Tek giriş: Site Asistan oturumu verir / kapatır ----------
+  if (IN_HOST) addEventListener('message', e => {
+    const d = e.data; if (!d || !HOST_OK(e.origin)) return;
+    if (d.type === 'sa-login-ack') { saLoginAck = true; return; }
+    if (d.type === 'sa-session' && typeof d.token === 'string' && d.token.length >= 20) {
+      const prev = lsGet(KEY_USER);
+      if (prev && prev !== d.user) { [KEY, KEY_REV, KEY_PENDING].forEach(k => lsSet(k, null)); lsSet('ritim.tasksImported', null); lsSet('ritim.notesImported', null); }
+      lsSet(KEY_PW, d.token); lsSet(KEY_USER, String(d.user || '')); lsSet('ritim.name', String(d.name || d.user || ''));
+      location.reload(); return;
+    }
+    if (d.type === 'sa-logout') { [KEY_PW, KEY_PENDING, KEY_REV, KEY, KEY_USER, 'ritim.name'].forEach(k => lsSet(k, null)); location.reload(); }
+  });
 
   // ---------- Boot ----------
   applyTheme();
