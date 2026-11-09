@@ -116,10 +116,21 @@
 :root[data-saskin="sis"] :is(.drawer,.modal>div){background-color:rgba(236,247,243,.97)}
 @media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"]:not(#x){--surface:#eaf6f1} }
 /* Sis: vurgu yazı rengiyle aynı lacivert olduğundan seçili durum dolguyla belirginleşir */
-:root[data-saskin="sis"] :is(html.embed .embed-nav a.on,.seg button.on,.list-strip button.on,.nav a.on,.tabbar a.on,#vaultBtn[aria-pressed="true"]){background:#163144!important;color:#fff!important;box-shadow:0 8px 18px -10px rgba(22,49,68,.55)!important}
-:root[data-saskin="sis"] :is(html.embed .embed-nav a.on,.nav a.on,.tabbar a.on) svg{stroke:#fff!important;color:#fff!important}
+:root[data-saskin="sis"] :is(.seg button.on,.list-strip button.on,.nav a.on,.tabbar a.on,#vaultBtn[aria-pressed="true"]){background:#163144!important;color:#fff!important;box-shadow:0 8px 18px -10px rgba(22,49,68,.55)!important}
+:root[data-saskin="sis"] :is(.nav a.on,.tabbar a.on) svg{stroke:#fff!important;color:#fff!important}
 :root[data-saskin="sis"] :is(.list-row.on,.note-it.on){box-shadow:inset 0 0 0 2px #163144!important}
-:root[data-saskin="sis"] .embed-nav{background:rgba(226,242,237,.86)!important;border-radius:22px!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.65),0 12px 26px -18px rgba(22,49,68,.4)!important;margin-left:0!important;margin-right:0!important}
+:root[data-saskin="sis"]:not(#x) html.embed .embed-nav,:root[data-saskin="sis"].embed:not(#x) .embed-nav{background:linear-gradient(180deg,#1b405b 0,#24506a 72%,rgba(36,80,106,0) 100%)!important;border-radius:0!important;box-shadow:0 -40px 0 #1b405b!important;margin:0 calc(50% - 50vw) 14px!important;padding:6px 12px 18px!important;gap:2px!important;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a{flex:0 0 auto!important;flex-direction:row!important;height:44px!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:10px!important;color:rgba(255,255,255,.7)!important;font-weight:300!important;font-size:15.5px!important}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a svg{display:none}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a span{font-size:inherit!important;font-weight:inherit!important;letter-spacing:normal!important}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a.on{color:#fff!important;font-weight:600!important}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav{top:var(--sa-top,0px)!important}
+@media (max-width: 420px){ :root[data-saskin="sis"].embed:not(#x) .embed-nav{padding:6px 6px 18px!important;justify-content:space-between} :root[data-saskin="sis"].embed:not(#x) .embed-nav a{padding:0 6px!important;font-size:14.5px!important} }
+/* Sis yazı: büyük harf ve geniş aralık yok (referans) */
+:root[data-saskin="sis"] body *:not(svg):not(svg *){text-transform:none!important;letter-spacing:normal!important}
+:root[data-saskin="sis"] :is(.eyebrow,.group-head){font-weight:500!important;font-size:.86rem!important}
+:root[data-saskin="sis"] :is(h1,h2,h3){font-weight:500!important}
 @media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"] .embed-nav{background:#e2f1eb!important} }
 
 
