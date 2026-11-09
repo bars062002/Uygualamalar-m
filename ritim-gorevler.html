@@ -484,6 +484,8 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .files li.up{opacity:.6}
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
 .drawer.morph{transition:none!important}
+.drawer.drop{box-shadow:inset 0 0 0 3px var(--accent)}
+#dFilePaste{margin-left:6px}
 /* OLED Siyah (Site Asistan teması): tam siyah zemin, ince kenar parıltısı */
 html:root[data-oled="on"]{--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
 html[data-oled="on"] :is(.card,.task,.drawer,.toast,.selbar){box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)!important}
@@ -1322,7 +1324,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         <a class="addr-link" id="dAddrLink" target="_blank" rel="noopener" hidden><svg class="i" viewBox="0 0 24 24"><path d="m3 11 19-9-9 19-2-8z"/></svg><span></span></a></div>
       <div><span class="lbl">Dosyalar</span><ul class="files" id="dFiles"></ul>
         <label class="btn sm file-add" id="dFileAdd" for="dFileIn"><svg class="i" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span>Dosya ekle</span></label><input type="file" id="dFileIn" multiple hidden>
-        <p class="hint-txt" id="dFileHint">Fotoğraf, PDF, Excel… Dosya başına en fazla 10 MB.</p></div>
+        <button type="button" class="btn sm file-add" id="dFilePaste" title="Panodaki görseli ya da dosyayı ekle (Ctrl+V / ⌘V)"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span>Yapıştır</span></button>
+        <p class="hint-txt" id="dFileHint">Fotoğraf, PDF, Excel… Dosya başına en fazla 10 MB. Görev açıkken Ctrl+V / ⌘V ile yapıştırabilir ya da dosyayı buraya sürükleyebilirsiniz.</p></div>
     </div>
     <label class="toggle-row" for="dDone"><button class="switch" id="dDone" role="switch" aria-checked="false"></button>Tamamlandı</label>
     <div class="two">
@@ -4205,9 +4208,31 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         <button class="btn icon sm" data-fdel="${esc(f.id)}" aria-label="Eki sil">${ico('x')}</button></li>`).join('')
       + up.map(n => `<li class="up"><span class="fi">…</span><span class="fn"><b>${esc(n)}</b><small>Yükleniyor…</small></span></li>`).join('');
   }
-  $('#dFileIn').addEventListener('change', async e => {
-    const tid = ui.open, files = [...e.target.files]; e.target.value = '';
+  $('#dFileIn').addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; addTaskFiles(files); });
+  /* Görev açıkken Ctrl+V / ⌘V: panodaki ekran görüntüsü ya da dosya göreve eklenir (metin yapıştırma bozulmaz) */
+  document.addEventListener('paste', e => {
+    if (!ui.open || !drawer.classList.contains('open')) return;
+    const f = pastedFiles(e.clipboardData); if (!f.length) return;
+    e.preventDefault(); addTaskFiles(f);
+  });
+  /* Dokunmatik cihazlar: Yapıştır düğmesi panoyu okur (iOS'ta "Yapıştır" onayı çıkar) */
+  $('#dFilePaste').addEventListener('click', async () => {
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.read) throw 0;
+      const items = await navigator.clipboard.read(), files = [];
+      const d = new Date(), p2 = x => String(x).padStart(2, '0'), stamp = `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${d.getFullYear()} ${p2(d.getHours())}.${p2(d.getMinutes())}`;
+      for (const it of items) { const ty = it.types.find(t => !t.startsWith('text/')); if (!ty) continue; const b = await it.getType(ty); const ext = (ty.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace('+xml', ''); files.push(new File([b], `Yapıştırılan ${stamp}${files.length ? ' ' + (files.length + 1) : ''}.${ext}`, { type: ty })); }
+      if (!files.length) return toast('Panoda görsel ya da dosya yok');
+      addTaskFiles(files);
+    } catch (err) { toast('Pano okunamadı · Ctrl+V / ⌘V deneyin ya da Dosya ekle’yi kullanın'); }
+  });
+  drawer.addEventListener('dragover', e => { if (ui.open && [...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); drawer.classList.add('drop'); } });
+  drawer.addEventListener('dragleave', e => { if (!drawer.contains(e.relatedTarget)) drawer.classList.remove('drop'); });
+  drawer.addEventListener('drop', e => { drawer.classList.remove('drop'); const f = pastedFiles(e.dataTransfer); if (f.length) { e.preventDefault(); addTaskFiles(f); } });
+  async function addTaskFiles(files) {
+    const tid = ui.open;
     if (!tid || !files.length) return;
+    if (navigator.vibrate) try { navigator.vibrate(6); } catch (e) {}
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) { toast(`${file.name}: 10 MB’tan büyük`); continue; }
       uploading.set(tid, [...(uploading.get(tid) || []), file.name]); syncDrawer();
@@ -4221,7 +4246,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const left = (uploading.get(tid) || []); left.splice(left.indexOf(file.name), 1); uploading.set(tid, left);
       syncDrawer();
     }
-  });
+  }
   $('#dFiles').addEventListener('click', async e => {
     const b = e.target.closest('[data-fdel]'); if (!b) return;
     e.preventDefault();
