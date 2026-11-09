@@ -80,12 +80,12 @@
 }
 :root[data-saskin="kagit"][data-saskin-acc="tema"]:not(#x){--accent:#2f2e2a; --accent-2:#141412; --accent-soft:rgba(47,46,42,.08); --accent-glow:rgba(47,46,42,.22); --on-accent:#ffffff}
 :root[data-saskin="brut"]:not(#x){
-  --bg:#0a2a30; --surface:#0a2a30; --hi:#103a41; --lo:#03100f; --track:#082328;
-  --page:radial-gradient(55% 40% at 0% 45%,rgba(15,150,156,.22) 0%,transparent 70%),radial-gradient(55% 40% at 100% 55%,rgba(15,150,156,.18) 0%,transparent 70%),linear-gradient(180deg,#072e33 0%,#0a2a30 45%,#05161a 100%);
-  --ink:#e6f4f5; --ink-2:#b8d6db; --ink-3:#8fb6be; --ok:#6fd3a3; --warn:#f0c46a; --bad:#ff7b6e; --scrim:rgba(3,12,14,.62);
-  color-scheme:dark;
+  --bg:#ddecef; --surface:#ddecef; --hi:#f7fcfd; --lo:#b3ccd2; --track:#d3e6ea;
+  --page:linear-gradient(180deg,#e6f2f4,#d3e6ea);
+  --ink:#05161a; --ink-2:#294d61; --ink-3:#3e6474; --ok:#1f7a55; --warn:#8a5b0f; --bad:#b42318; --scrim:rgba(5,22,26,.32);
+  color-scheme:light;
 }
-:root[data-saskin="brut"][data-saskin-acc="tema"]:not(#x){--accent:#6da5c0; --accent-2:#0f969c; --accent-soft:rgba(109,165,192,.14); --accent-glow:rgba(109,165,192,0); --on-accent:#05161a}
+:root[data-saskin="brut"][data-saskin-acc="tema"]:not(#x){--accent:#0c7075; --accent-2:#072e33; --accent-soft:rgba(12,112,117,.12); --accent-glow:rgba(12,112,117,0); --on-accent:#ffffff}
 :root[data-saskin="cam"]:not(#x){
   --bg:#2a4266; --surface:rgba(255,255,255,.14); --hi:transparent; --lo:rgba(0,0,0,.28); --track:rgba(255,255,255,.10);
   --page:radial-gradient(60% 45% at 15% 10%,rgba(214,132,96,.85) 0%,transparent 70%),radial-gradient(55% 45% at 95% 35%,rgba(92,146,196,.9) 0%,transparent 70%),radial-gradient(70% 55% at 40% 100%,rgba(52,104,84,.95) 0%,transparent 70%),linear-gradient(180deg,#3b5a8a,#1e3152);
@@ -117,7 +117,7 @@
 :root[data-saskin="gece"] :is(.drawer,.modal>div){background-color:#22122a}
 :root[data-saskin="arduvaz"] :is(.drawer,.modal>div){background-color:#22364a}
 
-:root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#0d343b}
+:root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#e6f2f4}
 
 
 /* Pano görev karuseli (Ritim'in kendi bileşeni): ortadaki kart önde, yandakiler derinlikte; kaydır ya da oklarla gez */
@@ -2057,7 +2057,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   if (EMBED) { let fy = scrollY, fr = 0; addEventListener('scroll', () => { if (fr) return; fr = requestAnimationFrame(() => { fr = 0; const y = scrollY, f = document.querySelector('.embed-nav .fab'); if (!f) return;
     if (y > fy + 6 && y > 120) f.classList.add('away'); else if (y < fy - 6 || y < 60) f.classList.remove('away'); fy = y; }); }, { passive: true }); }
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'dark', gece: 'dark', arduvaz: 'dark' };
+  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light', gece: 'dark', arduvaz: 'dark' };
   const HOST_SKINS = new Set(['cam', 'kagit', 'brut', 'gece', 'arduvaz']); let skin = null;
   let saOn = null, replayT = 0;
   const replayView = () => { clearTimeout(replayT); replayT = setTimeout(() => { if (STORE.ready && motionOK() && !document.hidden) enterView(); }, 80); };
