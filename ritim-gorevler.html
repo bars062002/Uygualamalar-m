@@ -104,6 +104,23 @@
 
 :root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#fffdf6}
 
+
+/* Pano görev karuseli (Ritim'in kendi bileşeni): ortadaki kart önde, yandakiler derinlikte; kaydır ya da oklarla gez */
+.rtc{position:relative;margin:6px 0 4px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline:none}
+.rtc:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:22px}
+.rtc-track{position:relative;height:236px;perspective:1000px}
+.rtc-it{position:absolute;top:0;left:50%;width:min(340px,82vw);height:100%;translate:-50% 0;will-change:transform,opacity;cursor:pointer}
+.rtc-it>.hx-card{position:absolute;inset:0;margin:0;display:flex;flex-direction:column}
+.rtc-it .hx-tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rtc-it .hx-acts{margin-top:auto}
+.rtc-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px}
+.rtc-bar button{width:44px;height:44px;border:0;border-radius:14px;display:grid;place-items:center;color:var(--ink);background:var(--surface);box-shadow:var(--raise-sm);cursor:pointer}
+.rtc-bar button:disabled{opacity:.35;cursor:default}
+.rtc-bar button:active{box-shadow:var(--inset-sm)}
+.rtc-bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rtc-bar svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.rtc-cap{max-width:58%;height:44px;padding:0 14px;display:flex;align-items:center;gap:8px;border-radius:14px;background:var(--track);box-shadow:var(--inset-sm);font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtc-cap small{color:var(--ink-3);font-weight:600;font-variant-numeric:tabular-nums}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 /* Paint the status-bar band so scrolled content never shows under the clock. */
@@ -2331,8 +2348,12 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     }).join('');
     /* Sıradaki görev */
     const nx = STORE.ready ? hxNextTask(t) : null;
-    if (!nx) { $('#dashNext').innerHTML = ''; }
+    /* Karusel: sıradaki + gecikenler + bugünküler (2+ görevde) — yana kaydır, dokununca görev büyüyerek açılır */
+    const carL = nx ? [nx].concat(S.tasks.filter(x => !x.done && x !== nx && (isLate(x) || x.due === t)).sort((a, b) => (a.due || '').localeCompare(b.due || '') || String(a.remind || '99').localeCompare(String(b.remind || '99')))).slice(0, 12) : [];
+    if (carL.length >= 2) { hxCarousel(carL, t); }
+    else if (!nx) { $('#dashNext').innerHTML = ''; hxCarousel.sig = ''; }
     else {
+      hxCarousel.sig = '';
       const lateBy = isLate(nx) ? hxDays(nx.due, t) : 0;
       const badge = lateBy ? `${lateBy} gün` : nx.due === t ? (nx.remind || 'Bugün') : dueLabel(nx.due);
       const kick = lateBy ? 'En eski geciken' : nx.due === t ? 'Sıradaki görev' : 'Yaklaşan görev';
@@ -2344,14 +2365,80 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
         <div class="hx-menu" role="menu" hidden data-for="${nx.id}"></div></div>`;
     }
     /* Bugünün listesi: gecikenler + bugünküler (sıradaki hariç) */
-    const rest = S.tasks.filter(x => !x.done && x !== nx && (isLate(x) || x.due === t)).sort((a, b) => (a.due || '').localeCompare(b.due || '') || String(a.remind || '99').localeCompare(String(b.remind || '99')));
+    const rest = carL.length >= 2 ? [] : S.tasks.filter(x => !x.done && x !== nx && (isLate(x) || x.due === t)).sort((a, b) => (a.due || '').localeCompare(b.due || '') || String(a.remind || '99').localeCompare(String(b.remind || '99')));
     $('#dashToday').innerHTML = !STORE.ready ? '' : rest.length ? `<div class="hx-h"><b>Bugünün listesi</b><a href="#gorevler">${rest.length + (nx && (isLate(nx) || nx.due === t) ? 1 : 0)} görev</a></div>` + rest.slice(0, 4).map(x => {
       const lb = isLate(x) ? hxDays(x.due, t) : 0;
       return `<div class="hx-row ${lb ? 'late' : ''}"><button type="button" class="hx-cb" data-hxdone="${x.id}" aria-label="Tamamla: ${esc(x.title)}"></button><button type="button" class="hx-li" data-open="${x.id}"><b>${esc(x.title)}</b><small>${x.site ? `<em>${esc(x.site)}</em>` : ''}<span>${HX.clock}${lb ? (lb === 1 ? 'Dün' : lb + ' gün gecikti') : esc(x.remind || 'Bugün')}</span></small></button></div>`;
     }).join('') + (rest.length > 4 ? `<a class="hx-more" href="#gorevler">${rest.length - 4} görev daha</a>` : '') : '';
   }
+
+  /* Ritim · Pano görev karuseli (kendi bileşeni). Sürüklemede parmağın hızı korunur, bırakınca gidiş yönüne göre
+     en yakın karta yay ile oturur (sönüm 1; hızlı fiskede hafif sekme), uçlarda direnç; "hareketi azalt"ta düz kayar. */
+  function rtCarousel(host, o) {
+    const n = o.items.length; let x = Math.max(0, Math.min(n - 1, o.start || 0)), at = -1, raf = 0;
+    host.className = 'rtc'; host.tabIndex = 0; host.setAttribute('role', 'region'); host.setAttribute('aria-roledescription', 'karusel'); host.setAttribute('aria-label', o.label || 'Kartlar');
+    host.innerHTML = `<div class="rtc-track"></div><div class="rtc-bar"><button type="button" data-rtc="-1" aria-label="Önceki"><svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button><div class="rtc-cap" aria-live="polite"></div><button type="button" data-rtc="1" aria-label="Sonraki"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button></div>`;
+    const track = host.querySelector('.rtc-track'), cap = host.querySelector('.rtc-cap');
+    const els = o.items.map((it, i) => { const d = document.createElement('div'); d.className = 'rtc-it'; d.dataset.k = i; d.innerHTML = o.card(it); track.appendChild(d); return d; });
+    const flat = () => !motionOK();
+    const draw = () => {
+      const w = els[0].offsetWidth || 300;
+      els.forEach((d, i) => { const k = i - x, a = Math.abs(k);
+        if (a > 3) { d.style.visibility = 'hidden'; return; } d.style.visibility = '';
+        d.style.transform = flat() ? `translateX(${k * w * 1.06}px)` : `translateX(${k * w * .6 + Math.sign(k) * Math.min(a, 1) * w * .07}px) translateZ(${-a * 80}px) rotateY(${Math.max(-1, Math.min(1, k)) * -26}deg) scale(${1 - Math.min(a, 2.4) * .12})`;
+        d.style.opacity = flat() ? (a < .5 ? 1 : .5) : Math.max(0, 1 - a * .3); d.style.zIndex = 50 - Math.round(a * 10);
+        const front = a < .5; d.setAttribute('aria-hidden', String(!front)); d.querySelectorAll('button').forEach(b => b.tabIndex = front ? 0 : -1); });
+      const c = Math.max(0, Math.min(n - 1, Math.round(x)));
+      if (c !== at) { at = c; cap.innerHTML = `${esc(o.title(o.items[c]))} <small>${c + 1} / ${n}</small>`; host.querySelector('[data-rtc="-1"]').disabled = c === 0; host.querySelector('[data-rtc="1"]').disabled = c === n - 1; o.onChange && o.onChange(c, o.items[c]); }
+    };
+    const settle = (to, v = 0, bouncy = false) => { to = Math.max(0, Math.min(n - 1, to)); cancelAnimationFrame(raf);
+      if (flat()) { x = to; draw(); return; }
+      const T = bouncy ? .3 : .42, z = bouncy ? .8 : 1, om = 2 * Math.PI / T; let dx = x - to, vel = v, t0 = performance.now();
+      const step = now => { const dt = Math.min(.032, (now - t0) / 1000); t0 = now; vel += (-om * om * dx - 2 * z * om * vel) * dt; dx += vel * dt; x = to + dx; draw();
+        if (Math.abs(dx) > .001 || Math.abs(vel) > .005) raf = requestAnimationFrame(step); else { x = to; draw(); } };
+      raf = requestAnimationFrame(step); };
+    let p = null;
+    track.addEventListener('pointerdown', e => { cancelAnimationFrame(raf); p = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: x, lx: e.clientX, lt: performance.now(), v: 0, live: false }; });
+    addEventListener('pointermove', e => { if (!p || e.pointerId !== p.id) return; const dx = e.clientX - p.sx;
+      if (!p.live) { if (Math.abs(dx) < 6) return; if (Math.abs(e.clientY - p.sy) > Math.abs(dx)) { p = null; return; } p.live = true; }
+      const w = (els[0].offsetWidth || 300) * .6; let nx = p.x0 - dx / w;
+      if (nx < 0) nx = -.5 * (1 - 1 / (1 - nx)); if (nx > n - 1) nx = n - 1 + .5 * (1 - 1 / (1 + nx - n + 1));
+      const now = performance.now(); p.v = .75 * ((e.clientX - p.lx) / Math.max(1, now - p.lt)) + .25 * p.v; p.lx = e.clientX; p.lt = now; x = nx; draw(); });
+    const lift = e => { if (!p || (e && e.pointerId !== p.id)) return; const q = p; p = null; if (!q.live) return; host._drag = performance.now();
+      const w = (els[0].offsetWidth || 300) * .6, v = -q.v * 1000 / w, far = x + v * .099, quick = Math.abs(q.v) > .45; /* gidiş yönü: momentum izdüşümü (d≈0,99) */
+      let to = Math.round(quick ? far : x); if (quick && to === Math.round(x)) to += q.v < 0 ? 1 : -1; settle(to, v, quick); };
+    addEventListener('pointerup', lift); addEventListener('pointercancel', lift);
+    track.addEventListener('click', e => { if (host._drag && performance.now() - host._drag < 300) { e.stopPropagation(); e.preventDefault(); return; }
+      const d = e.target.closest('.rtc-it'); if (!d) return; const i = +d.dataset.k;
+      if (i !== Math.round(x)) { e.stopPropagation(); e.preventDefault(); settle(i); return; }
+      if (!e.target.closest('button') && o.onOpen) o.onOpen(i, o.items[i], d.firstElementChild || d); }, true);
+    host.querySelector('.rtc-bar').addEventListener('click', e => { const b = e.target.closest('[data-rtc]'); if (b) settle(Math.round(x) + +b.dataset.rtc); });
+    host.addEventListener('keydown', e => { if (e.target !== host) return; if (e.key === 'ArrowRight') { e.preventDefault(); settle(Math.round(x) + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); settle(Math.round(x) - 1); }
+      if (e.key === 'Enter' && o.onOpen) { const c = Math.round(x); o.onOpen(c, o.items[c], els[c].firstElementChild); } });
+    draw();
+  }
+  function hxCard(x, t) {
+    const lateBy = isLate(x) ? hxDays(x.due, t) : 0;
+    const badge = lateBy ? `${lateBy} gün` : x.due === t ? (x.remind || 'Bugün') : dueLabel(x.due);
+    const kick = lateBy ? 'Geciken' : x.due === t ? 'Bugün' : 'Yaklaşan';
+    return `<div class="hx-card ${lateBy ? 'late' : ''}"><div class="hx-top"><span class="hx-k">${kick}</span><span class="hx-badge">${esc(badge)}</span></div>
+      <button type="button" class="hx-tt" data-open="${x.id}">${esc(x.title)}</button>
+      <div class="hx-meta">${x.site ? `<span class="hx-site">${esc(x.site)}</span>` : ''}<span>${HX.clock}${lateBy ? esc(fmtLong.format(parse(x.due))) + '’den beri' : esc(x.remind ? x.remind : dueLabel(x.due))}</span></div>
+      <div class="hx-acts"><button type="button" class="hx-btn w" data-hxdone="${x.id}">${HX.chk}Tamamla</button><button type="button" class="hx-btn g" data-hxsnz="${x.id}" aria-haspopup="menu" aria-expanded="false">${HX.arrow}Ertele</button></div></div>`;
+  }
+  function hxCarousel(L, t) {
+    const sig = L.map(x => [x.id, x.title, x.due, x.remind, x.site].join('~')).join('|') + t;
+    if (hxCarousel.sig === sig && $('#hxCar')) return; hxCarousel.sig = sig;
+    const prevId = hxCarousel.cur, start = Math.max(0, L.findIndex(x => x.id === prevId));
+    $('#dashNext').innerHTML = '<div id="hxCar"></div><div class="hx-menu hx-shared" role="menu" hidden></div>';
+    rtCarousel($('#hxCar'), { items: L, start, label: 'Bugünün görevleri', title: x => x.title, card: x => hxCard(x, t),
+      onChange: (i, x) => { hxCarousel.cur = x.id; const m = $('#dashNext .hx-shared'); if (m) m.hidden = true; },
+      onOpen: (i, x, c) => { ui.openSrc = c; openDrawer(x.id); } });
+  }
   function hxSnoozeMenu(id, btn) {
-    const m = $(`#dashNext .hx-menu[data-for="${id}"]`); if (!m) return;
+    let m = $(`#dashNext .hx-menu[data-for="${id}"]`);
+    if (!m) { m = $('#dashNext .hx-shared'); if (m) { if (m.dataset.for !== id) m.hidden = true; m.dataset.for = id; } }
+    if (!m) return;
     if (!m.hidden) { m.hidden = true; btn.setAttribute('aria-expanded', 'false'); return; }
     const t = today(), wd = (parse(t).getDay() + 6) % 7, toMon = wd === 0 ? 7 : 7 - wd;
     const o = [['Yarın', 1], ['2 gün sonra', 2], [wd === 0 ? 'Gelecek pazartesi' : 'Pazartesi', toMon], ['1 hafta sonra', 7]];
@@ -3189,7 +3276,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       return toast(t.star ? `“${t.title}” Önemli'ye taşındı` : `“${t.title}” Önemli'den çıkarıldı`, () => { t.star = !t.star; putTask(t); render(); });
     }
     const op = el.closest('[data-open]');
-    if (op) return openDrawer(op.dataset.open);
+    if (op) { ui.openSrc = op.closest('.hx-card, .hx-row, .up-row, .task') || op; return openDrawer(op.dataset.open); }
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.matches('.cat-row[data-cat]')) e.target.click();
@@ -4130,8 +4217,15 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     { const t0 = byId(id); if (t0 && isInbox(t0)) { t0.seen = true; putTask(t0); setTimeout(render, 450); } }
     ui.open = id; syncDrawer();
     /* Telefonda kart büyüyerek detay ekranına dönüşür (kartın yerinden açılır) */
-    const src = motionOK() && !drawer.classList.contains('open') && $(`.view:not([hidden]) .task[data-id="${id}"]`);
-    if (src && drawer.offsetWidth >= innerWidth - 2) {
+    const os = ui.openSrc; ui.openSrc = null;
+    const src = motionOK() && !drawer.classList.contains('open') && ($(`.view:not([hidden]) .task[data-id="${id}"]`) || (os && os.isConnected && os.getClientRects().length ? os : null));
+    ui.morphSrc = src || null;
+    if (src && drawer.offsetWidth < innerWidth - 2) { /* bilgisayar / tablet: yan panel karttan büyüyerek gelir */
+      const c = src.getBoundingClientRect(); drawer.classList.add('morph', 'open'); const d = drawer.getBoundingClientRect();
+      drawer.animate([{ transformOrigin: '0 0', transform: `translate(${c.left - d.left}px,${c.top - d.top}px) scale(${c.width / d.width},${c.height / d.height})`, borderRadius: '22px', opacity: .6 }, { transformOrigin: '0 0', transform: 'none', borderRadius: '0px', opacity: 1 }], { duration: 480, easing: 'cubic-bezier(.2,.9,.25,1)' })
+        .finished.then(() => drawer.classList.remove('morph'), () => drawer.classList.remove('morph'));
+    }
+    else if (src && drawer.offsetWidth >= innerWidth - 2) {
       const c = src.getBoundingClientRect(); drawer.classList.add('morph', 'open'); const d = drawer.getBoundingClientRect();
       const ins = `inset(${Math.max(0, c.top - d.top)}px ${Math.max(0, d.right - c.right)}px ${Math.max(0, d.bottom - c.bottom)}px ${Math.max(0, c.left - d.left)}px round 22px)`;
       drawer.animate([{ clipPath: ins }, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { duration: 460, easing: 'cubic-bezier(.2,.9,.25,1)' }).finished.then(() => drawer.classList.remove('morph'), () => drawer.classList.remove('morph'));
@@ -4145,7 +4239,19 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     commitPendingSub();
     { const d = ui.open && byId(ui.open);
       if (d && d.draft) { if (!d.title.trim() || d.title === 'Adsız görev') { S.tasks = S.tasks.filter(x => x !== d); dropTask(d.id); setTimeout(render, 0); } else { delete d.draft; putTask(d); toast(d.remind && d.due ? `“${d.title}” eklendi · ${d.remind}’de hatırlatılacak` : `“${d.title}” eklendi`); } } }
-    ui.open = null; drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); $('#scrim').hidden = true; disarm();
+    ui.open = null; if (!shrinkToCard()) drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); $('#scrim').hidden = true; disarm();
+  }
+  /* kapanırken panel açıldığı karta geri küçülür (kart hâlâ ekrandaysa) */
+  function shrinkToCard() {
+    const ms = ui.morphSrc; ui.morphSrc = null;
+    if (!ms || !ms.isConnected || !ms.getClientRects().length || !motionOK() || !drawer.classList.contains('open')) return false;
+    const c = ms.getBoundingClientRect(), d = drawer.getBoundingClientRect(); if (c.bottom < 0 || c.top > innerHeight) return false;
+    drawer.classList.add('morph');
+    const full = drawer.offsetWidth >= innerWidth - 2, ez = { duration: 380, easing: 'cubic-bezier(.3,.7,.2,1)' };
+    const a = full ? drawer.animate([{ clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: `inset(${Math.max(0, c.top - d.top)}px ${Math.max(0, d.right - c.right)}px ${Math.max(0, d.bottom - c.bottom)}px ${Math.max(0, c.left - d.left)}px round 22px)` }], ez)
+      : drawer.animate([{ transformOrigin: '0 0', transform: 'none', opacity: 1 }, { transformOrigin: '0 0', transform: `translate(${c.left - d.left}px,${c.top - d.top}px) scale(${c.width / d.width},${c.height / d.height})`, opacity: .4 }], ez);
+    const fin = () => { drawer.classList.remove('open'); requestAnimationFrame(() => requestAnimationFrame(() => drawer.classList.remove('morph'))); };
+    a.finished.then(fin, fin); return true;
   }
   function syncDrawer() {
     if (!ui.open) return;
