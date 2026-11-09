@@ -337,6 +337,15 @@ textarea.area{width:100%; min-height:110px; resize:vertical; padding:14px 18px; 
 .list-strip svg.i{width:14px; height:14px}
 
 .groups{display:flex; flex-direction:column; gap:26px}
+/* Sihirli artı */
+.fab[data-new]{touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none}
+.fab.mp-src{opacity:.35}
+.mp-ghost{position:fixed; left:0; top:0; z-index:200; display:flex; align-items:center; gap:10px; pointer-events:none; will-change:transform}
+.mp-ghost svg.i{flex:none; width:56px; height:56px; padding:15px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent); stroke-width:2.4; box-shadow:0 16px 30px -10px rgba(0,0,0,.35)}
+.mp-ghost span{padding:6px 12px; border-radius:99px; background:var(--surface); color:var(--ink); font-weight:700; font-size:.85rem; white-space:nowrap; box-shadow:var(--raise-sm)}
+body.mp-drag #groups section{transition:box-shadow .2s, background .2s; border-radius:18px}
+#groups section.mp-on{box-shadow:inset 0 0 0 2px var(--accent); background:var(--accent-soft)}
+@media (prefers-reduced-motion: reduce){ body.mp-drag #groups section{transition:none} }
 .group-head{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-size:.78rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); width:100%; text-align:left}
 .group-head .n{padding:1px 9px; border-radius:99px; box-shadow:var(--inset-sm); letter-spacing:0}
 .group-head.late{color:var(--bad)}
@@ -3230,8 +3239,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     try { parent.postMessage({ type: 'rt-site-open', code }, hostOrigin); } catch (_) {}
   }, true);
   /* Yeni görev taslağı: ayrıntı panelinde açılır; ad yazılmadan kapatılırsa iz bırakmadan silinir */
-  function newTaskDrawer(site) {
-    const t = normTask({ id: uid(), title: '', site: (site || '').toLocaleUpperCase('tr-TR'), cat: ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, pri: 'med', due: today(), remind: null, repeat: null, subs: [], createdAt: Date.now(), draft: true });
+  function newTaskDrawer(site, due) {
+    const t = normTask({ id: uid(), title: '', site: (site || '').toLocaleUpperCase('tr-TR'), cat: ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, pri: 'med', due: due === undefined ? today() : due, remind: null, repeat: null, subs: [], createdAt: Date.now(), draft: true });
     S.tasks.push(t); render(); openDrawer(t.id);
   }
   function openAdd() { const f = $('#addForm'); f.classList.add('open'); try { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) {} }
@@ -3247,6 +3256,35 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     setTimeout(() => $('#addTitle').focus(), 30);
   }
 
+  /* Sihirli artı (Things esinli): + düğmesini basılı tutup listede bir gruba sürükleyin → görev o günün tarihiyle açılır.
+     Kısa dokunuş eskisi gibi yeni görev açar; boşa bırakılırsa düğme yayla yerine döner. */
+  {
+    let mp = null, eatClick = false;
+    const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = (x, y) => { const el = document.elementFromPoint(x, y), sec = el && el.closest && el.closest('#groups section');
+      const k = sec && sec.querySelector('.group-head') && sec.querySelector('.group-head').dataset.group; return DROPPABLE.includes(k) ? sec : null; };
+    const MPL = { today: 'Bugüne ekle', tomorrow: 'Yarına ekle', week: 'Bu haftaya ekle', later: 'Daha sonraya ekle', none: 'Tarihsiz ekle' }, label = sec => MPL[sec.querySelector('.group-head').dataset.group];
+    document.addEventListener('pointerdown', e => { const f = e.target.closest && e.target.closest('.fab[data-new]'); if (!f || e.button > 0 || ui.route !== 'gorevler' || !$('#groups section')) return;
+      const r = f.getBoundingClientRect(); mp = { f, x0: e.clientX, y0: e.clientY, cx: r.left + r.width / 2, cy: r.top + r.height / 2, on: false, id: e.pointerId, hold: setTimeout(() => mp && start(), 380) }; });
+    const start = () => { if (mp.on) return; mp.on = true; eatClick = true; try { navigator.vibrate && navigator.vibrate(8); } catch (_) {}
+      const g = document.createElement('div'); g.className = 'mp-ghost'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span></span>';
+      document.body.appendChild(g); mp.g = g; mp.f.classList.add('mp-src'); document.body.classList.add('mp-drag'); move(mp.lx ?? mp.x0, mp.ly ?? mp.y0); };
+    const move = (x, y) => { mp.lx = x; mp.ly = y; if (!mp.on) return; mp.g.style.transform = `translate(${x - 28}px,${y - 28}px)`;
+      const sec = target(x, y); if (sec !== mp.sec) { mp.sec && mp.sec.classList.remove('mp-on'); mp.sec = sec; if (sec) { sec.classList.add('mp-on'); try { navigator.vibrate && navigator.vibrate(4); } catch (_) {} } }
+      mp.g.querySelector('span').textContent = sec ? label(sec) : 'Bir gruba bırakın';
+      const H = innerHeight, sp = y < 90 ? -10 : y > H - 140 ? 10 : 0; mp.sp = sp; if (sp && !mp.raf) { const tick = () => { if (!mp || !mp.sp) { mp && (mp.raf = 0); return; } scrollBy(0, mp.sp); mp.raf = requestAnimationFrame(tick); }; mp.raf = requestAnimationFrame(tick); } };
+    document.addEventListener('pointermove', e => { if (!mp || e.pointerId !== mp.id) return; if (!mp.on && Math.hypot(e.clientX - mp.x0, e.clientY - mp.y0) > 12) { clearTimeout(mp.hold); start(); } move(e.clientX, e.clientY); if (mp.on) e.preventDefault(); }, { passive: false });
+    const end = e => { if (!mp || (e.pointerId != null && e.pointerId !== mp.id)) return; clearTimeout(mp.hold); const m = mp; mp = null; if (!m.on) return;
+      document.body.classList.remove('mp-drag'); m.f.classList.remove('mp-src'); m.sec && m.sec.classList.remove('mp-on');
+      const k = m.sec && e.type === 'pointerup' && m.sec.querySelector('.group-head').dataset.group, g = m.g;
+      if (k) { g.animate([{ opacity: 1 }, { opacity: 0, transform: g.style.transform + ' scale(.4)' }], { duration: 220, easing: 'ease-out' }).onfinish = () => g.remove(); newTaskDrawer('', dueForGroup(k)); }
+      else if (still()) g.remove();
+      else g.animate([{ transform: g.style.transform }, { transform: `translate(${m.cx - 28}px,${m.cy - 28}px) scale(.9)` }], { duration: 420, easing: 'cubic-bezier(.34,1.3,.64,1)' }).onfinish = () => g.remove();
+      setTimeout(() => { eatClick = false; }, 60); };
+    document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+    document.addEventListener('click', e => { if (eatClick && e.target.closest && e.target.closest('.fab[data-new]')) { e.stopImmediatePropagation(); e.preventDefault(); eatClick = false; } }, true);
+    document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.fab[data-new]')) e.preventDefault(); });
+  }
   document.addEventListener('click', e => {
     const el = e.target;
     if (el.closest('[data-new]')) return focusNew();
