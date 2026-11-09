@@ -27,7 +27,16 @@ export async function onRequestPost({ request, env, data }) {
     rows[k] = n;
   }
   if (!Object.keys(rows).length || Object.keys(rows).length > 81) return json({ error: 'Kayıtta il yok.' }, 400);
-  snaps.push({ at: Date.now(), date: D_RE.test(String(b.date || '')) ? b.date : new Date().toISOString().slice(0, 10), rows });
+  /* İsteğe bağlı kırılım (ekran görüntüsünden): { il: { kamu|ozel|ozerk|top: { a: adet, o: ortalama } } } */
+  const det = {}, num = v => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 0 && n <= 1e8 ? n : null; };
+  for (const [k, g] of Object.entries((b && b.det) || {})) {
+    if (!IL_RE.test(k) || !g || typeof g !== 'object') continue;
+    const o = {}; for (const t of ['kamu', 'ozel', 'ozerk', 'top']) { const x = g[t]; if (x && (num(x.a) != null || num(x.o) != null)) o[t] = { a: num(x.a), o: num(x.o) }; }
+    if (Object.keys(o).length) det[k] = o;
+  }
+  const snap = { at: Date.now(), date: D_RE.test(String(b.date || '')) ? b.date : new Date().toISOString().slice(0, 10), rows };
+  if (Object.keys(det).length) snap.det = det;
+  snaps.push(snap);
   snaps.sort((x, y) => (x.date + x.at).localeCompare(y.date + y.at) || x.at - y.at);
   while (snaps.length > 60) snaps.shift();
   await store(env, owner, snaps);
