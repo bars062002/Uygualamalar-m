@@ -501,6 +501,9 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .file-add{display:inline-flex; gap:8px; cursor:pointer}
 .drawer.morph{transition:none!important}
 .drawer.drop{box-shadow:inset 0 0 0 3px var(--accent)}
+.paste-zone{margin-top:10px; min-height:64px; border-radius:var(--r-sm); box-shadow:var(--inset-sm); display:grid; place-items:center; color:var(--ink-3); font-size:16px; -webkit-user-select:text; user-select:text}
+.paste-zone:empty::before{content:"Basılı tutun › Yapıştır"}
+.paste-zone:focus{outline:2px solid var(--accent); outline-offset:2px}
 #dFilePaste{margin-left:6px}
 /* OLED Siyah (Site Asistan teması): tam siyah zemin, ince kenar parıltısı */
 html:root[data-oled="on"]{--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
@@ -1341,7 +1344,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       <div><span class="lbl">Dosyalar</span><ul class="files" id="dFiles"></ul>
         <label class="btn sm file-add" id="dFileAdd" for="dFileIn"><svg class="i" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span>Dosya ekle</span></label><input type="file" id="dFileIn" multiple hidden>
         <button type="button" class="btn sm file-add" id="dFilePaste" title="Panodaki görseli ya da dosyayı ekle (Ctrl+V / ⌘V)"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span>Yapıştır</span></button>
-        <p class="hint-txt" id="dFileHint">Fotoğraf, PDF, Excel… Dosya başına en fazla 10 MB. Görev açıkken Ctrl+V / ⌘V ile yapıştırabilir ya da dosyayı buraya sürükleyebilirsiniz.</p></div>
+        <div class="paste-zone" id="dPasteZone" contenteditable="true" role="textbox" aria-label="Fotoğrafı buraya yapıştırın" hidden></div>
+        <p class="hint-txt" id="dFileHint">Fotoğraf, PDF, Excel… Kopyaladığınız fotoğrafı Yapıştır ile (bilgisayarda Ctrl+V / ⌘V) ekleyebilirsiniz; büyük fotoğraflar otomatik küçültülür.</p></div>
     </div>
     <label class="toggle-row" for="dDone"><button class="switch" id="dDone" role="switch" aria-checked="false"></button>Tamamlandı</label>
     <div class="two">
@@ -4234,20 +4238,36 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   /* Dokunmatik cihazlar: Yapıştır düğmesi panoyu okur (iOS'ta "Yapıştır" onayı çıkar) */
   $('#dFilePaste').addEventListener('click', async () => {
     try {
-      if (!navigator.clipboard || !navigator.clipboard.read) throw 0;
+      if (!navigator.clipboard || !navigator.clipboard.read) return openPasteZone();
       const items = await navigator.clipboard.read(), files = [];
       const d = new Date(), p2 = x => String(x).padStart(2, '0'), stamp = `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${d.getFullYear()} ${p2(d.getHours())}.${p2(d.getMinutes())}`;
       for (const it of items) { const ty = it.types.find(t => !t.startsWith('text/')); if (!ty) continue; const b = await it.getType(ty); const ext = (ty.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace('+xml', ''); files.push(new File([b], `Yapıştırılan ${stamp}${files.length ? ' ' + (files.length + 1) : ''}.${ext}`, { type: ty })); }
-      if (!files.length) return toast('Panoda görsel ya da dosya yok');
+      if (!files.length) return toast('Panoda fotoğraf yok · önce fotoğrafı kopyalayın');
       addTaskFiles(files);
-    } catch (err) { toast('Pano okunamadı · Ctrl+V / ⌘V deneyin ya da Dosya ekle’yi kullanın'); }
+    } catch (err) { openPasteZone(); }
   });
+  /* iPhone pano okumaya izin vermezse: yapıştırma alanı açılır, basılı tutup "Yapıştır" denince fotoğraf göreve eklenir */
+  function openPasteZone() { const z = $('#dPasteZone'); z.hidden = false; z.textContent = ''; z.focus(); toast('Alana basılı tutun ve Yapıştır’a dokunun'); }
+  $('#dPasteZone').addEventListener('input', e => { e.target.textContent = ''; });
+  $('#dPasteZone').addEventListener('blur', e => { setTimeout(() => { e.target.hidden = true; }, 200); });
   drawer.addEventListener('dragover', e => { if (ui.open && [...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); drawer.classList.add('drop'); } });
   drawer.addEventListener('dragleave', e => { if (!drawer.contains(e.relatedTarget)) drawer.classList.remove('drop'); });
   drawer.addEventListener('drop', e => { drawer.classList.remove('drop'); const f = pastedFiles(e.dataTransfer); if (f.length) { e.preventDefault(); addTaskFiles(f); } });
+  /* Büyük fotoğraf (iPhone panosundan gelen PNG çoğu zaman 10 MB'ı aşar) yüklemeden önce 2560 px JPEG'e küçültülür */
+  async function shrinkPhoto(f) {
+    if (!/^image\/(png|jpe?g|webp|heic|heif)$/i.test(f.type) || f.size < 1.5 * 1024 * 1024) return f;
+    try {
+      const bmp = await createImageBitmap(f), k = Math.min(1, 2560 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); bmp.close && bmp.close();
+      const b = await new Promise(r => c.toBlob(r, 'image/jpeg', .85)); if (!b || b.size >= f.size) return f;
+      return new File([b], f.name.replace(/\.[a-z0-9]+$/i, '') + '.jpg', { type: 'image/jpeg' });
+    } catch (e) { return f; }
+  }
   async function addTaskFiles(files) {
     const tid = ui.open;
     if (!tid || !files.length) return;
+    files = await Promise.all(files.map(shrinkPhoto)); $('#dPasteZone').hidden = true;
     if (navigator.vibrate) try { navigator.vibrate(6); } catch (e) {}
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) { toast(`${file.name}: 10 MB’tan büyük`); continue; }
