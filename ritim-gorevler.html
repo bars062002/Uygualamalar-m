@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300..700&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
 /* Layout: soft-clay workspace. A raised sidebar rail beside a content grid; the round sign-in card becomes the progress disc and the focus timer. */
@@ -14,7 +14,7 @@
   --ok:#297052; --warn:#8d5a0d; --bad:#b42318;
   --p1:#9b1c1c; --p2:#46679a; --p3:#3b8063; --p4:#a26f15; --p5:#7a4fa0; --p6:#257f80; --p7:#bf5d1c; --p8:#5d6470;
   --scrim:rgba(40,40,48,.34);
-  --font:'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font:'Urbanist','Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --raise:9px 9px 20px var(--lo), -9px -9px 20px var(--hi);
   --raise-sm:5px 5px 11px var(--lo), -5px -5px 11px var(--hi);
   --inset:inset 6px 6px 12px var(--lo), inset -6px -6px 12px var(--hi);
@@ -102,6 +102,19 @@
 :root[data-saskin="arduvaz"] :is(.drawer,.modal>div){background-color:#22364a}
 
 :root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#e6f2f4}
+/* Sis — derin lacivertten nane sisine: buzlu cam kartlar, ince Urbanist rakamlar (Site Asistan Sis temasıyla eş) */
+:root[data-saskin="sis"]:not(#x){
+  --bg:#dff3eb; --surface:rgba(255,255,255,.46); --hi:rgba(255,255,255,.65); --lo:rgba(22,49,68,.13); --track:rgba(22,49,68,.10);
+  --page:linear-gradient(180deg,#b7d0d3 0%,#cfe5e2 22%,#dff3eb 55%,#eef8f4 100%);
+  --ink:#163144; --ink-2:#2c4859; --ink-3:#40596a; --ok:#1f7a55; --warn:#8a5b0f; --bad:#b42318; --scrim:rgba(16,36,52,.36);
+  --raise:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 1px rgba(255,255,255,.6),0 18px 34px -20px rgba(22,49,68,.38);
+  --raise-sm:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(255,255,255,.55),0 8px 18px -12px rgba(22,49,68,.3);
+  --inset:inset 0 0 0 1px rgba(255,255,255,.6),inset 0 0 0 2000px rgba(255,255,255,.2); --inset-sm:inset 0 0 0 1px rgba(255,255,255,.6),inset 0 0 0 2000px rgba(255,255,255,.14);
+  --font:'Urbanist','Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:light;
+}
+:root[data-saskin="sis"][data-saskin-acc="tema"]:not(#x){--accent:#163144; --accent-2:#1b405b; --accent-soft:rgba(22,49,68,.10); --accent-glow:rgba(22,49,68,0); --on-accent:#ffffff}
+:root[data-saskin="sis"] :is(.drawer,.modal>div){background-color:rgba(236,247,243,.97)}
+@media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"]:not(#x){--surface:#eaf6f1} }
 
 
 /* Pano görev karuseli (Ritim'in kendi bileşeni): ortadaki kart önde, yandakiler derinlikte; kaydır ya da oklarla gez */
@@ -2050,8 +2063,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   if (EMBED) { let fy = scrollY, fr = 0; addEventListener('scroll', () => { if (fr) return; fr = requestAnimationFrame(() => { fr = 0; const y = scrollY, f = document.querySelector('.embed-nav .fab'); if (!f) return;
     if (y > fy + 6 && y > 120) f.classList.add('away'); else if (y < fy - 6 || y < 60) f.classList.remove('away'); fy = y; }); }, { passive: true }); }
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light', gece: 'dark', arduvaz: 'dark' };
-  const HOST_SKINS = new Set(['cam', 'kagit', 'brut', 'gece', 'arduvaz']); let skin = null;
+  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light', gece: 'dark', arduvaz: 'dark', sis: 'light' };
+  const HOST_SKINS = new Set(['cam', 'kagit', 'brut', 'gece', 'arduvaz', 'sis']); let skin = null;
   let saOn = null, replayT = 0;
   const replayView = () => { clearTimeout(replayT); replayT = setTimeout(() => { if (STORE.ready && motionOK() && !document.hidden) enterView(); }, 80); };
   /* Uygulamaya arka plandan dönünce de (Site Asistan'da Ritim açıksa ya da Ritim tek başına) */
