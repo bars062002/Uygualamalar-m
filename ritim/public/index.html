@@ -120,8 +120,8 @@
 :root[data-saskin="brut"] :is(.drawer,.modal>div){background-color:#e6f2f4}
 /* Sis — derin lacivertten nane sisine: buzlu cam kartlar, ince Urbanist rakamlar (Site Asistan Sis temasıyla eş) */
 :root[data-saskin="sis"]:not(#x){
-  --bg:#e6eeec; --surface:rgba(255,255,255,.46); --hi:rgba(255,255,255,.65); --lo:rgba(22,49,68,.13); --track:rgba(22,49,68,.10);
-  --page:linear-gradient(180deg,#c9d5d7 0%,#dae4e4 22%,#e9f0ee 55%,#f5f9f8 100%);
+  --bg:#e4f0f0; --surface:rgba(255,255,255,.46); --hi:rgba(255,255,255,.65); --lo:rgba(22,49,68,.13); --track:rgba(22,49,68,.10);
+  --page:linear-gradient(180deg,#d8e4e4 0%,#e4f0f0 35%,#f0fcfc 75%,#fcfcfc 100%);
   --ink:#163144; --ink-2:#2c4859; --ink-3:#40596a; --ok:#1f7a55; --warn:#8a5b0f; --bad:#b42318; --scrim:rgba(16,36,52,.36);
   --raise:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 1px rgba(255,255,255,.6),0 18px 34px -20px rgba(22,49,68,.38);
   --raise-sm:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(255,255,255,.55),0 8px 18px -12px rgba(22,49,68,.3);
@@ -129,8 +129,8 @@
   --font:'Urbanist','Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:light;
 }
 :root[data-saskin="sis"][data-saskin-acc="tema"]:not(#x){--accent:#163144; --accent-2:#1b405b; --accent-soft:rgba(22,49,68,.10); --accent-glow:rgba(22,49,68,0); --on-accent:#ffffff}
-:root[data-saskin="sis"] :is(.drawer,.modal>div){background-color:rgba(240,245,244,.97)}
-@media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"]:not(#x){--surface:#eef3f2} }
+:root[data-saskin="sis"] :is(.drawer,.modal>div){background-color:rgba(240,252,252,.97)}
+@media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"]:not(#x){--surface:#f0fcfc} }
 /* Sis: vurgu yazı rengiyle aynı lacivert olduğundan seçili durum dolguyla belirginleşir */
 :root[data-saskin="sis"] :is(.seg button.on,.list-strip button.on,.nav a.on,.tabbar a.on,#vaultBtn[aria-pressed="true"]){background:#163144!important;color:#fff!important;box-shadow:0 8px 18px -10px rgba(22,49,68,.55)!important}
 :root[data-saskin="sis"] :is(.nav a.on,.tabbar a.on) svg{stroke:#fff!important;color:#fff!important}
