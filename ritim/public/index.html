@@ -145,6 +145,8 @@
 @media (max-width: 420px){ :root[data-saskin="sis"].embed:not(#x) .embed-nav{padding:6px 6px 18px!important;justify-content:space-between} :root[data-saskin="sis"].embed:not(#x) .embed-nav a{padding:0 6px!important;font-size:14.5px!important} }
 :root[data-saskin="sis"].embed:not(#x) .embed-nav a.on::after{content:"";position:absolute;left:50%;bottom:6px;width:18px;height:2px;margin-left:-9px;border-radius:2px;background:#0d0c22}
 :root[data-saskin="sis"]:not(#x){--line:#cccccc}
+/* Sis: yüzen katmanlar dolu yüzey (yarı saydam cam, alttaki görevleri içinden gösterip yazıyı okunmaz yapıyordu) */
+:root[data-saskin="sis"]:not(#x) :is(.selbar,.toast,.rem,.modal-card,.hx-menu,.mp-ghost span,.pop,.menu,.ctx){background:#fcfcfc!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:0 0 0 1px #cccccc,0 18px 40px -16px rgba(13,12,34,.35)!important}
 /* Sis yazı: büyük harf ve geniş aralık yok (referans) */
 :root[data-saskin="sis"] body *:not(svg):not(svg *){text-transform:none!important;letter-spacing:normal!important}
 :root[data-saskin="sis"] :is(.eyebrow,.group-head){font-weight:500!important;font-size:.86rem!important}
@@ -617,6 +619,8 @@ body.selmode #groups .task.picked .check{background:linear-gradient(135deg,var(-
 body.selmode #groups .task.picked .check svg.i{opacity:1}
 .selbar{position:fixed; z-index:55; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); width:min(560px, calc(100% - 24px)); padding:10px; border-radius:24px; background:var(--surface); box-shadow:var(--raise); display:grid; gap:8px}
 .selbar:not([hidden]){animation:sb-in .42s var(--spring) both}
+/* seçim modunda + düğmesi gizlenir (çubuğun Sil düğmesinin üstüne biniyordu) */
+body:has(.selbar:not([hidden])) .fab[data-new]{opacity:0!important;pointer-events:none!important;transform:scale(.6)!important}
 @keyframes sb-in{from{opacity:0; transform:translate(-50%, 24px) scale(.96)}}
 .selbar .sb-top{display:flex; align-items:center; gap:8px}
 .selbar .sb-n{flex:1; font-weight:700; font-size:.95rem}
