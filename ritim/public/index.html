@@ -2038,9 +2038,15 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       /* son 7 günde günlük tamamlanan (eskiden bugüne) ve 2+ gündür bekleyen önemli/gecikmiş işler */
       wk: Array.from({ length: 7 }, (_, i) => { const d = addDays(today(), i - 6); return S.tasks.filter(t => t.done && !t.sample && doneDay(t) === d).length; }),
       stale: S.tasks.filter(t => staleDays(t) >= 2).length, tmr: S.tasks.filter(t => !t.done && !t.sample && t.due === addDays(today(), 1)).length };
+    /* Site Asistan "Sıradaki" şeridi: bugünün sıradaki saatli görevi ayrı alan (gecikmişler 6'lık listeyi doldursa da gelsin) */
+    { const d = new Date(), hm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      const nx = S.tasks.filter(t => !t.done && !t.sample && t.due === today() && /^\d{2}:\d{2}$/.test(t.remind || '') && t.remind >= hm).sort((a, b) => a.remind.localeCompare(b.remind))[0];
+      sum.next = nx ? { id: nx.id, t: nx.title || 'Görev', rem: nx.remind, site: nx.site || '' } : null; }
     const k = JSON.stringify(sum); if (k === sumSent) return; sumSent = k;
     try { parent.postMessage({ type: 'rt-sum', sum }, hostOrigin); } catch (e) {}
   }
+  /* saat ilerledikçe 'sıradaki' değişir: dakikada bir yeniden hesapla (değişmediyse gönderilmez) */
+  if (IN_HOST) setInterval(() => { try { postSum(); } catch (_) {} }, 60000);
 
   // ---------- Icons ----------
   const ICO = {
