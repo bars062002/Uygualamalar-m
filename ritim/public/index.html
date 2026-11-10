@@ -122,13 +122,13 @@
 :root[data-saskin="sis"]:not(#x){
   --bg:#e4f0f0; --surface:rgba(255,255,255,.46); --hi:rgba(255,255,255,.65); --lo:rgba(13,12,34,.13); --track:rgba(13,12,34,.10);
   --page:linear-gradient(180deg,#d8e4e4 0%,#e4f0f0 35%,#f0fcfc 75%,#fcfcfc 100%);
-  --ink:#0d0c22; --ink-2:#2e3a44; --ink-3:#4a5a66; --ok:#1f7a55; --warn:#8a5b0f; --bad:#b42318; --scrim:rgba(16,36,52,.36);
+  --ink:#0d0c22; --ink-2:#0d0c22; --ink-3:#0d0c22; --ok:#1f7a55; --warn:#8a5b0f; --bad:#b42318; --scrim:rgba(16,36,52,.36);
   --raise:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 1px rgba(255,255,255,.6),0 18px 34px -20px rgba(13,12,34,.38);
   --raise-sm:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(255,255,255,.55),0 8px 18px -12px rgba(13,12,34,.3);
   --inset:inset 0 0 0 1px rgba(255,255,255,.6),inset 0 0 0 2000px rgba(255,255,255,.2); --inset-sm:inset 0 0 0 1px rgba(255,255,255,.6),inset 0 0 0 2000px rgba(255,255,255,.14);
   --font:'Urbanist','Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif; color-scheme:light;
 }
-:root[data-saskin="sis"][data-saskin-acc="tema"]:not(#x){--accent:#0d0c22; --accent-2:#849ca8; --accent-soft:rgba(13,12,34,.10); --accent-glow:rgba(13,12,34,0); --on-accent:#ffffff}
+:root[data-saskin="sis"][data-saskin-acc="tema"]:not(#x){--accent:#0d0c22; --accent-2:#849ca8; --accent-soft:rgba(13,12,34,.10); --accent-glow:rgba(13,12,34,0); --on-accent:#fcfcfc}
 :root[data-saskin="sis"] :is(.drawer,.modal>div){background-color:rgba(240,252,252,.97)}
 @media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"]:not(#x){--surface:#f0fcfc} }
 /* Sis: vurgu yazı rengiyle aynı lacivert olduğundan seçili durum dolguyla belirginleşir */
@@ -136,7 +136,7 @@
 :root[data-saskin="sis"] :is(.nav a.on,.tabbar a.on) svg{stroke:#fff!important;color:#fff!important}
 :root[data-saskin="sis"] :is(.list-row.on,.note-it.on){box-shadow:inset 0 0 0 2px #0d0c22!important}
 :root[data-saskin="sis"]:not(#x) html.embed .embed-nav,:root[data-saskin="sis"].embed:not(#x) .embed-nav{background:linear-gradient(180deg,#849ca8 0,#90a8b4 72%,rgba(144,168,180,0) 100%)!important;border-radius:0!important;box-shadow:0 -40px 0 #849ca8!important;margin:0 calc(50% - 50vw) 14px!important;padding:6px 12px 18px!important;gap:2px!important;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
-:root[data-saskin="sis"].embed:not(#x) .embed-nav a{flex:0 0 auto!important;flex-direction:row!important;height:44px!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:10px!important;color:#1c2530!important;font-weight:300!important;font-size:15.5px!important}
+:root[data-saskin="sis"].embed:not(#x) .embed-nav a{flex:0 0 auto!important;flex-direction:row!important;height:44px!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:10px!important;color:#0d0c22!important;font-weight:300!important;font-size:15.5px!important}
 :root[data-saskin="sis"].embed:not(#x) .embed-nav a svg{display:none}
 :root[data-saskin="sis"].embed:not(#x) .embed-nav a span{font-size:inherit!important;font-weight:inherit!important;letter-spacing:normal!important}
 :root[data-saskin="sis"].embed:not(#x) .embed-nav a.on{color:#0d0c22!important;font-weight:600!important;position:relative}
