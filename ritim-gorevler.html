@@ -136,6 +136,17 @@
 :root[data-saskin="sis"] :is(.eyebrow,.group-head){font-weight:500!important;font-size:.86rem!important}
 :root[data-saskin="sis"] :is(h1,h2,h3){font-weight:500!important}
 @media (prefers-reduced-transparency: reduce){ :root[data-saskin="sis"] .embed-nav{background:#e2f1eb!important} }
+/* Sis zemini (Site Asistan ile tek gradyan): üstte derin mavi, ortaya kadar sadeleşir, aşağı doğru beyazlaşır.
+   Site Asistan çerçevenin ekrandaki konumunu --sis-off ile bildirir; gradyan oradan devam eder, dikiş olmaz. */
+:root[data-saskin="sis"].embed:not(#x) body{background:linear-gradient(180deg,#1f4562 0,#254b68 3.5%,#2f5875 7.5%,#3d6681 11.5%,#4d748c 16%,#5f8396 20.5%,#7393a4 25.5%,#89a6b3 31%,#9db6c0 38%,#b1c6cd 47%,#c5d6da 56%,#d6e3e5 65%,#e4eeee 74%,#eff6f5 84%,#f7fbfa 93%,#fcfcfc 100%) no-repeat 0 calc(-1 * var(--sis-off,0px)) / 100% calc(100vh + var(--sis-off,0px)) fixed!important}
+@media (min-width: 768px){ :root[data-saskin="sis"].embed:not(#x){--sis-off:64px} }
+:root[data-saskin="sis"].embed:not(#x):not(#y) .embed-nav{background:none!important;box-shadow:none!important}
+:root[data-saskin="sis"].embed:not(#x):not(#y) .embed-nav a{color:rgba(255,255,255,.86)!important}
+:root[data-saskin="sis"].embed:not(#x):not(#y) .embed-nav a.on{color:#fff!important}
+:root[data-saskin="sis"].embed:not(#x):not(#y) .embed-nav a.on::after{background:#fff}
+:root[data-saskin="sis"].embed:not(#x):not(#y) .embed-nav a:focus-visible{outline-color:#fff}
+:root[data-saskin="sis"].embed:not(#x):not(#y) .vhead>div:first-child :is(.eyebrow,h1){color:#fff!important;text-shadow:none!important}
+
 
 
 /* Pano görev karuseli (Ritim'in kendi bileşeni): ortadaki kart önde, yandakiler derinlikte; kaydır ya da oklarla gez */
@@ -2113,6 +2124,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       if (on && saOn === false) { clearTimeout(replayT); if (STORE.ready && motionOK() && !document.hidden) { root.classList.remove('rt-prime'); enterView(); } else root.classList.remove('rt-prime'); }
       saOn = on; }
     const st = document.documentElement.style;
+    if (typeof d.off === 'number' && d.off >= 0 && d.off < 400) st.setProperty('--sis-off', Math.round(d.off) + 'px');
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
     const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
