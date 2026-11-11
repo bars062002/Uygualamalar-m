@@ -899,6 +899,9 @@ html.embed .reminders{top:calc(var(--sa-top, 0px) + 12px)}
 .hx-d:focus-visible,.hx-btn:focus-visible,.hx-cb:focus-visible,.hx-li:focus-visible,.hx-tt:focus-visible,.hx-menu button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 @media (min-width:900px){ .hero.hx{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"week week" "sum next" "msg next" "list next"; align-items:start; column-gap:22px}
   .hx-week{grid-area:week}.hx-sum{grid-area:sum}.hx-msg{grid-area:msg}.hx-next{grid-area:next}.hx-list{grid-area:list} }
+/* Geniş ekran: özet tam genişlikte, kart destesi alanın ortasında (yelpaze iki yana eşit açılır, özetin üstüne binmez) */
+@media (min-width:900px){ .hero.hx{grid-template-columns:minmax(0,1fr); grid-template-areas:"week" "sum" "msg" "next" "list"}
+  .hx-next{width:min(100%,600px); justify-self:center} .hx-sum{justify-content:center; gap:36px} .hx-list:not(:empty){width:min(100%,900px); justify-self:center} }
 /* Sekmeler ayrı ayrı kartlar: zemin şeffaf (yapışkan kalırken altı sayfa rengiyle örtülür), her sekme kabarık, seçili olan gömülü */
 html.embed .embed-nav{background:var(--bg); box-shadow:none; border-radius:0; gap:8px; padding:8px 4px 10px; margin:0 -4px 14px; overflow:visible}
 html.embed .embed-nav a{background:var(--surface); box-shadow:var(--raise-sm); border-radius:16px}
