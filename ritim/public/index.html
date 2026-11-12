@@ -152,7 +152,7 @@
 :root:is([data-saskin="sis"],[data-saskin="baris"]) :is(.eyebrow,.group-head){font-weight:500!important;font-size:.86rem!important}
 :root:is([data-saskin="sis"],[data-saskin="baris"]) :is(h1,h2,h3){font-weight:500!important}
 @media (prefers-reduced-transparency: reduce){ :root:is([data-saskin="sis"],[data-saskin="baris"]) .embed-nav{background:#e2f1eb!important} }
-/* BARIŞ — Site Asistan'ın Barış teması: düz nötr gri, siyah yazı, seçili koyu gri karo, ana eylem yeşil */
+/* BARIŞ — Site Asistan'ın Barış teması: düz nötr gri, siyah yazı, seçili koyu gri karo, vurgu ve ana eylem yeşil */
 :root[data-saskin="baris"]:not(#x):not(#y){
   --pal-ink:#0a0a0a; --pal-ink-rgb:10,10,10; --pal-mid:#bdbdbd; --pal-l1:#d1d1d1; --pal-l2:#d1d1d1; --pal-l3:#e3e3e3; --pal-l4:#ebebeb; --pal-line:#bdbdbd;
   --pal-g:linear-gradient(180deg,#d4d4d4 0%,#d1d1d1 50%,#cdcdcd 100%);
@@ -160,7 +160,8 @@
   --ink-2:#4d4d4d; --ink-3:#4d4d4d;
   --raise:inset 0 0 0 1px rgba(255,255,255,.28); --raise-sm:inset 0 0 0 1px rgba(255,255,255,.24);
   --inset:inset 0 0 0 2000px rgba(255,255,255,.26); --inset-sm:inset 0 0 0 2000px rgba(255,255,255,.2)}
-:root[data-saskin="baris"][data-saskin-acc="tema"]:not(#x):not(#y){--accent:#0a0a0a; --accent-2:#3a3a3a; --accent-soft:rgba(10,10,10,.08); --accent-glow:rgba(10,10,10,0); --on-accent:#ffffff}
+/* Barış "Tema" vurgusu yeşil: yazı/halka #08643f (zeminde 4,7:1), dolgu #0c8558 (beyaz yazıyla 4,65:1) */
+:root[data-saskin="baris"][data-saskin-acc="tema"]:not(#x):not(#y){--accent:#08643f; --accent-2:#0c8558; --accent-soft:rgba(12,133,88,.12); --accent-glow:rgba(12,133,88,0); --on-accent:#ffffff}
 :root[data-saskin="baris"]:not(#x):not(#y) *{-webkit-backdrop-filter:none!important; backdrop-filter:none!important}
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .embed-nav{gap:6px!important}
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .embed-nav a{color:#0a0a0a!important; background:rgba(255,255,255,.42)!important; border-radius:14px!important; font-weight:500!important; padding:0 16px!important}
