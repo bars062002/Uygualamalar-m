@@ -171,8 +171,11 @@
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .vhead>div:first-child .eyebrow{color:#4d4d4d!important}
 :root[data-saskin="baris"]:not(#x):not(#y) :is(.seg button.on,.list-strip button.on,.nav a.on,.tabbar a.on,#vaultBtn[aria-pressed="true"]){background:#bdbdbd!important; color:#0a0a0a!important; box-shadow:none!important}
 :root[data-saskin="baris"]:not(#x):not(#y) :is(.nav a.on,.tabbar a.on) svg{stroke:#0a0a0a!important; color:#0a0a0a!important}
-:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab,.hx-btn.w){background:#0c8558!important; color:#fff!important; box-shadow:none!important}
-:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab) svg{stroke:#fff!important}
+/* ana eylem: "Tema" vurgusunda yeşil; Site Asistan'da başka vurgu (ya da özel renk) seçilince o renk */
+:root[data-saskin="baris"]:not(#x):not(#y){--br-act:#0c8558; --br-on:#ffffff}
+:root[data-saskin="baris"]:is(:not([data-saskin-acc]),[data-acc-ozel]):not(#x):not(#y){--br-act:var(--accent); --br-on:var(--on-accent)}
+:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab,.hx-btn.w){background:var(--br-act)!important; color:var(--br-on)!important; box-shadow:none!important}
+:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab) svg{stroke:var(--br-on)!important}
 /* Sis zemini (Site Asistan ile tek gradyan): üstte derin mavi, ortaya kadar sadeleşir, aşağı doğru beyazlaşır.
    Site Asistan çerçevenin ekrandaki konumunu --sis-off ile bildirir; gradyan oradan devam eder, dikiş olmaz. */
 :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x) body{background:var(--pal-g,linear-gradient(180deg,#1f4562 0,#254b68 3.5%,#2f5875 7.5%,#3d6681 11.5%,#4d748c 16%,#5f8396 20.5%,#7393a4 25.5%,#89a6b3 31%,#9db6c0 38%,#b1c6cd 47%,#c5d6da 56%,#d6e3e5 65%,#e4eeee 74%,#eff6f5 84%,#f7fbfa 93%,var(--pal-l4,#fcfcfc) 100%)) no-repeat 0 calc(-1 * var(--sis-off,0px)) / 100% calc(100vh + var(--sis-off,0px)) fixed!important}
