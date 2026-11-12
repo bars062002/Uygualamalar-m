@@ -136,7 +136,7 @@
 :root:is([data-saskin="sis"],[data-saskin="baris"]) :is(.eyebrow,.group-head){font-weight:500!important;font-size:.86rem!important}
 :root:is([data-saskin="sis"],[data-saskin="baris"]) :is(h1,h2,h3){font-weight:500!important}
 @media (prefers-reduced-transparency: reduce){ :root:is([data-saskin="sis"],[data-saskin="baris"]) .embed-nav{background:#e2f1eb!important} }
-/* BARIŞ — Site Asistan'ın Barış teması: düz nötr gri, siyah yazı, seçili koyu gri karo, ana eylem yeşil */
+/* BARIŞ — Site Asistan'ın Barış teması: düz nötr gri, siyah yazı, seçili koyu gri karo, vurgu ve ana eylem yeşil */
 :root[data-saskin="baris"]:not(#x):not(#y){
   --pal-ink:#0a0a0a; --pal-ink-rgb:10,10,10; --pal-mid:#bdbdbd; --pal-l1:#d1d1d1; --pal-l2:#d1d1d1; --pal-l3:#e3e3e3; --pal-l4:#ebebeb; --pal-line:#bdbdbd;
   --pal-g:linear-gradient(180deg,#d4d4d4 0%,#d1d1d1 50%,#cdcdcd 100%);
@@ -144,7 +144,8 @@
   --ink-2:#4d4d4d; --ink-3:#4d4d4d;
   --raise:inset 0 0 0 1px rgba(255,255,255,.28); --raise-sm:inset 0 0 0 1px rgba(255,255,255,.24);
   --inset:inset 0 0 0 2000px rgba(255,255,255,.26); --inset-sm:inset 0 0 0 2000px rgba(255,255,255,.2)}
-:root[data-saskin="baris"][data-saskin-acc="tema"]:not(#x):not(#y){--accent:#0a0a0a; --accent-2:#3a3a3a; --accent-soft:rgba(10,10,10,.08); --accent-glow:rgba(10,10,10,0); --on-accent:#ffffff}
+/* Barış "Tema" vurgusu yeşil: yazı/halka #08643f (zeminde 4,7:1), dolgu #0c8558 (beyaz yazıyla 4,65:1) */
+:root[data-saskin="baris"][data-saskin-acc="tema"]:not(#x):not(#y){--accent:#08643f; --accent-2:#0c8558; --accent-soft:rgba(12,133,88,.12); --accent-glow:rgba(12,133,88,0); --on-accent:#ffffff}
 :root[data-saskin="baris"]:not(#x):not(#y) *{-webkit-backdrop-filter:none!important; backdrop-filter:none!important}
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .embed-nav{gap:6px!important}
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .embed-nav a{color:#0a0a0a!important; background:rgba(255,255,255,.42)!important; border-radius:14px!important; font-weight:500!important; padding:0 16px!important}
@@ -155,8 +156,11 @@
 :root[data-saskin="baris"].embed:not(#x):not(#y):not(#z) .vhead>div:first-child .eyebrow{color:#4d4d4d!important}
 :root[data-saskin="baris"]:not(#x):not(#y) :is(.seg button.on,.list-strip button.on,.nav a.on,.tabbar a.on,#vaultBtn[aria-pressed="true"]){background:#bdbdbd!important; color:#0a0a0a!important; box-shadow:none!important}
 :root[data-saskin="baris"]:not(#x):not(#y) :is(.nav a.on,.tabbar a.on) svg{stroke:#0a0a0a!important; color:#0a0a0a!important}
-:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab,.hx-btn.w){background:#0c8558!important; color:#fff!important; box-shadow:none!important}
-:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab) svg{stroke:#fff!important}
+/* ana eylem: "Tema" vurgusunda yeşil; Site Asistan'da başka vurgu (ya da özel renk) seçilince o renk */
+:root[data-saskin="baris"]:not(#x):not(#y){--br-act:#0c8558; --br-on:#ffffff}
+:root[data-saskin="baris"]:is(:not([data-saskin-acc]),[data-acc-ozel]):not(#x):not(#y){--br-act:var(--accent); --br-on:var(--on-accent)}
+:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab,.hx-btn.w){background:var(--br-act)!important; color:var(--br-on)!important; box-shadow:none!important}
+:root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab) svg{stroke:var(--br-on)!important}
 /* Sis zemini (Site Asistan ile tek gradyan): üstte derin mavi, ortaya kadar sadeleşir, aşağı doğru beyazlaşır.
    Site Asistan çerçevenin ekrandaki konumunu --sis-off ile bildirir; gradyan oradan devam eder, dikiş olmaz. */
 :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x) body{background:var(--pal-g,linear-gradient(180deg,#1f4562 0,#254b68 3.5%,#2f5875 7.5%,#3d6681 11.5%,#4d748c 16%,#5f8396 20.5%,#7393a4 25.5%,#89a6b3 31%,#9db6c0 38%,#b1c6cd 47%,#c5d6da 56%,#d6e3e5 65%,#e4eeee 74%,#eff6f5 84%,#f7fbfa 93%,var(--pal-l4,#fcfcfc) 100%)) no-repeat 0 calc(-1 * var(--sis-off,0px)) / 100% calc(100vh + var(--sis-off,0px)) fixed!important}
@@ -2160,12 +2164,12 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const set = (k, v) => { if (v) { if (st.getPropertyValue(k) !== v) st.setProperty(k, v); } else st.removeProperty(k); };
       set('--pal-ink', P && ok(P.ink) ? P.ink : ''); set('--pal-ink-rgb', P && ok(P.ink) ? rgb(P.ink) : '');
       ['mid', 'l1', 'l2', 'l3', 'l4', 'line'].forEach(k => set('--pal-' + k, P && ok(P[k]) ? P[k] : ''));
-      set('--pal-g', P && typeof P.g === 'string' && /^linear-gradient\(180deg,[#0-9a-f%., ]+\)$/i.test(P.g) ? P.g : ''); }
+      set('--pal-g', P && typeof P.g === 'string' && /^linear-gradient\(180deg,[#0-9a-f%., ]+\)$/i.test(P.g) ? P.g : '');
       /* Ritim / Ritim Koyu teması: Site Asistan paleti yüzey, yazı ve (Palet vurgusu seçiliyse) vurgu rengini boyar */
       { const Q = P && P.rt && typeof P.rt === 'object' ? P.rt : null, M = { bg: ['--bg', '--surface'], hi: ['--hi'], lo: ['--lo'], ink: ['--ink'], ink2: ['--ink-2'], ink3: ['--ink-3'], acc: ['--accent'], acc2: ['--accent-2'], on: ['--on-accent'] };
         Object.entries(M).forEach(([k, vs]) => vs.forEach(v => set(v, Q && ok(Q[k]) ? Q[k] : '')));
         if (Q && ok(Q.acc)) { const [r, g, b] = rgb(Q.acc).split(','); set('--accent-soft', `rgba(${r},${g},${b},.12)`); set('--accent-glow', `rgba(${r},${g},${b},.3)`); } else { set('--accent-soft', ''); set('--accent-glow', ''); }
-        if (Q && ok(Q.bg)) { const [r, g, b] = rgb(Q.bg).split(',').map(Number); set('--track', `rgb(${Math.round(r * .93)},${Math.round(g * .93)},${Math.round(b * .93)})`); } else set('--track', ''); }
+        if (Q && ok(Q.bg)) { const [r, g, b] = rgb(Q.bg).split(',').map(Number); set('--track', `rgb(${Math.round(r * .93)},${Math.round(g * .93)},${Math.round(b * .93)})`); } else set('--track', ''); } }
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
     const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
