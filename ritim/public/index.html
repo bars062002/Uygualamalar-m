@@ -199,10 +199,10 @@
 @media (prefers-reduced-transparency: reduce){ :root[data-rtg]:not([data-saskin]).embed::before{display:none} :root[data-rtg]:not([data-saskin]).embed:not(#x):not(#y) body{background:var(--bg)!important} }
 @media (min-width: 768px){ :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x){--sis-off:64px} }
 :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav{background:none!important;box-shadow:none!important}
-:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a{color:rgba(255,255,255,.86)!important}
-:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a.on{color:#fff!important}
-:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a.on::after{background:#fff}
-:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a:focus-visible{outline-color:#fff}
+:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a{color:rgba(var(--pal-ink-rgb,13,12,34),.72)!important}
+:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a.on{color:var(--pal-ink,#0d0c22)!important}
+:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a.on::after{background:var(--pal-ink,#0d0c22)}
+:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav a:focus-visible{outline-color:var(--pal-ink,#0d0c22)}
 :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .vhead>div:first-child :is(.eyebrow,h1){color:#fff!important;text-shadow:none!important}
 
 
@@ -882,6 +882,9 @@ html.embed .modal{padding-top:calc(var(--sa-top, 0px) + 16px); padding-bottom:ca
 .embed-nav{display:none}
 /* Site Asistan içinde: yayın sayfasının kök dolgusu (saat/ev çubuğu payı) iPhone'da çerçeveye de uygulanıp üstte çift boşluk açıyordu; paylar --sa-top/--sa-bottom ile gelir */
 html.embed{padding-top:0!important; padding-bottom:0!important}
+/* sekmeler sayfa başlığının altında, akışta (yapışkan değil): kaydırınca içerik çubuğun arkasına girip yazılar üst üste binmez */
+html.embed:not(#x):not(#y) .embed-nav{position:relative!important; top:auto!important}
+:root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav{background:none!important; box-shadow:none!important; margin:-4px calc(50% - 50vw) 12px!important; padding:0 12px 6px!important}
 html.embed .side,html.embed .tabbar,html.embed .tab-ind{display:none!important}
 html.embed body::after,html.embed body::before{display:none!important}
 html.embed .app{grid-template-columns:minmax(0,1fr)!important; gap:0!important; max-width:1100px;
@@ -2406,6 +2409,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
     $$('[data-route]').forEach(a => a.classList.toggle('on', a.dataset.route === r));
+    /* Site Asistan içinde: bölüm sekmeleri sayfa başlığının altında (başlık en üstte, Ana Sayfa ile aynı düzen) */
+    if (EMBED) { const nv = $('.embed-nav'), vh = $('#v-' + r + ' .vhead'); if (nv && vh && vh.nextElementSibling !== nv) vh.after(nv); }
     if (ui.route !== r || !ui.shown) ui.entering = true;
     ui.route = r; ui.shown = true;
     render();
