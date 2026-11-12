@@ -2176,12 +2176,12 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const set = (k, v) => { if (v) { if (st.getPropertyValue(k) !== v) st.setProperty(k, v); } else st.removeProperty(k); };
       set('--pal-ink', P && ok(P.ink) ? P.ink : ''); set('--pal-ink-rgb', P && ok(P.ink) ? rgb(P.ink) : '');
       ['mid', 'l1', 'l2', 'l3', 'l4', 'line'].forEach(k => set('--pal-' + k, P && ok(P[k]) ? P[k] : ''));
-      set('--pal-g', P && typeof P.g === 'string' && /^linear-gradient\(180deg,[#0-9a-f%., ]+\)$/i.test(P.g) ? P.g : ''); }
+      set('--pal-g', P && typeof P.g === 'string' && /^linear-gradient\(180deg,[#0-9a-f%., ]+\)$/i.test(P.g) ? P.g : '');
       /* Ritim / Ritim Koyu teması: Site Asistan paleti yüzey, yazı ve (Palet vurgusu seçiliyse) vurgu rengini boyar */
       { const Q = P && P.rt && typeof P.rt === 'object' ? P.rt : null, M = { bg: ['--bg', '--surface'], hi: ['--hi'], lo: ['--lo'], ink: ['--ink'], ink2: ['--ink-2'], ink3: ['--ink-3'], acc: ['--accent'], acc2: ['--accent-2'], on: ['--on-accent'] };
         Object.entries(M).forEach(([k, vs]) => vs.forEach(v => set(v, Q && ok(Q[k]) ? Q[k] : '')));
         if (Q && ok(Q.acc)) { const [r, g, b] = rgb(Q.acc).split(','); set('--accent-soft', `rgba(${r},${g},${b},.12)`); set('--accent-glow', `rgba(${r},${g},${b},.3)`); } else { set('--accent-soft', ''); set('--accent-glow', ''); }
-        if (Q && ok(Q.bg)) { const [r, g, b] = rgb(Q.bg).split(',').map(Number); set('--track', `rgb(${Math.round(r * .93)},${Math.round(g * .93)},${Math.round(b * .93)})`); } else set('--track', ''); }
+        if (Q && ok(Q.bg)) { const [r, g, b] = rgb(Q.bg).split(',').map(Number); set('--track', `rgb(${Math.round(r * .93)},${Math.round(g * .93)},${Math.round(b * .93)})`); } else set('--track', ''); } }
     ['t', 'b', 'l', 'r'].forEach(k => { if (typeof d[k] !== 'number') return; const nm = { t: '--sa-top', b: '--sa-bottom', l: '--sa-left', r: '--sa-right' }[k], v = d[k] + 'px'; if (st.getPropertyValue(nm) !== v) st.setProperty(nm, v); });
     const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
     const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
