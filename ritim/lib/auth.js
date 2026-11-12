@@ -29,6 +29,7 @@ export async function ensureSchema(env) {
     env.DB.prepare('CREATE INDEX IF NOT EXISTS users_qkey ON users (qkey)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS profiles (username TEXT PRIMARY KEY, avatar TEXT, name TEXT, title TEXT, updated INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS prefs (username TEXT PRIMARY KEY, layout TEXT, updated INTEGER)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS docs (col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (col, id))'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS files (id TEXT PRIMARY KEY, owner TEXT NOT NULL, k TEXT NOT NULL, name TEXT, type TEXT, size INTEGER, parts INTEGER, created INTEGER)'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS files_owner ON files (owner)'),
