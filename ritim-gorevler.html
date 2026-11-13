@@ -866,6 +866,16 @@ html.embed .modal{padding-top:calc(var(--sa-top, 0px) + 16px); padding-bottom:ca
 .embed-nav{display:none}
 /* Site Asistan içinde: yayın sayfasının kök dolgusu (saat/ev çubuğu payı) iPhone'da çerçeveye de uygulanıp üstte çift boşluk açıyordu; paylar --sa-top/--sa-bottom ile gelir */
 html.embed{padding-top:0!important; padding-bottom:0!important}
+/* Site Asistan içinde gezinme satırındaki küçük "+" gereksiz: her bölümün kendi ekleme düğmesi var (Yeni not, yüzen +) */
+html.embed:not(#x):not(#y) .embed-nav .fab{display:none!important}
+/* Dosyalarım: gradyan başlıkta (Sis, palet) cam düğme, beyaz yazı; açıkken beyaz dolgu. Diğer temalarda temanın yazı rengi, okunur. */
+html.embed:not(#x) #vaultBtn{color:var(--ink)!important}
+@media (max-width:767px){
+:root:is([data-saskin="sis"],[data-rtg]:not([data-saskin])).embed:not(#x):not(#y):not(#z) #vaultBtn:not([aria-pressed="true"]){background:rgba(255,255,255,.16)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.32)!important;color:#fff!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+:root:is([data-saskin="sis"],[data-rtg]:not([data-saskin])).embed:not(#x):not(#y):not(#z) #vaultBtn[aria-pressed="true"]{background:#fff!important;color:var(--pal-ink,#0d0c22)!important;box-shadow:0 8px 18px -10px rgba(0,0,0,.45)!important}
+:root:is([data-saskin="sis"],[data-rtg]:not([data-saskin])).embed:not(#x):not(#y):not(#z) #vaultBtn svg{stroke:currentColor!important;color:inherit!important}
+:root:is([data-saskin="sis"],[data-rtg]:not([data-saskin])).embed:not(#x):not(#y):not(#z) #vaultBtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+}
 /* sekmeler sayfa başlığının altında, akışta (yapışkan değil): kaydırınca içerik çubuğun arkasına girip yazılar üst üste binmez */
 html.embed:not(#x):not(#y) .embed-nav{position:relative!important; top:auto!important}
 :root:is([data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .embed-nav{background:none!important; box-shadow:none!important; margin:-4px calc(50% - 50vw) 12px!important; padding:0 12px 6px!important}
