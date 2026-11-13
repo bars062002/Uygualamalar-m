@@ -18,3 +18,9 @@ Kaydırma, sürükleme, alt panel, yay animasyonu, basma geri bildirimi ya da ge
 - Ritim, Site Asistan içinde `?embed=1` ile iframe olarak açılır; `html.embed` kuralları orada geçerlidir.
 - Ana dala birleştirince Cloudflare Workers Builds `ritim-app`'i yayınlar.
 - Commit/PR'larda model adı geçmez.
+
+## Yayın düzeni (kullanıcı onayı, 13 Kasım 2026)
+- Değişiklikler dalda birikir; **günde en çok bir kez** ya da kullanıcı "yayınla" deyince ana dala birleştirilir (her sürüm, kurum ağında ~16 sn ilk açılış beklemesine yol açıyor).
+- Uygulamayı bozan acil düzeltmeler hemen yayınlanabilir; kullanıcıya bildirilir.
+- Her yayından önce kullanıcıya değişiklik listesi ve sürüm numarası verilir.
+- PR açma ve birleştirme için ayrıca onay istenmez (kullanıcının kalıcı talimatı).
