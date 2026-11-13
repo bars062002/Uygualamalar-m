@@ -3266,7 +3266,8 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if ((d.type === 'sa-done-task' || d.type === 'sa-snooze-task') && typeof d.id === 'string') {
       const f = () => { if (!STORE.ready) return setTimeout(f, 300); const t = byId(d.id); if (!t || t.done) { sumSent = ''; postSum(); return; }
         if (d.type === 'sa-done-task') toggleDone(d.id);
-        else { const n = new Date(); n.setDate(n.getDate() + 1); t.due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') && d.due > today() ? d.due : ymd(n); t.reminded = null; putTask(t); render(); }
+        else { const n = new Date(); n.setDate(n.getDate() + 1); const hasT = /^\d{2}:\d{2}$/.test(d.remind || ''); /* Site Asistan: özel tarih + hatırlatma saati (bugün ileri saat de olabilir) */
+          t.due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') && (d.due > today() || (d.due === today() && hasT)) ? d.due : ymd(n); if (typeof d.remind === 'string') t.remind = hasT ? d.remind : null; t.reminded = null; putTask(t); render(); }
         sumSent = ''; postSum(); };
       f(); return;
     }
