@@ -1098,6 +1098,15 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 .vault{margin-top:24px; padding:22px; display:flex; flex-direction:column; gap:16px}
 .vault.drop{outline:2px dashed var(--accent); outline-offset:-8px}
 .vt-head{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+/* Dosyalarım kilidi: şifre girilmeden liste, arama ve yükleme alanı gizli */
+.vault.locked>:not(.vt-head):not(.vt-lock){display:none!important}
+.vault.locked #vaultAdd{display:none!important}
+.vt-lock{display:flex; flex-direction:column; gap:12px; max-width:420px}
+.vt-lock[hidden]{display:none}
+.vt-lk-t{margin:0; display:flex; flex-direction:column; gap:4px}.vt-lk-t span{color:var(--ink-2); font-size:14px}
+.vt-lock input{font-size:16px; min-height:48px}
+.vt-lock .btn{min-height:48px; justify-content:center}
+.vt-lk-e{margin:0; color:var(--bad); font-weight:600; font-size:14px}
 .vt-ic{width:46px; height:46px; flex:none; border-radius:14px; display:grid; place-items:center; color:var(--accent); background:var(--field, transparent); box-shadow:var(--inset-sm)}
 .vt-ttl{flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px}
 .vt-ttl b{font-size:1.05rem}
@@ -1351,6 +1360,13 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
           <label class="btn primary sm" id="vaultAdd" for="vaultIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>Dosya yükle</span></label>
           <input type="file" id="vaultIn" multiple hidden>
         </div>
+        <form class="vt-lock" id="vaultLock" hidden autocomplete="on">
+          <p class="vt-lk-t"><b>Dosyalarım kilitli</b><span>Açmak için Görev hesabının şifresini gir. 15 dakika açık kalır; kapatınca yeniden kilitlenir.</span></p>
+          <input type="text" name="username" id="vaultUser" autocomplete="username" hidden>
+          <label class="field" for="vaultPw"><input id="vaultPw" type="password" autocomplete="current-password" placeholder="Şifre" aria-label="Şifre" required></label>
+          <button class="btn primary" type="submit" id="vaultOpen">Kilidi aç</button>
+          <p class="vt-lk-e" id="vaultErr" role="alert" hidden></p>
+        </form>
         <div class="vt-use"><span class="vt-bar"><i id="vaultBar"></i></span><small class="num" id="vaultUse">—</small></div>
         <label class="field vt-q" for="vaultQ"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="vaultQ" type="search" placeholder="Dosyalarda ara…" autocomplete="off"></label>
         <ul class="files vt-list" id="vaultList"></ul>
@@ -3883,28 +3899,49 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     try { await fetch('/api/file?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() }); } catch (err) {}
   });
 
-  const vui = { open: false, files: null, used: 0, max: 150 * 1048576, q: '', up: [], thumbs: new Map() };
+  const vui = { open: false, key: '', exp: 0, files: null, used: 0, max: 150 * 1048576, q: '', up: [], thumbs: new Map() };
+  /* Dosyalarım kilidi: sunucudan şifreyle alınan 15 dakikalık anahtar (yalnız bellekte; kapatınca silinir) */
+  const vh = () => ({ ...authH(), ...(vui.key ? { 'x-vault': vui.key } : {}) });
+  const vaultUnlocked = () => !!vui.key && vui.exp > Date.now() + 5000;
+  function vaultLock(msg) {
+    vui.key = ''; vui.exp = 0; vui.files = null; vui.thumbs.forEach(u => { try { URL.revokeObjectURL(u); } catch (_) {} }); vui.thumbs.clear();
+    $('#vault').classList.add('locked'); $('#vaultLock').hidden = false; const e = $('#vaultErr'); e.hidden = !msg; e.textContent = msg || '';
+    $('#vaultUser').value = lsGet(KEY_USER) || ''; $('#vaultPw').value = ''; if (vui.open) setTimeout(() => $('#vaultPw').focus(), 80);
+  }
   function setVault(open) {
     vui.open = open;
     $('#vault').hidden = !open; $('#notesWrap').hidden = open;
     $('#vaultBtn').setAttribute('aria-pressed', String(open));
-    if (open) loadVault();
+    if (!open) { vaultLock(); return; }
+    if (STORE.mode === 'api' && !vaultUnlocked()) { vaultLock(); return; }
+    $('#vault').classList.remove('locked'); $('#vaultLock').hidden = true; loadVault();
   }
+  $('#vaultLock').addEventListener('submit', async ev => {
+    ev.preventDefault(); const pw = $('#vaultPw').value, b = $('#vaultOpen'), e = $('#vaultErr'); if (!pw) return;
+    b.disabled = true; e.hidden = true;
+    try {
+      const r = await fetch('/api/vault-unlock', { method: 'POST', headers: { ...authH(), 'content-type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { if (r.status === 401 && j.auth) askLogin(); e.textContent = j.error || 'Açılamadı.'; e.hidden = false; $('#vaultPw').select(); return; }
+      vui.key = j.v; vui.exp = j.exp; clearTimeout(vui.lt); vui.lt = setTimeout(() => { if (vui.open) vaultLock('15 dakika doldu, yeniden kilitlendi.'); else vaultLock(); }, Math.max(0, j.exp - Date.now()));
+      $('#vaultPw').value = ''; $('#vault').classList.remove('locked'); $('#vaultLock').hidden = true; loadVault();
+    } catch (_) { e.textContent = 'Bağlantı yok, yeniden dene.'; e.hidden = false; } finally { b.disabled = false; }
+  });
   async function loadVault() {
     if (STORE.mode !== 'api') { vui.files = []; renderVault('Dosyalarım için hesabınla giriş yapmalısın.'); return; }
     if (!vui.files) renderVault('Yükleniyor…');
     try {
-      const r = await fetch('/api/vault', { headers: authH() });
+      const r = await fetch('/api/vault', { headers: vh() });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) { if (r.status === 401) askLogin(); renderVault(j.error || 'Dosyalar alınamadı.'); return; }
+      if (!r.ok) { if (r.status === 401) askLogin(); if (r.status === 403 && j.vault) { vaultLock(); return; } renderVault(j.error || 'Dosyalar alınamadı.'); return; }
       vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; renderVault();
     } catch (err) { renderVault('Bağlantı yok — dosyalar alınamadı.'); }
   }
   async function loadVaultQuiet() {
-    try { const r = await fetch('/api/vault', { headers: authH() }); if (!r.ok) return; const j = await r.json(); vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; } catch (err) {}
+    try { const r = await fetch('/api/vault', { headers: vh() }); if (!r.ok) return; const j = await r.json(); vui.files = j.files || []; vui.used = j.used || 0; vui.max = j.max || vui.max; } catch (err) {}
   }
   async function vaultBlob(f) {
-    const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { headers: authH() });
+    const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { headers: vh() });
     if (!r.ok) throw new Error('x');
     return new Blob([await r.arrayBuffer()], { type: f.type || 'application/octet-stream' });
   }
@@ -3944,7 +3981,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
   $('#vaultIn').addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; addVaultFiles(f); });
   $('#vaultQ').addEventListener('input', e => { vui.q = e.target.value; renderVault(); });
   document.addEventListener('paste', e => {
-    if (!vui.open || ui.route !== 'notlar' || e.target.closest?.('input:not([type=search]),textarea')) return;
+    if (!vui.open || !vaultUnlocked() || ui.route !== 'notlar' || e.target.closest?.('input:not([type=search]),textarea')) return;
     const f = pastedFiles(e.clipboardData); if (f.length) { e.preventDefault(); addVaultFiles(f); }
   });
   $('#vault').addEventListener('dragover', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); $('#vault').classList.add('drop'); } });
@@ -3974,7 +4011,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     site = site.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
     if (site === (f.site || '')) return renderVault();
     const old = f.site; f.site = site; renderVault();
-    try { const r = await fetch('/api/vault?id=' + encodeURIComponent(id), { method: 'PUT', headers: { ...authH(), 'content-type': 'application/json' }, body: JSON.stringify({ site }) }); if (!r.ok) throw new Error('x');
+    try { const r = await fetch('/api/vault?id=' + encodeURIComponent(id), { method: 'PUT', headers: { ...vh(), 'content-type': 'application/json' }, body: JSON.stringify({ site }) }); if (!r.ok) throw new Error('x');
       toast(site ? `${f.name} → ${site} sahasına bağlandı` : 'Saha bağı kaldırıldı'); }
     catch (err) { f.site = old; renderVault(); toast('Kaydedilemedi — bağlantını kontrol et'); }
   }
@@ -3989,7 +4026,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     if (op) return openVault(f);
     if (!(await askYes(`“${f.name}” silinsin mi?`, 'Dosyalarım’dan kalıcı olarak silinir; geri alınamaz.'))) return;
     try {
-      const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: authH() });
+      const r = await fetch('/api/vault?id=' + encodeURIComponent(f.id), { method: 'DELETE', headers: vh() });
       if (!r.ok) throw new Error('x');
       vui.files = vui.files.filter(x => x.id !== f.id); vui.used = Math.max(0, vui.used - (f.size || 0)); renderVault(); toast(`${f.name} silindi`);
     } catch (err) { toast('Silinemedi — bağlantını kontrol et'); }
