@@ -179,6 +179,12 @@
 :root[data-saskin="baris"]:not(#x):not(#y) :is(.btn.primary,.fab) svg{stroke:var(--br-on)!important}
 /* Ritim / Ritim Koyu + palet (Site Asistan): Sis gibi gradyan zemin; üstteki sekme şeridi ve başlık beyaz, kartlar düz zemin + yumuşak gölge */
 :root[data-rtg]:not([data-saskin]).embed:not(#x){--raise:0 18px 34px -20px rgba(0,0,0,.34); --raise-sm:0 12px 26px -16px rgba(0,0,0,.28)}
+/* Alışveriş ekleme satırı gradyan üstünde: bulanık gömülü gölge yerine düz, okunur yüzey; Ekle vurgu renginde dolu */
+:root:is([data-rtg],[data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .shop-add .field{background:color-mix(in srgb,var(--surface,#fff) 92%,transparent)!important;box-shadow:0 0 0 1px rgba(255,255,255,.55),0 10px 24px -16px rgba(0,0,0,.45)!important;border:0!important;color:var(--ink)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+:root:is([data-rtg],[data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .shop-add .field input{color:var(--ink)!important;font-size:16px}
+:root:is([data-rtg],[data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .shop-add .field input::placeholder{color:var(--ink-3)!important;opacity:1}
+:root:is([data-rtg],[data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .shop-add .field svg{stroke:var(--accent)!important;color:var(--accent)!important}
+:root:is([data-rtg],[data-saskin="sis"],[data-saskin="baris"]).embed:not(#x):not(#y) .shop-add .btn.primary{background:var(--accent)!important;color:var(--on-accent,#fff)!important;box-shadow:0 10px 22px -12px rgba(0,0,0,.5)!important;border:0!important;min-height:48px;padding:0 22px;letter-spacing:.04em}
 :root[data-rtg]:not([data-saskin]).embed:not(#x) body{background:var(--pal-g) no-repeat 0 calc(-1 * var(--sis-off,0px)) / 100% calc(100vh + var(--sis-off,0px)) fixed!important}
 @media (min-width: 768px){ :root[data-rtg]:not([data-saskin]).embed:not(#x){--sis-off:64px} }
 :root[data-rtg]:not([data-saskin]).embed:not(#x):not(#y) .embed-nav{background:none!important;box-shadow:none!important}
