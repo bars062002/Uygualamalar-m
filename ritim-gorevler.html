@@ -636,7 +636,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 .paste-zone:focus{outline:2px solid var(--accent); outline-offset:2px}
 #dFilePaste{margin-left:6px}
 /* OLED Siyah (Site Asistan teması): tam siyah zemin, ince kenar parıltısı */
-html:root[data-oled="on"]{--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
+html:root[data-oled="on"]:not(#oled1){--bg:#000; --surface:#000; --page:#000; --hi:#1a1a1e; --lo:#000; --track:#0b0b0c}
 html[data-oled="on"] :is(.card,.task,.drawer,.toast,.selbar){box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)!important}
 .voice-btn{width:48px; padding:0; display:grid; place-items:center}
 .voice-top{width:44px; padding:0; display:grid; place-items:center}
