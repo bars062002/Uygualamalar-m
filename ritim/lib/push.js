@@ -127,10 +127,14 @@ export async function runSchedule(env) {
       const soon = con.map(c => ({ ...c, d: dayDiff(c.b, now.ymd) })).filter(c => c.d >= 0 && c.d <= 7).sort((a, b) => a.d - b.d);
       const parts = [];
       if (today || late) parts.push(`${today} görev bugün${late ? `, ${late} gecikmiş` : ''}`);
+      /* bugünün görevleri adıyla ve saatiyle (ilk 3, saatliler önce) */
+      { const td = tasks.filter(t => t.due === now.ymd).sort((a, b) => String(a.remind || '99').localeCompare(String(b.remind || '99')));
+        if (td.length) parts.push(td.slice(0, 3).map(t => `• ${t.remind ? t.remind + ' ' : ''}${t.site ? t.site + ' · ' : ''}${String(t.title || 'Görev').replace(new RegExp('^' + (t.site || '\u0000') + '\\s*·\\s*'), '').slice(0, 48)}`).join('\n') + (td.length > 3 ? `\n+${td.length - 3} görev daha` : '')); }
       /* 2 gündür ele alınmayan önemli ya da gecikmiş işler ayrıca öne çıkar */
       const stale = tasks.filter(t => (t.star || (t.due && t.due < now.ymd)) && Date.now() - (+t.touched || +new Date(t.createdAt || 0) || Date.now()) >= 2 * 864e5)
         .sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0));
       if (stale.length) parts.unshift(`Bekleyen: ${stale.length} önemli iş 2+ gündür ele alınmadı — ` + stale.slice(0, 3).map(t => String(t.title || 'Görev').slice(0, 40)).join(', ') + (stale.length > 3 ? '…' : ''));
+      { const d0 = soon.filter(c => c.d === 0); if (d0.length) parts.push(`Bugün biten sözleşme: ${d0.slice(0, 3).map(c => c.k).join(', ')}${d0.length > 3 ? '…' : ''}`); }
       if (soon.length) parts.push(`${soon.length} sözleşme 7 gün içinde bitiyor: ` + soon.slice(0, 4).map(c => `${c.k} (${c.d ? c.d + ' gün' : 'bugün'})`).join(', ') + (soon.length > 4 ? '…' : ''));
       /* Söylenecek bir şey olmasa da özet gelir: sistemin çalıştığı her sabah görünür */
       const body = parts.length ? parts.join('\n') : 'Bugün için planlı ya da geciken görev yok. 7 gün içinde biten sözleşme yok.';
