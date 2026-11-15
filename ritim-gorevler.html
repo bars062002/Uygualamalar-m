@@ -3314,6 +3314,16 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       reply(); return;
     }
     /* Saha 360 › Saha ziyareti: fotoğraflar Dosyalarım'a (saha kodlu, yalnız sen görürsün), ziyaret notu Notlar'a */
+    /* Saha 360 › Not: sahaya bağlı kısa not (konum/fotoğraf yok) */
+    if (d.type === 'sa-add-note' && d.rid && typeof d.site === 'string' && typeof d.text === 'string' && d.text.trim()) {
+      const reply = (ok, extra) => { try { e.source.postMessage(Object.assign({ type: 'rt-note-added', rid: d.rid, ok }, extra || {}), e.origin); } catch (_) {} };
+      const run = () => { if (!STORE.ready) return setTimeout(run, 300);
+        const site = d.site.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20), at = new Date(), p2 = x => String(x).padStart(2, '0'), txt = d.text.trim().slice(0, 4000);
+        const first = txt.split(/\n|[.!?](\s|$)/)[0].trim().slice(0, 60);
+        const now = at.toISOString(), n = normNote({ id: uid(), title: `${site} · ${first || 'Not'}`, body: `- Tarih: ${p2(at.getDate())}.${p2(at.getMonth() + 1)}.${at.getFullYear()} ${p2(at.getHours())}.${p2(at.getMinutes())}\n\n${txt}`, site, created: now, updated: now, src: 'sa' });
+        S.notes.push(n); putNote(n); if (ui.route === 'notlar') renderNotes(); reply(true, { note: n.id }); };
+      run(); return;
+    }
     if (d.type === 'sa-visit' && d.rid && typeof d.site === 'string') {
       const reply = (ok, extra) => { try { e.source.postMessage(Object.assign({ type: 'rt-visit', rid: d.rid, ok }, extra || {}), e.origin); } catch (_) {} };
       const run = async () => {
@@ -3382,6 +3392,9 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const f = () => { if (!STORE.ready) return setTimeout(f, 300);
         const due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') ? d.due : '', rem = /^\d{2}:\d{2}$/.test(d.remind || '') ? d.remind : '';
         const t = addTask(d.title.trim().slice(0, 140), ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, 'med', due, String(d.site || '').slice(0, 24), rem);
+        /* Site Asistan hızlı giriş: cümleden ayrılan not (ör. “yer sahibiyle görüşüldü”) görevin notuna yazılır, Saha 360 geçmişinde görünür */
+        if (typeof d.note === 'string' && d.note.trim()) { t.notes = d.note.trim().slice(0, 2000); putTask(t); }
+        if (d.prio === 'high') { t.pri = 'high'; putTask(t); }
         try { e.source.postMessage({ type: 'rt-added', rid: d.rid, ok: true, id: t.id, due: t.due, remind: t.remind }, e.origin); } catch (_) {} };
       f(); return;
     }
