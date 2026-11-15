@@ -3398,6 +3398,9 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       const f = () => { if (!STORE.ready) return setTimeout(f, 300);
         const due = /^\d{4}-\d{2}-\d{2}$/.test(d.due || '') ? d.due : '', rem = /^\d{2}:\d{2}$/.test(d.remind || '') ? d.remind : '';
         const t = addTask(d.title.trim().slice(0, 140), ui.cat && lists().some(l => l.id === ui.cat) ? ui.cat : lists()[0].id, 'med', due, String(d.site || '').slice(0, 24), rem);
+        /* Site Asistan hızlı giriş: cümleden ayrılan not (ör. “yer sahibiyle görüşüldü”) görevin notuna yazılır, Saha 360 geçmişinde görünür */
+        if (typeof d.note === 'string' && d.note.trim()) { t.notes = d.note.trim().slice(0, 2000); putTask(t); }
+        if (d.prio === 'high') { t.pri = 'high'; putTask(t); }
         try { e.source.postMessage({ type: 'rt-added', rid: d.rid, ok: true, id: t.id, due: t.due, remind: t.remind }, e.origin); } catch (_) {} };
       f(); return;
     }
