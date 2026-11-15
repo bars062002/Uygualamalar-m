@@ -12,6 +12,7 @@ import { onRequestPost as filePost, onRequestGet as fileGet, onRequestDelete as 
 import { onRequestGetKey as pushKey, onRequestPostSub as pushSub, onRequestPostUnsub as pushUnsub, onRequestPostTest as pushTest, onRequestGetStatus as pushStatusGet } from './functions/api/push.js';
 import { onRequestPost as taskPost } from './functions/api/task.js';
 import { onRequestGet as vaultGet, onRequestPost as vaultPost, onRequestPut as vaultPut, onRequestDelete as vaultDel } from './functions/api/vault.js';
+import { onRequestPost as vaultUnlock } from './functions/api/vault-unlock.js';
 import { onRequestGet as kiraGet, onRequestPost as kiraPost } from './functions/api/kira.js';
 import { onRequestGet as ilkiraGet, onRequestPost as ilkiraPost } from './functions/api/ilkira.js';
 import { runSchedule } from './lib/push.js';
@@ -21,7 +22,7 @@ import { onRequestGet as profileGet, onRequestPost as profilePost } from './func
 import { ensureSchema } from './lib/auth.js';
 import { json } from './lib/http.js';
 
-const routes = { 'GET /api/profile': profileGet, 'POST /api/profile': profilePost, 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'GET /api/quick': quickGet, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost, 'POST /api/claim': claim, 'POST /api/file': filePost, 'GET /api/file': fileGet, 'DELETE /api/file': fileDel, 'GET /api/push/key': pushKey, 'POST /api/push/sub': pushSub, 'POST /api/push/unsub': pushUnsub, 'POST /api/push/test': pushTest, 'GET /api/push/status': pushStatusGet, 'POST /api/task': taskPost, 'GET /api/backup': backupGet, 'POST /api/backup': backupPost, 'GET /api/vault': vaultGet, 'POST /api/vault': vaultPost, 'PUT /api/vault': vaultPut, 'DELETE /api/vault': vaultDel, 'GET /api/kira': kiraGet, 'GET /api/ilkira': ilkiraGet, 'POST /api/ilkira': ilkiraPost, 'POST /api/kira': kiraPost };
+const routes = { 'GET /api/profile': profileGet, 'POST /api/profile': profilePost, 'GET /api/sync': sync, 'POST /api/batch': batch, 'POST /api/quick': quick, 'GET /api/quick': quickGet, 'POST /api/register': register, 'POST /api/login': login, 'GET /api/me': meGet, 'POST /api/me': mePost, 'POST /api/claim': claim, 'POST /api/file': filePost, 'GET /api/file': fileGet, 'DELETE /api/file': fileDel, 'GET /api/push/key': pushKey, 'POST /api/push/sub': pushSub, 'POST /api/push/unsub': pushUnsub, 'POST /api/push/test': pushTest, 'GET /api/push/status': pushStatusGet, 'POST /api/task': taskPost, 'GET /api/backup': backupGet, 'POST /api/backup': backupPost, 'GET /api/vault': vaultGet, 'POST /api/vault': vaultPost, 'PUT /api/vault': vaultPut, 'DELETE /api/vault': vaultDel, 'POST /api/vault-unlock': vaultUnlock, 'GET /api/kira': kiraGet, 'GET /api/ilkira': ilkiraGet, 'POST /api/ilkira': ilkiraPost, 'POST /api/kira': kiraPost };
 
 export default {
   async fetch(request, env) {

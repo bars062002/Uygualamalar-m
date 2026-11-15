@@ -1,5 +1,9 @@
 import { json } from '../../lib/http.js';
 import { storeFile, fileResponse, MAX_USER } from './file.js';
+import { vaultOk } from './vault-unlock.js';
+
+// Kilit: listeleme, açma, bağlama ve silme şifreyle açılmış anahtar ister (x-vault). Yükleme kilitsiz (ziyaret fotoğrafları).
+const locked = () => json({ error: 'Dosyalarım kilitli. Şifrenle aç.', vault: true }, 403);
 
 // Dosyalarım: yalnız sahibinin görebildiği özel dosya alanı. Bağlantıyla paylaşılamaz; her istek oturum ister.
 //   GET    /api/vault          → { files: [{id, name, type, size, created}], used, max }
@@ -12,6 +16,7 @@ async function ensureCols(env) { if (cols) return; try { await env.DB.prepare('A
 const siteOf = v => String(v || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
 
 export async function onRequestGet({ request, env, data }) {
+  if (!(await vaultOk(request))) return locked();
   await ensureCols(env);
   const owner = data.user.username, id = new URL(request.url).searchParams.get('id') || '';
   if (id) {
@@ -35,6 +40,7 @@ export async function onRequestPost({ request, env, data }) {
 }
 
 export async function onRequestPut({ request, env, data }) {
+  if (!(await vaultOk(request))) return locked();
   await ensureCols(env);
   const owner = data.user.username, id = new URL(request.url).searchParams.get('id') || '';
   let b; try { b = await request.json(); } catch (_) { return json({ error: 'Geçersiz istek.' }, 400); }
@@ -45,6 +51,7 @@ export async function onRequestPut({ request, env, data }) {
 }
 
 export async function onRequestDelete({ request, env, data }) {
+  if (!(await vaultOk(request))) return locked();
   const owner = data.user.username, id = new URL(request.url).searchParams.get('id') || '';
   const v = await env.DB.prepare('SELECT owner FROM vault WHERE id = ?').bind(id).first();
   if (!v) return json({ ok: true });
