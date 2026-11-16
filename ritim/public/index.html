@@ -1214,6 +1214,15 @@ html.embed[data-photo] .view>.vhead::before{content:"";position:absolute;z-index
   background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.18)),url(img/gorev.jpg?v=1) center 40%/cover no-repeat;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent);pointer-events:none}
 html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead .vhead-actions .btn{background:rgba(0,0,0,.38)!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebrow,.emboss,#todayDate){color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.55)!important}
+
+/* Görev paneli: başlık birden çok satıra kayar (kesilmez), sade odak; derili temalarda panel opak (arkadaki sayfa görünmesin), alanlar belirgin */
+.d-title{display:block;flex:none;resize:none;overflow:hidden;line-height:1.25;min-height:1.6em;font-family:inherit;border-radius:12px;padding:8px 10px;margin:0 -10px;width:calc(100% + 20px);border-bottom:0!important;transition:background .2s}
+.d-title:focus,.d-title:focus-visible{outline:none!important;background:var(--accent-soft,rgba(0,0,0,.05));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 45%,transparent)}
+:root:is([data-saskin="sis"],[data-saskin="baris"],[data-saskin="isvicre"],[data-saskin="kagit"],[data-saskin="brut"]):not(#x):not(#y) .drawer{background:#F4F6F7!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+:root[data-saskin="isvicre"]:not(#x):not(#y) .drawer{background:#fff!important}
+:root:is([data-saskin="sis"],[data-saskin="baris"],[data-saskin="isvicre"]):not(#x):not(#y) .drawer :is(.field,.d-age>div){background:#fff!important;box-shadow:0 0 0 1px rgba(13,12,34,.08),0 1px 2px rgba(13,12,34,.05)!important}
+:root:is([data-saskin="kabartma"],[data-saskin="sivicam"],[data-saskin="gece"],[data-saskin="arduvaz"]):not(#x):not(#y) .drawer{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+:root[data-saskin="sivicam"]:not(#x):not(#y) .drawer{background:#111B47!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1556,7 +1565,7 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
     <button class="btn icon sm" id="dClose" aria-label="Kapat"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="d-body">
-    <input class="d-title" id="dTitle" aria-label="Görev başlığı" maxlength="140">
+    <textarea class="d-title" id="dTitle" aria-label="Görev başlığı" maxlength="140" rows="1" enterkeyhint="done"></textarea>
     <div class="d-age" id="dAge"></div>
     <div><span class="lbl">Saha kodu</span><label class="field" for="dSite"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="dSite" placeholder="Örn. KSEMR32087" maxlength="20" autocapitalize="characters" spellcheck="false"></label></div>
     <div class="ct" id="dCt">
@@ -4561,7 +4570,7 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
   function syncDrawer() {
     if (!ui.open) return;
     const t = byId(ui.open); if (!t) return closeDrawer();
-    if (document.activeElement !== $('#dTitle')) $('#dTitle').value = t.title;
+    if (document.activeElement !== $('#dTitle')) $('#dTitle').value = t.title; dtFit();
     if (document.activeElement !== $('#dNotes')) $('#dNotes').value = t.notes;
     if (document.activeElement !== $('#dSite')) $('#dSite').value = t.site || '';
     if (document.activeElement !== $('#dPerson')) $('#dPerson').value = t.person || '';
@@ -4601,9 +4610,12 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
   const edit = fn => { const t = cur(); if (!t) return; fn(t); putTask(t); render(); syncDrawer(); flashSaved(); };
   $('#dClose').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
+  function dtFit() { const a = $('#dTitle'); if (!a) return; a.style.setProperty('height', 'auto', 'important'); a.style.setProperty('height', a.scrollHeight + 'px', 'important'); } /* başlık uzunsa alt satıra kayar, kesilmez */
+  addEventListener('resize', dtFit);
   $('#dSaveNew').addEventListener('click', () => { const t = cur(); if (!t) return; if (!$('#dTitle').value.trim()) { $('#dTitle').focus(); toast('Görev adı boş olamaz'); return; } closeDrawer(); });
   $('#dCancelNew').addEventListener('click', () => { const t = cur(); if (t) t.title = ''; closeDrawer(); });
-  $('#dTitle').addEventListener('input', e => edit(t => { t.title = e.target.value.trim() || 'Adsız görev'; }));
+  $('#dTitle').addEventListener('input', e => { if (/\n/.test(e.target.value)) e.target.value = e.target.value.replace(/\s*\n+\s*/g, ' '); dtFit(); edit(t => { t.title = e.target.value.trim() || 'Adsız görev'; }); });
+  $('#dTitle').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }); /* başlık tek paragraf; Enter kapatır */
   $('#dNotes').addEventListener('input', e => edit(t => { t.notes = e.target.value; }));
   // ---------- Görev iletişim bilgileri ve ekler ----------
   // Telefon: Ara / WhatsApp / BiP (cep numarası ise). E-posta: mail uygulamasında hazır taslak. Adres: yol tarifi.
