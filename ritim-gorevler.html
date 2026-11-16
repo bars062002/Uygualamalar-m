@@ -1191,6 +1191,13 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
 @media (max-width: 520px){ .modal-card.login{padding:36px 22px} }
 .lg-seg{width:100%; display:grid; grid-template-columns:1fr 1fr}
 .lg-seg button{justify-content:center}
+
+/* Site Asistan › Fotoğraflı görünüm (yalnız gömülüyken): sayfa başlığının arkasında yapılacaklar defteri fotoğrafı, aşağı doğru erir */
+html.embed[data-photo] .view>.vhead{position:relative;isolation:isolate}
+html.embed[data-photo] .view>.vhead::before{content:"";position:absolute;z-index:-1;left:calc(50% - 50vw);right:calc(50% - 50vw);top:calc(-1 * (var(--sa-top,0px) + 60px));bottom:-46px;
+  background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.18)),url(img/gorev.jpg?v=1) center 40%/cover no-repeat;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent);pointer-events:none}
+html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead .vhead-actions .btn{background:rgba(0,0,0,.38)!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebrow,.emboss,#todayDate){color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.55)!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2250,6 +2257,7 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
     { const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
       const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
       if (d.theme) { if (d.theme === 'oled') document.documentElement.dataset.oled = 'on'; else delete document.documentElement.dataset.oled; }
+      if ('photo' in d) { if (d.photo) document.documentElement.dataset.photo = '1'; else delete document.documentElement.dataset.photo; } /* Site Asistan › Fotoğraflı görünüm: başlıkta defter fotoğrafı */
       if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
     /* Site Asistan › Ayarlar › Renk paleti: Sis renkleri ev sahibinin paletinden gelir (null → varsayılan Sis) */
     { const P = d.pal && typeof d.pal === 'object' ? d.pal : null, ok = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
