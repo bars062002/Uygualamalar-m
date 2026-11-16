@@ -3346,6 +3346,22 @@ html.embed .vhead-actions .bk-open{height:52px; border-radius:16px}
       };
       reply(); return;
     }
+    /* Saha 360 › Fotoğraflar: sahaya bağlı görseller Dosyalarım'dan (kilit açıksa) küçük boyutta gönderilir */
+    if (d.type === 'sa-site-photos' && typeof d.code === 'string' && d.rid) {
+      const reply = x => { try { e.source.postMessage(Object.assign({ type: 'rt-photos', rid: d.rid }, x), e.origin); } catch (_) {} };
+      const run = async () => {
+        if (!STORE.ready) return setTimeout(run, 300);
+        if (STORE.mode !== 'api') return reply({ err: 'login' });
+        if (!vaultUnlocked()) return reply({ locked: true });
+        if (!vui.files) await loadVaultQuiet();
+        const c = d.code.toLocaleUpperCase('tr-TR').replace(/\s+/g, ''), hit = x => { const v = String(x || '').toLocaleUpperCase('tr-TR').replace(/\s+/g, ''); return !!v && (v === c || (c.length >= 4 && v.startsWith(c))); };
+        const img = f => /^image\//.test(f.type || '') || /\.(jpe?g|png|webp|gif|heic)$/i.test(f.name || '');
+        const L = (vui.files || []).filter(f => hit(f.site) && img(f)).sort((a, b) => String(b.created).localeCompare(String(a.created))).slice(0, 12), out = [];
+        for (const f of L) { try { out.push({ id: f.id, n: f.name, at: f.created, blob: await vaultBlob(f) }); } catch (_) {} }
+        reply({ photos: out, total: (vui.files || []).filter(f => hit(f.site) && img(f)).length });
+      };
+      run(); return;
+    }
     /* Saha 360 › Saha ziyareti: fotoğraflar Dosyalarım'a (saha kodlu, yalnız sen görürsün), ziyaret notu Notlar'a */
     /* Saha 360 › Not: sahaya bağlı kısa not (konum/fotoğraf yok) */
     if (d.type === 'sa-add-note' && d.rid && typeof d.site === 'string' && typeof d.text === 'string' && d.text.trim()) {
