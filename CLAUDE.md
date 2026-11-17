@@ -19,6 +19,12 @@ Kaydırma, sürükleme, alt panel, yay animasyonu, basma geri bildirimi ya da ge
 - Seçili bölüm Site Asistan'ın seçili/birincil rengiyle aynı düz dolgu; renk ev sahibinden `accHex` ile gelir (paletin tepe tonu ya da seçili vurgu).
 - Nöromorfik + palet: yüzeyler nöromorfik gri kalır, yalnız vurgu/veri rengi değişir.
 
+## Simetri ve tutarlı düzen (kullanıcı talebi, 17 Kasım 2026 — her işte zorunlu)
+- Kullanıcı için simetri ve tutarlı tasarım "çok çok önemli": yeni özellik ya da özelleştirme ne kadar iyi olursa olsun mevcut tasarım diline ve düzene uymalı.
+- Boş kalan alan bırakma: bir sütun kısa kalıyorsa içerik yan yana dizilir ya da alanı dolduracak şekilde yerleşir (ör. aday ayrıntısında fotoğraf + harita bilgi kartının altında yan yana, aynı boyda).
+- Yan yana öğeler aynı boyda, aynı köşe yarıçapında, aynı aralıkla; hizalar ortak çizgide biter.
+- Her işten önce ve sonra ekranı bilgisayar ve telefon boyutunda gözle kontrol et; asimetri, boşluk, tutarsız düğme/kart görünümü varsa sorulmadan düzelt ve kullanıcıya söyle.
+
 ## Proje kuralları
 - Tek kaynak `ritim-gorevler.html`; değişiklikten sonra `node ritim/build.mjs` ile `ritim/public/index.html` üretilir (ikisi birlikte commit edilir).
 - Ritim, Site Asistan içinde `?embed=1` ile iframe olarak açılır; `html.embed` kuralları orada geçerlidir.
