@@ -3416,6 +3416,8 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
     let host = ''; try { host = new URL(e.origin).hostname; } catch (_) { return; }
     if (!/^site-asistan[\w-]*\.brsakpnr\.workers\.dev$|^localhost$/.test(host)) return;
     if (d.type === 'sa-sum') { sumSent = ''; postSum(); return; }
+    /* Site Asistan sağ üst kalem: Pano kartlarını ekranda düzenle (aç/kapat) */
+    if (d.type === 'sa-edit') { const L = window.SA_LAY; if (!L) return; const t = () => { try { L.on ? L.exit() : L.enter(); } catch (_) {} }; if (!/^#?pano/.test(location.hash) && !L.on) { location.hash = '#pano'; setTimeout(t, 350); } else t(); return; }
     /* Site Asistan ana sayfası: görevi tamamla / yarına ertele */
     if ((d.type === 'sa-done-task' || d.type === 'sa-snooze-task') && typeof d.id === 'string') {
       const f = () => { if (!STORE.ready) return setTimeout(f, 300); const t = byId(d.id); if (!t || t.done) { sumSent = ''; postSum(); return; }
