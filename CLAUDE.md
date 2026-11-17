@@ -13,6 +13,12 @@ Kaydırma, sürükleme, alt panel, yay animasyonu, basma geri bildirimi ya da ge
 - Varsayılan yay sönüm 1,0 (sekmesiz); sekme yalnız fiskeden sonra (sönüm ≈0,8, tepki 0,3).
 - Geri bildirim basışta anında; geri alınabilir işlemde "Geri al" bildirimi; "hareketi azalt" ve "saydamlığı azalt" ayarlarına uy.
 
+## Site Asistan içindeki görünüm (16–17 Kasım 2026 kararları)
+- Site Asistan'daki tema adı artık **Nöromorfik** (eski "Ritim" teması); bu uygulamanın adı "Ritim" olarak kalır.
+- Bölüm sekmeleri (`.embed-nav`): ekrana sığan tek gömülü şerit, 6 eşit bölme, kaydırma yok; telefonda Görevler→Görev, Alışveriş→Sepet.
+- Seçili bölüm Site Asistan'ın seçili/birincil rengiyle aynı düz dolgu; renk ev sahibinden `accHex` ile gelir (paletin tepe tonu ya da seçili vurgu).
+- Nöromorfik + palet: yüzeyler nöromorfik gri kalır, yalnız vurgu/veri rengi değişir.
+
 ## Proje kuralları
 - Tek kaynak `ritim-gorevler.html`; değişiklikten sonra `node ritim/build.mjs` ile `ritim/public/index.html` üretilir (ikisi birlikte commit edilir).
 - Ritim, Site Asistan içinde `?embed=1` ile iframe olarak açılır; `html.embed` kuralları orada geçerlidir.
