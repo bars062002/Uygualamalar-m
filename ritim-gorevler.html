@@ -1257,6 +1257,14 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
 .d-s360[hidden]{display:none}
 .d-s360 svg.i{width:15px; height:15px}
 .d-s360:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* Site Asistan içinde: üstte Site Asistan'daki gibi koyu vurgu bandı (her sekmede aynı) */
+html.embed:not(#b1):not(#b2):not(#b3) body{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 82%,#000) 0%,var(--accent) 30%,color-mix(in srgb,var(--accent) 55%,var(--bg)) 62%,var(--bg) 100%) top/100% 360px no-repeat,var(--bg)!important}
+html.embed:not(#b1):not(#b2):not(#b3) .embed-nav{background:var(--bg)!important}
+html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead :is(h1,h2,.eyebrow,p,small){color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.2)!important;background:none!important}
+html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.primary){background:var(--bg)!important;color:var(--ink)!important}
+:root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .embed-nav{background:var(--bg)!important;opacity:1!important;box-shadow:inset 3px 3px 7px var(--lo),inset -3px -3px 7px var(--hi),0 8px 18px -10px rgba(0,0,0,.35)!important}
+:root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .embed-nav a:not(.on){color:var(--ink-2,var(--ink))!important;opacity:1!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
