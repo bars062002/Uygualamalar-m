@@ -1035,6 +1035,8 @@ html.embed .vhead-actions :is(a[href="#notlar"],a[href="#odak"],[data-look]){dis
    Selamlama satırında yalnız yedekleme simgesi sağda kalır (bir satır kazanılır) */
 html.embed #v-pano .vhead{flex-wrap:nowrap; align-items:center}
 html.embed .vhead-actions{flex:0 0 auto; gap:12px}
+/* Site Asistan'ın sağ üstteki kalem düğmesi Yedekler'in üstüne binmesin */
+@media (max-width:899px){html.embed .vhead:has(.vhead-actions) {padding-right:60px}}
 html.embed #v-pano .vhead-actions .btn.primary[data-new]{display:none!important}
 html.embed .vhead-actions .btn.primary{flex:1; height:52px; border-radius:16px; letter-spacing:.06em;
   background:linear-gradient(115deg,var(--accent) 0%,var(--accent-2) 100%); color:var(--on-accent);
@@ -1277,6 +1279,9 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
 /* Site Asistan içinde: üstte Site Asistan'daki gibi koyu vurgu bandı (her sekmede aynı) */
 html.embed:not(#b1):not(#b2):not(#b3) body{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 82%,#000) 0%,var(--accent) 30%,color-mix(in srgb,var(--accent) 55%,var(--bg)) 62%,var(--bg) 100%) top/100% 210px no-repeat,var(--bg)!important}
 html.embed:not(#b1):not(#b2):not(#b3) .embed-nav{background:var(--bg)!important}
+/* Site Asistan ile birebir yumuşak gradyan; saat şeridi boyası gömülüde yok (ikinci şerit görünüyordu) */
+html.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) body{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 70%,#000) 0,color-mix(in srgb,var(--accent) 84%,#000) calc(var(--sa-top,0px) + 50px),var(--accent) calc(var(--sa-top,0px) + 130px),color-mix(in srgb,var(--accent) 80%,var(--bg)) calc(var(--sa-top,0px) + 180px),color-mix(in srgb,var(--accent) 58%,var(--bg)) calc(var(--sa-top,0px) + 230px),color-mix(in srgb,var(--accent) 36%,var(--bg)) calc(var(--sa-top,0px) + 280px),color-mix(in srgb,var(--accent) 17%,var(--bg)) calc(var(--sa-top,0px) + 325px),color-mix(in srgb,var(--accent) 5%,var(--bg)) calc(var(--sa-top,0px) + 365px),var(--bg) calc(var(--sa-top,0px) + 400px)) top/100% calc(var(--sa-top,0px) + 400px) no-repeat,var(--bg)!important}
+html.embed body::before{display:none!important}
 html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead :is(h1,h2,.eyebrow,p,small){color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.2)!important;background:none!important}
 html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.primary){background:var(--bg)!important;color:var(--ink)!important}
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .embed-nav{background:var(--bg)!important;opacity:1!important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.14),0 8px 18px -10px rgba(0,0,0,.4)!important}
@@ -4603,6 +4608,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
 
   // ---------- Drawer ----------
   const drawer = $('#drawer');
+  if (window.parent !== window) { let sOn = null; addEventListener('scroll', () => { const on = scrollY > 2; if (on !== sOn) { sOn = on; try { parent.postMessage({ type: 'rt-scr', on }, '*'); } catch (_) {} } }, { passive: true }); }
   if (window.parent !== window) { let dOpen = null; new MutationObserver(() => { const o = drawer.classList.contains('open'); if (o === dOpen) return; dOpen = o; if (!o) { const z = $('#dPasteZone'); if (z) z.hidden = true; } try { parent.postMessage({ type: 'rt-ui', drawer: o }, '*'); } catch (e) {} }).observe(drawer, { attributes: true, attributeFilter: ['class'] }); }
   // Alt görev kutusunda Enter'a basılmadan kalan yazı: panel kapanırken ya da başka göreve geçerken
   // ait olduğu göreve eklenir, kutu boşaltılır (bir sonraki görevde görünmez).
