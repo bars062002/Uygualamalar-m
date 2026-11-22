@@ -665,7 +665,7 @@ html.theming, html.theming *{transition:background-color .45s ease, color .45s e
 
 .drawer.drop{box-shadow:inset 0 0 0 3px var(--accent)}
 .paste-zone{margin-top:10px; min-height:64px; border-radius:var(--r-sm); box-shadow:var(--inset-sm); display:grid; place-items:center; color:var(--ink-3); font-size:16px; -webkit-user-select:text; user-select:text}
-.paste-zone:empty::before{content:"Basılı tutun › Yapıştır"}
+.paste-zone:empty::before{content:"Buraya basılı tutun, sonra Yapıştır’a dokunun"; text-align:center; padding:0 12px}
 .paste-zone:focus{outline:2px solid var(--accent); outline-offset:2px}
 #dFilePaste{margin-left:6px}
 /* OLED Siyah (Site Asistan teması): tam siyah zemin, ince kenar parıltısı */
@@ -752,6 +752,8 @@ body.selmode .tabbar{transform:translateY(calc(100% + 64px)); transition:transfo
 .inbox-link{display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:11px 14px; border-radius:999px; color:var(--accent); text-decoration:none; font-size:.85rem; box-shadow:var(--raise-sm); background:var(--surface)}
 .inbox-link .i{width:15px; height:15px}
 .d-foot{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 26px 22px}
+html.embed .d-foot{padding-bottom:calc(var(--sa-bottom, 0px) + 22px)!important}
+html.embed .drawer{padding-top:var(--sa-top, 0px)}
 .d-foot .btn{flex:1 1 auto; min-width:0; padding-left:12px; padding-right:12px; justify-content:center; white-space:nowrap}
 .d-foot .btn span{overflow:hidden; text-overflow:ellipsis}
 .d-foot .btn[hidden]{display:none}
@@ -4570,6 +4572,7 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
 
   // ---------- Drawer ----------
   const drawer = $('#drawer');
+  if (window.parent !== window) { let dOpen = null; new MutationObserver(() => { const o = drawer.classList.contains('open'); if (o === dOpen) return; dOpen = o; if (!o) { const z = $('#dPasteZone'); if (z) z.hidden = true; } try { parent.postMessage({ type: 'rt-ui', drawer: o }, '*'); } catch (e) {} }).observe(drawer, { attributes: true, attributeFilter: ['class'] }); }
   // Alt görev kutusunda Enter'a basılmadan kalan yazı: panel kapanırken ya da başka göreve geçerken
   // ait olduğu göreve eklenir, kutu boşaltılır (bir sonraki görevde görünmez).
   function commitPendingSub() {
@@ -4718,14 +4721,14 @@ html.embed[data-photo]:not(#ph1):not(#ph2):not(#ph3) .view>.vhead :is(h1,.eyebro
       const items = await navigator.clipboard.read(), files = [];
       const d = new Date(), p2 = x => String(x).padStart(2, '0'), stamp = `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${d.getFullYear()} ${p2(d.getHours())}.${p2(d.getMinutes())}`;
       for (const it of items) { const ty = it.types.find(t => !t.startsWith('text/')); if (!ty) continue; const b = await it.getType(ty); const ext = (ty.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace('+xml', ''); files.push(new File([b], `Yapıştırılan ${stamp}${files.length ? ' ' + (files.length + 1) : ''}.${ext}`, { type: ty })); }
-      if (!files.length) return toast('Panoda fotoğraf yok · önce fotoğrafı kopyalayın');
+      if (!files.length) return openPasteZone();
       addTaskFiles(files);
     } catch (err) { openPasteZone(); }
   });
   /* iPhone pano okumaya izin vermezse: yapıştırma alanı açılır, basılı tutup "Yapıştır" denince fotoğraf göreve eklenir */
-  function openPasteZone() { const z = $('#dPasteZone'); z.hidden = false; z.textContent = ''; z.focus(); toast('Alana basılı tutun ve Yapıştır’a dokunun'); }
+  function openPasteZone() { const z = $('#dPasteZone'); z.hidden = false; z.textContent = ''; z.scrollIntoView({ block: 'center' }); z.focus(); toast('Aşağıdaki alana basılı tutup Yapıştır’a dokunun'); clearTimeout(openPasteZone.t); openPasteZone.t = setTimeout(() => { z.hidden = true; }, 60000); }
   $('#dPasteZone').addEventListener('input', e => { e.target.textContent = ''; });
-  $('#dPasteZone').addEventListener('blur', e => { setTimeout(() => { e.target.hidden = true; }, 200); });
+  /* odak kaybında kapanmaz (iOS uzun basışta odağı bırakabiliyor); yapıştırınca, çekmece kapanınca ya da 60 sn sonra kapanır */
   drawer.addEventListener('dragover', e => { if (ui.open && [...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); drawer.classList.add('drop'); } });
   drawer.addEventListener('dragleave', e => { if (!drawer.contains(e.relatedTarget)) drawer.classList.remove('drop'); });
   drawer.addEventListener('drop', e => { drawer.classList.remove('drop'); const f = pastedFiles(e.dataTransfer); if (f.length) { e.preventDefault(); addTaskFiles(f); } });
