@@ -1356,6 +1356,11 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .embed-nav{background:var(--bg)!important;opacity:1!important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.14),0 8px 18px -10px rgba(0,0,0,.4)!important}
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .vhead :is(.btn,button){box-shadow:0 6px 14px -8px rgba(0,0,0,.4)!important}
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) .embed-nav a:not(.on){color:var(--ink-2,var(--ink))!important;opacity:1!important}
+
+/* ===== Site Asistan sa-v474 · katman sadeleştirme: Görev · Takvim · Notlar · Sepet (Pano Bugün'de, Odak görev ayrıntısından) ===== */
+:root.embed:not(#s1):not(#s2):not(#s3):not(#s4):not(#s5):not(#s6) .embed-nav{grid-template-columns:none!important;grid-auto-flow:column!important;grid-auto-columns:minmax(0,1fr)!important}
+:root.embed:not(#s1):not(#s2):not(#s3):not(#s4):not(#s5):not(#s6) .embed-nav :is(a[data-route="pano"],a[data-route="odak"]){display:none!important}
+:root.embed .embed-nav a[data-route="gorevler"]{order:1}:root.embed .embed-nav a[data-route="takvim"]{order:2}:root.embed .embed-nav a[data-route="notlar"]{order:3}:root.embed .embed-nav a[data-route="alisveris"]{order:4}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2625,7 +2630,8 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
   // ---------- Router ----------
   const ROUTES = ['pano', 'gorevler', 'alisveris', 'notlar', 'takvim', 'odak'];
   function route() {
-    const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
+    const r0 = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
+    const r = EMBED && r0 === 'pano' ? 'gorevler' : r0; /* sa-v474: Site Asistan içinde Pano yok (Bugün onun yerini tutar) */
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
     $$('[data-route]').forEach(a => a.classList.toggle('on', a.dataset.route === r));
     /* Site Asistan içinde: bölüm sekmeleri sayfa başlığının altında (başlık en üstte, Ana Sayfa ile aynı düzen) */
