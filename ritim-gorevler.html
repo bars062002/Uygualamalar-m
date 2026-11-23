@@ -1345,6 +1345,9 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
 :root.embed:not(#s1):not(#s2):not(#s3):not(#s4):not(#s5):not(#s6) .embed-nav{grid-template-columns:none!important;grid-auto-flow:column!important;grid-auto-columns:minmax(0,1fr)!important}
 :root.embed:not(#s1):not(#s2):not(#s3):not(#s4):not(#s5):not(#s6) .embed-nav :is(a[data-route="pano"],a[data-route="odak"]){display:none!important}
 :root.embed .embed-nav a[data-route="gorevler"]{order:1}:root.embed .embed-nav a[data-route="takvim"]{order:2}:root.embed .embed-nav a[data-route="notlar"]{order:3}:root.embed .embed-nav a[data-route="alisveris"]{order:4}
+
+/* Site Asistan sa-v475 · Nöromorfik Krem: aynı nöromorfik dil, krem kil */
+:root[data-krm="on"]:not([data-theme="dark"]):not(#krm1):not(#krm2){--bg:#ECE5DC;--surface:#ECE5DC;--hi:#FFFDF9;--lo:#CABEAF;--track:#DCD2C5;--ink:#2E2620;--ink-2:#4E443B;--ink-3:#675C52}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2381,7 +2384,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
   if (EMBED) { let fy = scrollY, fr = 0; addEventListener('scroll', () => { if (fr) return; fr = requestAnimationFrame(() => { fr = 0; const y = scrollY, f = document.querySelector('.embed-nav .fab'); if (!f) return;
     if (y > fy + 6 && y > 120) f.classList.add('away'); else if (y < fy - 6 || y < 60) f.classList.remove('away'); fy = y; }); }, { passive: true }); }
   if (EMBED) document.documentElement.classList.add('embed');
-  const HOST_THEME = { ritim: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light', gece: 'dark', arduvaz: 'dark', sis: 'light', baris: 'light', kabartma: 'dark', sivicam: 'dark', isvicre: 'light', krem: 'light', noir: 'dark', atmosfer: 'light', banka: 'dark', lumi: 'light', reband: 'dark', taksi: 'light' };
+  const HOST_THEME = { ritim: 'light', ritimkrem: 'light', ritimkoyu: 'dark', oled: 'dark', applelight: 'light', apple: 'dark', glassy: 'dark', fumar: 'forest', suet: 'forest', cam: 'dark', kagit: 'light', brut: 'light', gece: 'dark', arduvaz: 'dark', sis: 'light', baris: 'light', kabartma: 'dark', sivicam: 'dark', isvicre: 'light', krem: 'light', noir: 'dark', atmosfer: 'light', banka: 'dark', lumi: 'light', reband: 'dark', taksi: 'light' };
   const HOST_SKINS = new Set(['cam', 'kagit', 'brut', 'gece', 'arduvaz', 'sis', 'baris', 'kabartma', 'sivicam', 'isvicre', 'krem', 'noir', 'atmosfer', 'banka', 'lumi', 'reband', 'taksi']); let skin = null;
   let saOn = null, replayT = 0;
   const replayView = () => { clearTimeout(replayT); replayT = setTimeout(() => { if (STORE.ready && motionOK() && !document.hidden) enterView(); }, 80); };
@@ -2408,6 +2411,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
     { const nt = d.theme && HOST_THEME[d.theme], na = d.accent && ACCENTS.some(a => a.id === d.accent) ? d.accent : null;
       const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
       if (d.theme) { if (d.theme === 'oled') document.documentElement.dataset.oled = 'on'; else delete document.documentElement.dataset.oled; }
+      if (d.theme) { if (d.theme === 'ritimkrem') document.documentElement.dataset.krm = 'on'; else delete document.documentElement.dataset.krm; } /* Site Asistan sa-v475 · Nöromorfik Krem */
       if ('photo' in d) { if (d.photo) document.documentElement.dataset.photo = '1'; else delete document.documentElement.dataset.photo; } /* Site Asistan › Fotoğraflı görünüm: başlıkta defter fotoğrafı */
       if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
     /* Site Asistan › Ayarlar › Renk paleti: Sis renkleri ev sahibinin paletinden gelir (null → varsayılan Sis) */
