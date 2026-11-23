@@ -1282,6 +1282,27 @@ html.embed:not(#b1):not(#b2):not(#b3) .embed-nav{background:var(--bg)!important}
 /* Site Asistan ile birebir yumuşak gradyan; saat şeridi boyası gömülüde yok (ikinci şerit görünüyordu) */
 html.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) body{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 70%,#000) 0,color-mix(in srgb,var(--accent) 70%,#000) calc(var(--sa-top,0px) + 4px),color-mix(in srgb,var(--accent) 74%,#000) calc(var(--sa-top,0px) + 34px),color-mix(in srgb,var(--accent) 86%,#000) calc(var(--sa-top,0px) + 80px),var(--accent) calc(var(--sa-top,0px) + 130px),color-mix(in srgb,var(--accent) 80%,var(--bg)) calc(var(--sa-top,0px) + 180px),color-mix(in srgb,var(--accent) 58%,var(--bg)) calc(var(--sa-top,0px) + 230px),color-mix(in srgb,var(--accent) 36%,var(--bg)) calc(var(--sa-top,0px) + 280px),color-mix(in srgb,var(--accent) 17%,var(--bg)) calc(var(--sa-top,0px) + 325px),color-mix(in srgb,var(--accent) 5%,var(--bg)) calc(var(--sa-top,0px) + 365px),var(--bg) calc(var(--sa-top,0px) + 400px)) top/100% calc(var(--sa-top,0px) + 400px) no-repeat,var(--bg)!important}
 html.embed body::before{display:none!important}
+/* Takvim (Akış) düzeni: Akış/Ay seçicisi gömülü ve okunur; gezinme tek gömülü şerit; gün kartları tam genişlik ve gömülü; her işte tek dokunuşla Ertele */
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) #calMode{background:var(--bg)!important;box-shadow:inset 3px 3px 7px rgba(0,0,0,.18),inset -3px -3px 7px rgba(255,255,255,.6)!important;padding:4px!important;border-radius:14px!important;border:0!important}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) #calMode button{min-height:40px;padding:0 18px;border-radius:11px;color:var(--ink-2,var(--ink))!important;font-weight:600;background:transparent!important;box-shadow:none!important;opacity:1!important}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) #calMode button.on{color:var(--accent)!important;font-weight:800!important;box-shadow:inset 3px 3px 7px rgba(0,0,0,.18),inset -3px -3px 7px rgba(255,255,255,.6)!important}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow{gap:0!important;margin-top:8px!important}:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-bar{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:18px;background:var(--bg);box-shadow:inset 3px 3px 7px rgba(0,0,0,.16),inset -3px -3px 7px rgba(255,255,255,.6);margin-bottom:14px}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-bar .btn{background:transparent!important;box-shadow:none!important;min-height:44px;color:var(--ink)!important}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-bar #flowToday{font-weight:700;letter-spacing:0;text-transform:none}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-bar .flow-range{font-size:1.05rem}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-bar .flow-sum{margin-left:auto;font-weight:600;color:var(--ink-2,var(--ink))}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .flow-days{display:flex;flex-direction:column;gap:14px;max-width:none!important}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .fday{width:auto!important;max-width:none!important;box-shadow:inset 5px 5px 11px rgba(0,0,0,.16),inset -5px -5px 11px rgba(255,255,255,.6)!important;background:var(--bg)}
+:root:not(#t1):not(#t2):not(#t3):not(#t4):not(#t5):not(#t6):not(#t7):not(#t8):not(#t9) .tl-row .fb{align-items:center}
+.tl-row .fsnz{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:12px;font-size:.85rem;font-weight:700;color:var(--ink-2,var(--ink));background:var(--bg);box-shadow:3px 3px 7px rgba(0,0,0,.14),-2px -2px 6px rgba(255,255,255,.55)}
+.tl-row .fsnz svg{width:16px;height:16px}
+.tl-row .fsnz:active{box-shadow:inset 3px 3px 6px rgba(0,0,0,.18),inset -2px -2px 5px rgba(255,255,255,.5);transform:scale(.97)}
+.tl-row .fsnz:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:599px){.tl-row .fsnz span{display:none}.tl-row .fsnz{width:44px;height:44px;padding:0;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.tl-row .fsnz:active{transform:none}}
+/* Seçili sekme dili B (Site Asistan ile aynı): dolgu yok; içe basık, kalın, vurgu renginde */
+:root.embed:not(#c1):not(#c2):not(#c3):not(#c4):not(#c5):not(#c6):not(#c7):not(#c8):not(#c9) :is(.embed-nav a.on,.list-strip button.on,#segFilter button.on){background:var(--bg)!important;color:var(--accent)!important;font-weight:800!important;box-shadow:inset 3px 3px 7px rgba(0,0,0,.18),inset -3px -3px 7px rgba(255,255,255,.6)!important}
+:root.embed[data-theme="dark"]:not(#c1):not(#c2):not(#c3):not(#c4):not(#c5):not(#c6):not(#c7):not(#c8):not(#c9) :is(.embed-nav a.on,.list-strip button.on,#segFilter button.on){box-shadow:inset 3px 3px 7px rgba(0,0,0,.55),inset -2px -2px 5px rgba(255,255,255,.05)!important}
 /* Liste ve filtre çipleri gömülü (bant üstünde beyaz hale yok); seçili çip içe basık ve vurgu dolgulu */
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5):not(#b6):not(#b7) .list-strip button{background:var(--bg)!important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.16),inset -2px -2px 5px rgba(255,255,255,.55)!important;color:var(--ink-2,var(--ink))!important}
 :root.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5):not(#b6):not(#b7) .list-strip button.on{background:var(--accent)!important;color:var(--on-accent,#fff)!important;box-shadow:inset 3px 3px 7px rgba(0,0,0,.45),inset -2px -2px 6px rgba(255,255,255,.18)!important}
@@ -3037,7 +3058,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
         <span class="ft">${x.remind ? `${x.remind}${x.pomo ? '' : ''}` : '<small>Tüm gün</small>'}</span>
         <span class="fbar" aria-hidden="true"></span>
         <span class="fb"><button class="fchk" data-ftoggle="${x.id}" aria-label="${x.done ? 'Tamamlanmadı yap' : 'Tamamla'}: ${esc(x.title)}"><i>${ico('check')}</i></button>
-          <button class="fx" data-open="${x.id}"><b>${esc(x.title)}</b>${sub ? `<small>${sub}</small>` : ''}</button></span></li>`;
+          <button class="fx" data-open="${x.id}"><b>${esc(x.title)}</b>${sub ? `<small>${sub}</small>` : ''}</button>${x.done ? '' : `<button type="button" class="fsnz" data-fsnz="${x.id}" aria-label="Ertele: ${esc(x.title)}" title="Ertele">${ico('clock')}<span>Ertele</span></button>`}</span></li>`;
     };
     let html = '', open = 0, done = 0;
     if (late.length) html += `<section class="fday late"><h3>Gecikmiş <span class="fd-tag">${late.length} iş</span></h3><ul>${late.map(x => row(x, true)).join('')}</ul></section>`;
@@ -3065,6 +3086,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
   $('#flowNext').addEventListener('click', () => shiftFlow(1));
   $('#flowToday').addEventListener('click', () => { ui.flowFrom = today(); renderFlow(); });
   $('#flowDays').addEventListener('click', e => {
+    const sz = e.target.closest('[data-fsnz]'); if (sz) { e.stopPropagation(); if (navigator.vibrate) try { navigator.vibrate(8); } catch (_) {} openSnooze(sz.dataset.fsnz); return; }
     const b = e.target.closest('[data-ftoggle]'); if (!b) return;
     e.stopPropagation(); const r = b.closest('.tl-row'); r.classList.toggle('done');   // basışta anında geri bildirim
     setTimeout(() => toggleDone(b.dataset.ftoggle), 160);
@@ -3258,6 +3280,9 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
     toast(ts.length > 1 ? `${ts.length} görev → ${dueLabel(due)}` : `“${ts[0].title}” → ${dueLabel(due)}`, () => { prev.forEach(p => { p.t.due = p.due; p.t.reminded = p.reminded; putTask(p.t); }); render(); syncDrawer(); });
   }
   $('#snzList').addEventListener('click', e => { const b = e.target.closest('[data-snzd]'); if (b) doSnooze(b.dataset.snzd); });
+  /* Tarih seç: masaüstü tarayıcılarında saydam tarih alanına dokunmak takvimi açmıyordu → showPicker ile açılır (iPhone kendi seçicisini açar) */
+  document.addEventListener('click', e => { const l = e.target.closest('.hx-pick, label[for="snzPick"]'); if (!l) return; const inp = l.querySelector('input[type=date]') || document.getElementById('snzPick'); if (!inp || e.target === inp) return; e.preventDefault(); try { inp.showPicker ? inp.showPicker() : (inp.focus(), inp.click()); } catch (_) { inp.focus(); } }, true);
+  document.addEventListener('click', e => { const inp = e.target.closest && e.target.closest('.hx-pick input[type=date], #snzPick'); if (!inp) return; try { inp.showPicker && inp.showPicker(); } catch (_) {} }, true);
   $('#snzList').addEventListener('change', e => { if (e.target.id === 'snzPick' && e.target.value) doSnooze(e.target.value); });
   $('#snzClose').addEventListener('click', closeSnooze);
   $('#snzModal').addEventListener('click', e => { if (e.target.id === 'snzModal') closeSnooze(); });
