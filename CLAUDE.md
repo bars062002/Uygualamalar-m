@@ -20,6 +20,7 @@ Kaydırma, sürükleme, alt panel, yay animasyonu, basma geri bildirimi ya da ge
 - Nöromorfik + palet: yüzeyler nöromorfik gri kalır, yalnız vurgu/veri rengi değişir.
 
 ## Simetri ve tutarlı düzen (kullanıcı talebi, 17 Kasım 2026 — her işte zorunlu)
+- **Sık düzen (23 Kasım 2026, kullanıcı kararı):** bilgisayarda hiçbir liste satırı tam genişliğe yayılmaz. Satırlar sık kartlara dönüşür ve ekran genişledikçe 2–3 sütuna dizilir (`repeat(auto-fill,minmax(300–420px,1fr))`); özet ve liste kartları yan yana. Kartın içinde bilgi ile düğmeler birbirine yakın durur (ör. Sahada OK / NOK yan yana, kartın altında). Yeni ekranda da sorulmadan uygulanır.
 - Kullanıcı için simetri ve tutarlı tasarım "çok çok önemli": yeni özellik ya da özelleştirme ne kadar iyi olursa olsun mevcut tasarım diline ve düzene uymalı.
 - Boş kalan alan bırakma: bir sütun kısa kalıyorsa içerik yan yana dizilir ya da alanı dolduracak şekilde yerleşir (ör. aday ayrıntısında fotoğraf + harita bilgi kartının altında yan yana, aynı boyda).
 - Yan yana öğeler aynı boyda, aynı köşe yarıçapında, aynı aralıkla; hizalar ortak çizgide biter.
