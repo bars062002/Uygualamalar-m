@@ -1282,6 +1282,11 @@ html.embed:not(#b1):not(#b2):not(#b3) .embed-nav{background:var(--bg)!important}
 /* Site Asistan ile birebir yumuşak gradyan; saat şeridi boyası gömülüde yok (ikinci şerit görünüyordu) */
 html.embed:not(#b1):not(#b2):not(#b3):not(#b4):not(#b5) body{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 70%,#000) 0,color-mix(in srgb,var(--accent) 70%,#000) calc(var(--sa-top,0px) + 4px),color-mix(in srgb,var(--accent) 74%,#000) calc(var(--sa-top,0px) + 34px),color-mix(in srgb,var(--accent) 86%,#000) calc(var(--sa-top,0px) + 80px),var(--accent) calc(var(--sa-top,0px) + 130px),color-mix(in srgb,var(--accent) 80%,var(--bg)) calc(var(--sa-top,0px) + 180px),color-mix(in srgb,var(--accent) 58%,var(--bg)) calc(var(--sa-top,0px) + 230px),color-mix(in srgb,var(--accent) 36%,var(--bg)) calc(var(--sa-top,0px) + 280px),color-mix(in srgb,var(--accent) 17%,var(--bg)) calc(var(--sa-top,0px) + 325px),color-mix(in srgb,var(--accent) 5%,var(--bg)) calc(var(--sa-top,0px) + 365px),var(--bg) calc(var(--sa-top,0px) + 400px)) top/100% calc(var(--sa-top,0px) + 400px) no-repeat,var(--bg)!important}
 html.embed body::before{display:none!important}
+/* Bölümler arası aralık: 28 + 18 + 6 px yerine tek düzen (14 px) */
+:root.embed:not(#d1):not(#d2):not(#d3):not(#d4):not(#d5):not(#d6):not(#d7):not(#d8):not(#d9):not(#d10):not(#d11):not(#d12) .view{gap:14px!important}
+:root.embed:not(#d1):not(#d2):not(#d3):not(#d4):not(#d5):not(#d6):not(#d7):not(#d8):not(#d9):not(#d10):not(#d11):not(#d12) .embed-nav{margin-bottom:6px!important}
+:root.embed:not(#d1):not(#d2):not(#d3):not(#d4):not(#d5):not(#d6):not(#d7):not(#d8):not(#d9):not(#d10):not(#d11):not(#d12) .list-strip{margin-top:0!important;margin-bottom:0!important}
+:root.embed:not(#d1):not(#d2):not(#d3):not(#d4):not(#d5):not(#d6):not(#d7):not(#d8):not(#d9):not(#d10):not(#d11):not(#d12) #addForm{margin-top:0!important;margin-bottom:0!important}
 /* Görev ekleme (bilgisayar): tek satır başlık; yazmaya başlayınca altında tek sıra eşit alanlar (Saha · Liste · Öncelik · Tarih · Saat · Ses · Ekle); Vazgeç yalnız telefonda */
 @media (min-width:900px){
  :root.embed:not(#a1):not(#a2):not(#a3):not(#a4):not(#a5):not(#a6):not(#a7):not(#a8):not(#a9):not(#a10) #addForm{display:grid!important;grid-template-columns:1.3fr 1fr .8fr 1.1fr 1fr 48px 120px;gap:10px!important;align-items:stretch;margin:4px 0 14px!important}
