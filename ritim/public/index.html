@@ -2236,6 +2236,10 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
     if (EMBED) return;
     const secure = location.protocol === 'https:' || location.hostname === 'localhost';
     if ('serviceWorker' in navigator && secure) navigator.serviceWorker.register('/sw.js').catch(() => {});
+    /* Yeni sürüm arkada indiyse: yazı yazılmıyor ve pencere açık değilse bir kez yenile (kurum ağında güncelleme bir açılış gecikmesin) */
+    if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (!ev.data || ev.data.type !== 'ritim-updated') return; try { if (sessionStorage.getItem('rt-upd')) return; } catch (_) {}
+      const busy = () => { const a = document.activeElement; return (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || document.querySelector('.modal:not([hidden]),.drawer.open'); };
+      const go = () => { if (busy()) return setTimeout(go, 3000); try { sessionStorage.setItem('rt-upd', '1'); } catch (_) {} location.reload(); }; go(); });
   }
 
   function setSync() {

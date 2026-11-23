@@ -1,5 +1,5 @@
 // Keeps the app shell available offline. Data requests (/api) always go to the network.
-const CACHE = 'ritim-v5';
+const CACHE = 'ritim-v6';
 const SHELL = ['/', '/manifest.webmanifest', '/vendor/Sortable.min.js', '/fonts/ritim-fonts.css', '/icons/apple-touch-icon.png', '/icons/icon-192.png'];
 const NAV_TIMEOUT_MS = 4000;
 
@@ -39,9 +39,11 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate') {
     // Ağ yavaşsa (4 sn) kayıtlı kopya hemen açılır, ama indirme arkada sürer ve kopya yenilenir:
     // böylece mobil veride bile bir sonraki açılışta yeni sürüm gelir.
-    const net = fetch(req);
+    const net = fetch(req); let fromCache = false;
     e.waitUntil(net.then(async res => {
       if (res.ok && !res.redirected) await (await caches.open(CACHE)).put('/', res.clone());
+      /* Ağ yavaşken eski kopya açıldıysa, yenisi inince sayfaya haber ver (sayfa uygun anda kendini yeniler) */
+      if (fromCache && res.ok) { const id = e.resultingClientId || e.clientId; const c = id && await self.clients.get(id); if (c) c.postMessage({ type: 'ritim-updated' }); }
     }).catch(() => {}));
     e.respondWith((async () => {
       try {
@@ -50,6 +52,7 @@ self.addEventListener('fetch', e => {
         if (res.ok) return new Response(await res.clone().blob(), { headers: res.headers });
         return (await caches.match('/')) || res;
       } catch (err) {
+        fromCache = true;
         return (await caches.match('/')) ||
           new Response(FALLBACK, { headers: { 'content-type': 'text/html; charset=utf-8' } });
       }
