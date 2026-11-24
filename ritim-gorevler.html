@@ -2318,6 +2318,11 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
       /* son 7 günde günlük tamamlanan (eskiden bugüne) ve 2+ gündür bekleyen önemli/gecikmiş işler */
       wk: Array.from({ length: 7 }, (_, i) => { const d = addDays(today(), i - 6); return S.tasks.filter(t => t.done && !t.sample && doneDay(t) === d).length; }),
       stale: S.tasks.filter(t => staleDays(t) >= 2).length, tmr: S.tasks.filter(t => !t.done && !t.sample && t.due === addDays(today(), 1)).length };
+    /* Site Asistan sa-v479 · Bugün › Notlarım: sabitlenenler ve en son düzenlenen 4 not (başlık, kısa metin, saha) */
+    { const snip = b => String(b || '').split('\n').filter(l => !/^\s*-\s*Tarih:/.test(l)).join(' ').replace(/[#*_`>\[\]]/g, '').replace(/\s+/g, ' ').trim().slice(0, 110);
+      sum.notes = S.notes.slice().sort((a, b) => (b.pinned - a.pinned) || String(b.updated || '').localeCompare(String(a.updated || ''))).slice(0, 4)
+        .map(n => ({ id: n.id, t: n.title || 'Not', s: snip(n.body), site: n.site || '', at: n.updated || n.created || '', pin: !!n.pinned }));
+      sum.nn = S.notes.length; }
     /* Site Asistan "Sıradaki" şeridi: bugünün sıradaki saatli görevi ayrı alan (gecikmişler 6'lık listeyi doldursa da gelsin) */
     { const d = new Date(), hm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       const nx = S.tasks.filter(t => !t.done && !t.sample && t.due === today() && /^\d{2}:\d{2}$/.test(t.remind || '') && t.remind >= hm).sort((a, b) => a.remind.localeCompare(b.remind))[0];
@@ -2620,6 +2625,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
   function route() {
     const r0 = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'pano';
     const r = EMBED && r0 === 'pano' ? 'gorevler' : r0; /* sa-v474: Site Asistan içinde Pano yok (Bugün onun yerini tutar) */
+    if (IN_HOST) try { parent.postMessage({ type: 'rt-route', r }, hostOrigin); } catch (_) {} /* sa-v479: kabuğun ekle düğmesi bölüme uyar (Notlar'da + Not) */
     ROUTES.forEach(x => { $('#v-' + x).hidden = x !== r; });
     $$('[data-route]').forEach(a => a.classList.toggle('on', a.dataset.route === r));
     /* Site Asistan içinde: bölüm sekmeleri sayfa başlığının altında (başlık en üstte, Ana Sayfa ile aynı düzen) */
@@ -3558,13 +3564,13 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
     }
     /* Saha 360 › Saha ziyareti: fotoğraflar Dosyalarım'a (saha kodlu, yalnız sen görürsün), ziyaret notu Notlar'a */
     /* Saha 360 › Not: sahaya bağlı kısa not (konum/fotoğraf yok) */
-    if (d.type === 'sa-add-note' && d.rid && typeof d.site === 'string' && typeof d.text === 'string' && d.text.trim()) {
+    if (d.type === 'sa-add-note' && d.rid && typeof d.text === 'string' && d.text.trim()) { if (typeof d.site !== 'string') d.site = '';
       const reply = (ok, extra) => { try { e.source.postMessage(Object.assign({ type: 'rt-note-added', rid: d.rid, ok }, extra || {}), e.origin); } catch (_) {} };
       const run = () => { if (!STORE.ready) return setTimeout(run, 300);
         const site = d.site.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20), at = new Date(), p2 = x => String(x).padStart(2, '0'), txt = d.text.trim().slice(0, 4000);
         const first = txt.split(/\n|[.!?](\s|$)/)[0].trim().slice(0, 60);
-        const now = at.toISOString(), n = normNote({ id: uid(), title: `${site} · ${first || 'Not'}`, body: `- Tarih: ${p2(at.getDate())}.${p2(at.getMonth() + 1)}.${at.getFullYear()} ${p2(at.getHours())}.${p2(at.getMinutes())}\n\n${txt}`, site, created: now, updated: now, src: 'sa' });
-        S.notes.push(n); putNote(n); if (ui.route === 'notlar') renderNotes(); reply(true, { note: n.id }); };
+        const now = at.toISOString(), n = normNote({ id: uid(), title: site ? `${site} · ${first || 'Not'}` : (first || 'Not'), body: `- Tarih: ${p2(at.getDate())}.${p2(at.getMonth() + 1)}.${at.getFullYear()} ${p2(at.getHours())}.${p2(at.getMinutes())}\n\n${txt}`, site, created: now, updated: now, src: 'sa' });
+        S.notes.push(n); putNote(n); if (ui.route === 'notlar') renderNotes(); reply(true, { note: n.id }); sumSent = ''; try { postSum(); } catch (_) {} };
       run(); return;
     }
     if (d.type === 'sa-visit' && d.rid && typeof d.site === 'string') {
@@ -3641,6 +3647,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
         try { e.source.postMessage({ type: 'rt-added', rid: d.rid, ok: true, id: t.id, due: t.due, remind: t.remind }, e.origin); } catch (_) {} };
       f(); return;
     }
+    if (d.type === 'sa-new-note') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); location.hash = '#notlar'; setTimeout(() => { const b = document.getElementById('noteNew'); b && b.click(); }, 250); }; f(); return; }
     if (d.type === 'sa-open-note' && typeof d.id === 'string') { const f = () => { if (!STORE.ready) return setTimeout(f, 300); location.hash = '#notlar'; setTimeout(() => { if (noteOf(d.id)) openNote(d.id); }, 150); }; f(); return; }
     if (d.type !== 'sa-search' || typeof d.q !== 'string') return;
     applySaSearch(d.q.trim().slice(0, 60));
