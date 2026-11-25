@@ -1348,6 +1348,15 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
 
 /* Site Asistan sa-v475 · Nöromorfik Krem: aynı nöromorfik dil, krem kil */
 :root[data-krm="on"]:not([data-theme="dark"]):not(#krm1):not(#krm2){--bg:#ECE5DC;--surface:#ECE5DC;--hi:#FFFDF9;--lo:#CABEAF;--track:#DCD2C5;--ink:#2E2620;--ink-2:#4E443B;--ink-3:#675C52}
+
+/* Site Asistan sa-v484 · Kategori renkleri: görevler lavanta, notlar mavi (Ayarlar › Kategori renkleri) */
+:root{--c-gorev-b:#E6DDF6;--c-gorev-f:#4E3A86;--c-not-b:#D8E9F3;--c-not-f:#245A78}
+:root[data-krm="on"]{--c-gorev-b:#E9DDEB;--c-not-b:#DCE6E8}
+:root[data-theme="dark"]{--c-gorev-b:#2E2740;--c-gorev-f:#C9B8F2;--c-not-b:#1E2F3A;--c-not-f:#A9D3EC}
+:root[data-tint="card"]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7) li.task{background:var(--c-gorev-b)!important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.07)!important}
+:root[data-tint="card"]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7) .note-list .note-it{background:var(--c-not-b)!important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.07)!important}
+:root[data-tint]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7) li.task .check{border-color:var(--c-gorev-f)!important}
+:root[data-tint]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7) .note-list .note-it .nt-t{color:var(--c-not-f)!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2417,6 +2426,7 @@ html.embed:not(#b1):not(#b2):not(#b3):not(#b4) .vhead .vhead-actions .btn:not(.p
       const ns = HOST_SKINS.has(d.theme) ? d.theme : null;
       if (d.theme) { if (d.theme === 'oled') document.documentElement.dataset.oled = 'on'; else delete document.documentElement.dataset.oled; }
       if (d.theme) { if (d.theme === 'ritimkrem') document.documentElement.dataset.krm = 'on'; else delete document.documentElement.dataset.krm; } /* Site Asistan sa-v475 · Nöromorfik Krem */
+      if ('tint' in d) { if (d.tint === 'icon' || d.tint === 'card') document.documentElement.dataset.tint = d.tint; else delete document.documentElement.dataset.tint; } /* Site Asistan sa-v484 · kategori renkleri */
       if ('photo' in d) { if (d.photo) document.documentElement.dataset.photo = '1'; else delete document.documentElement.dataset.photo; } /* Site Asistan › Fotoğraflı görünüm: başlıkta defter fotoğrafı */
       if (nt) theme = nt; accent = na; skin = ns; applyTheme(); }
     /* Site Asistan › Ayarlar › Renk paleti: Sis renkleri ev sahibinin paletinden gelir (null → varsayılan Sis) */
